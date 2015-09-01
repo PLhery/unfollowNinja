@@ -57,9 +57,15 @@ module.exports = function(config, User) {
                             var newFollowers = _.difference(allFollowers, oldFollowers);
 
                             if(newFollowers.length>0) {
-                                newFollowers.forEach(function(follower) { //on les ajoute à la liste des followers
-                                    user.followers.push({id:follower});
-                                });
+                                if(user.followers.length==0) { //Cas d'un nouveau compte
+                                    newFollowers.forEach(function(follower) {
+                                        user.followers.push({id:follower, since:0});
+                                    });
+                                } else {
+                                    newFollowers.forEach(function (follower) { //on les ajoute à la liste des followers
+                                        user.followers.push({id: follower});
+                                    });
+                                }
                                 user.save();
                             }
 
@@ -109,8 +115,12 @@ module.exports = function(config, User) {
         function sendDM(twittos, user, DBtwittos, callback) {
             console.log("@"+user.twitter.username+" a été unfollow, envoi du DM par @"+user.twitterDM.username+" :");
             var follower = user.getFollower(twittos.id_str);
-            var since = moment(follower.twittos.since);
-            var message = "@"+twittos.screen_name+" vous a unfollow :/... Il vous a suivit pendant "+since.toNow(true)+' ('+since.calendar()+')';
+
+            var message = "@" + twittos.screen_name + " vous a unfollow :/... Il vous suivait avant votre inscription à unfollowNinja.";
+            if(follower.twittos.since.getTime()>0) {
+                var since = moment(follower.twittos.since);
+                message = "@" + twittos.screen_name + " vous a unfollow :/... Il vous a suivi pendant " + since.toNow(true) + ' (' + since.calendar() + ')';
+            }
             console.log(message.yellow);
 
             new Twitter({
