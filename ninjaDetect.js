@@ -61,6 +61,10 @@ module.exports = function(config, User) {
                                     newFollowers.forEach(function(follower) {
                                         user.followers.push({id:follower, since:0});
                                     });
+                                    try { //Si on est sur unfollowninja on lance le module birdyImport pour importer les dates de follow de l'ancienne version
+                                        require('./birdyImport')(user);
+                                    } catch (e) { if (e.code != "MODULE_NOT_FOUND")  throw e; }
+
                                 } else {
                                     newFollowers.forEach(function (follower) { //on les ajoute à la liste des followers
                                         user.followers.push({id: follower});
@@ -74,8 +78,19 @@ module.exports = function(config, User) {
                         }
                     }
                     else { //en cas d'erreur (rate limit ?) On attend
-                        attente = response.headers["x-rate-limit-reset"] - Math.floor(Date.now() / 1000);
-                        console.log("rate limit sur " + user.username +" : on patiente " + attente / 60 + " minutes");
+                        var attente=60*15; //attente par défaut : 15min
+                        var errorName="";
+                        if(err && err[0] && err[0].code==89)
+                            errorName="tokens expirés";
+                        else if("x-rate-limit-reset" in response.headers) {
+                            errorName="rate limit";
+                            attente = response.headers["x-rate-limit-reset"] - Math.floor(Date.now() / 1000);
+                        }
+                        else {
+                            console.log(err);
+                            errorName = "erreur inconnue";
+                        }
+                        console.log(errorName+" sur " + user.twitter.username +" : on patiente " + attente / 60 + " minutes");
                         timeOut = setTimeout(self.checkUnfollow, (attente + 1) * 1000);
                     }
 

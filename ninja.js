@@ -172,7 +172,7 @@ app.get('/step2/disable', function(req, res){
 //Définition de la page 404
 app.use(function(req, res, next){
     res.setHeader('Content-Type', 'text/plain');
-    res.send(404, 'Page introuvable !');
+    res.status(404).send('Page introuvable !');
 });
 
 app.listen(config.port, function() {
