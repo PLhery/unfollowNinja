@@ -1,0 +1,48 @@
+{
+  "name": "unfollowninja",
+  "version": "1.0.10",
+  "description": "Detectez vos unfollows et envoyez-vous un MP.",
+  "author": "MrPointVirgule <paul-louis@outlook.fr> (http://twitter.com/MrPointVirgule)",
+  "bin": {
+    "ninja": "ninja.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrPointVirgule/unfollowNinja.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MrPointVirgule/unfollowNinja/issues"
+  },
+  "keywords": [
+    "twitter",
+    "unfollow",
+    "ninja",
+    "unfollowninja"
+  ],
+  "dependencies": {
+    "basic-auth": "*",
+    "body-parser": "*",
+    "colors": "*",
+    "compression": "*",
+    "cookie-parser": "*",
+    "debug": "*",
+    "ejs": "*",
+    "express": "*",
+    "express-session": "*",
+    "moment": "*",
+    "mongoose": "*",
+    "morgan": "*",
+    "mysql": "*",
+    "on-finished": "*",
+    "on-headers": "*",
+    "passport": "*",
+    "passport-twitter": "*",
+    "php-unserialize": "*",
+    "pmx": "*",
+    "twitter": "*",
+    "underscore": "*"
+  },
+  "preferGlobal": true,
+  "analyze": true,
+  "license": "BSD-3-Clause"
+}

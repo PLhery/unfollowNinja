@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 require('pmx').init();//monitoring avec pm2 + keymetrics
 require("colors");
 console.log(("Unfollow NINJAAA".trap+" - le serv'\n\n").yellow);
@@ -53,16 +55,16 @@ app.use(passport.session());
 
 //Gestion de la connection etape 1
 passport.use('twitter-step1', new TwitterStrategy({ consumerKey: config.twitter.consumerKey, consumerSecret: config.twitter.consumerSecret, callbackURL: config.URL+"step1/auth/callback"},
-  function(token, tokenSecret, profile, done) {
-      User.update({"twitter.id": profile.id}, {twitter: {id: profile.id, username: profile.username, photo: profile.photos[0].value, token: token, secret: tokenSecret} }, { upsert:true }, function(err, raw){
-          if(err)
-            console.log(err);
-          User.findOne({"twitter.id": profile.id}, function(err, user) {
-              detect.updateUser(user);
-              done(err, user);
-          });
-      });
-  }
+    function(token, tokenSecret, profile, done) {
+        User.update({"twitter.id": profile.id}, {twitter: {id: profile.id, username: profile.username, photo: profile.photos[0].value, token: token, secret: tokenSecret} }, { upsert:true }, function(err, raw){
+            if(err)
+                console.log(err);
+            User.findOne({"twitter.id": profile.id}, function(err, user) {
+                detect.updateUser(user);
+                done(err, user);
+            });
+        });
+    }
 ));
 
 //Gestion de la connection etape 2
@@ -76,7 +78,7 @@ passport.use('twitter-step2', new TwitterStrategy({consumerKey: config.twitterDM
 
 //Indique à passport qu'on utilisera mongoose pour stocker les infos utilisateur
 passport.serializeUser(function(user, done) {
-  done(null, user._id);
+    done(null, user._id);
 });
 passport.deserializeUser(function(id, done) {
     User.findById(id, done);
@@ -118,7 +120,7 @@ app.get('/step1/auth/callback',
     passport.authenticate('twitter-step1', { failureRedirect: '/' }), function(req, res) {
         req.session.user = req.user._id;
         res.redirect('/step2');
-  });
+    });
 
 app.get('/step2/', function(req, res) {
     if(req.user) { //Si on est bien connecté
