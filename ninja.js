@@ -40,12 +40,13 @@ var detect = new (require('./ninjaDetect'))(config, User);
 //Implémentation d'express et ses plugins (gère la partie web)
 var express = require('express');
 var app = express();
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 app.use(require('compression')()); //compresse les données en gzip
 app.use(require('morgan')('tiny')); //affiche les logs de connection dans la console
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(require('express-session')({ secret: config.sessionSecret, resave: true, saveUninitialized: true }));
+app.set('views', __dirname + '/views');
 
 //Implémentation de passport et son plugin twitter (gère la connection)
 var passport = require('passport');
@@ -87,9 +88,11 @@ passport.deserializeUser(function(id, done) {
 
 //Vérifie qu'on est sur le bon domaine, sinon on redirige !
 app.get('/*', function(req, res, next) {
-    if(((req.get('x-forwarded-proto') || req.protocol) + '://' + req.get('host') + "/")!=config.URL)
+    var currentURL = (req.get('x-forwarded-proto') || req.protocol) + '://' + req.get('host') + "/";
+    if(currentURL!=config.URL) {
+        console.log("accès par "+currentURL.underline+" au lieu de "+config.URL.underline);
         res.redirect(config.URL);
-    else
+    } else
         next();
 });
 

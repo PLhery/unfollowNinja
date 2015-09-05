@@ -179,7 +179,7 @@ module.exports = function(config, User) {
 
         this.remove = function() {
             if(timeOut)
-                clearTimeOut(timeOut);
+                clearTimeout(timeOut);
             console.log("J'arrête de checker les followers de "+("@"+user.twitter.username).blue+" .");
             delete bots[user._id];
         };
