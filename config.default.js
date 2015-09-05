@@ -1,6 +1,6 @@
 var config = {};
 
-config.URL =  "https://unfollowninja.fr/"; //L'url publique de votre site
+config.URL =  "https://unfollowninja.fr/"; //L'url publique de votre site (ex http://127.0.0.1:8080/ )
 config.port = 8080; //Le port sur lequel l'app doit écouter
 
 config.mongoDB = "mongodb://localhost/ninja"; //base de donnée mongoDB à utiliser
@@ -8,7 +8,7 @@ config.mongoDB = "mongodb://localhost/ninja"; //base de donnée mongoDB à utili
 config.sessionSecret = "This is my funky secret oh my god it has ninja turtles"; //Ecrivez ce que vous voulez, permet d'eviter une session hijacking
 
 /*Votre app de connection :
-Créez une app sur dev.twitter.com, avec juste les droits en lecture, et en callback_URL https://LESITE.COM/step1/auth/callback
+Créez une app sur dev.twitter.com > manage your apps, avec juste les droits en lecture, et en callback_URL https://LESITE.COM/step1/auth/callback
 Notez votre token et secret
 */
 config.twitter = {
