@@ -1,7 +1,7 @@
 body {
     background-image:url("images/background.jpg");
     background-size: cover;
-    background-position-y:bottom;
+    background-position:bottom;
     background-attachment: fixed;
 }
 .logo {
@@ -92,4 +92,12 @@ footer.mdl-mini-footer {
 .discussion .messages time {
     font-size: 0.7rem;
     color: #ccc;
+}
+
+#boutonDon {
+    position: fixed;
+    z-index: 2000;
+    right: 0;
+    top: 50%;
+    margin-top: -109px;
 }
