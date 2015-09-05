@@ -177,6 +177,13 @@ app.use(function(req, res, next){
     res.status(404).send('Page introuvable !');
 });
 
-app.listen(config.port, function() {
-    console.log("Yo, j'écoute le port "+config.port.toString().underline);
+//On lance le serveur web.
+app.listen(config.port, function () {
+    console.log("Yo, j'écoute le port " + config.port.toString().underline);
+}).on('error', function(err) {
+    if(err.code = "EACCESS") {
+        console.error(("Une erreur est survenue : le port "+config.port+" déja utilisé ou est reservé à root, lancez donc l'appli en tant que root ou changez de port !").red.bgWhite+"\n\n");
+        process.exit(err.code);
+    }
+    throw err;
 });
