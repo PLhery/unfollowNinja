@@ -43,7 +43,7 @@ module.exports = function(config, User) {
                         allFollowers = allFollowers.concat(data.ids);
 
                         if (data['next_cursor'] > 0) { //si + de 5000 followers -plusieurs pages
-                            account.client.get('followers/ids', { user_id: account.row.twitterId, cursor: data['next_cursor_str']}, getData);
+                            client.get('followers/ids', { user_id: user.twitter.id, stringify_ids:true, cursor: data['next_cursor_str']}, getData);
                         } else{ ///Quand on a tout (et qu'on a bien des followers)
 
                             //on traite les UNFOLLOWERS
