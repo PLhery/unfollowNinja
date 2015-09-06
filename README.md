@@ -47,4 +47,4 @@ ma configuration (de gauche à droite) : twitter.photo, twitter.username, follow
 5. Envoyez-moi un pull request :D
 
 ## History
-1.0.15 - version initiale
+1.0.16 - version initiale
