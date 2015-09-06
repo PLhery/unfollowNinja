@@ -148,7 +148,7 @@ module.exports = function(config, User) {
                         if(error[0]) {
                             switch(error[0].code) {
                                 case 151:
-                                    console.log("erreur - message en double. Une nouvelle tentative aura lieu.");
+                                    console.log("erreur - message en double. Le DM ne sera pas réenvoyé.");
                                     callback();
                                     break;
                                 case 64:
