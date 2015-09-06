@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-require('pmx').init();//monitoring avec pm2 + keymetrics
+var pmx = require('pmx').init();//monitoring avec pm2 + keymetrics
 require("colors");
 console.log(("Unfollow NINJAAA".trap+" - le serv'\n\n").yellow);
 
@@ -189,4 +189,14 @@ app.listen(config.port, function () {
         process.exit(err.code);
     }
     throw err;
+});
+
+
+//Ajout d'indicateurs à keymetrics
+var probe = pmx.probe();
+probe.metric({ //Nombre de comptes actifs
+    name    : 'Comptes actifs',
+    value   : function() {
+        return detect.getNumberofActiveUsers();
+    }
 });

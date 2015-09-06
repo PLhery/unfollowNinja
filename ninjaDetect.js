@@ -221,4 +221,10 @@ module.exports = function(config, User) {
             }
         }
     };
+
+
+    /* getters - setters*/
+    this.getNumberofActiveUsers = function() {
+        return _.size(bots);
+    };
 };
