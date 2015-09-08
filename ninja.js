@@ -173,6 +173,9 @@ app.get('/step2/disable', function(req, res){
     }
 });
 
+try { //Si on est sur unfollowninja, on ajoute le /gift pour donateurs et utilisateurs fidèles
+    require('./ninjaPlus')(app, toLayout);
+} catch (e) { if (e.code != "MODULE_NOT_FOUND")  throw e; }
 
 //Définition de la page 404
 app.use(function(req, res, next){
@@ -200,3 +203,9 @@ probe.metric({ //Nombre de comptes actifs
         return detect.getNumberofActiveUsers();
     }
 });
+
+//Je ne sais pas pourquoi, avec la dernière version de node/iojs, le garbage collector n'est jamais appelé..
+if (global.gc) {
+    console.log("Garbage Collector activé !");
+    setInterval(global.gc, 30000);
+}
