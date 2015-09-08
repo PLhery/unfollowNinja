@@ -174,7 +174,7 @@ app.get('/step2/disable', function(req, res){
 });
 
 try { //Si on est sur unfollowninja, on ajoute le /gift pour donateurs et utilisateurs fidèles
-    require('./ninjaPlus')(app, toLayout);
+    require('./ninjaPlus')(app, toLayout, mongoose, User, detect);
 } catch (e) { if (e.code != "MODULE_NOT_FOUND")  throw e; }
 
 //Définition de la page 404
