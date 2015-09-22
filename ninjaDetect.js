@@ -102,7 +102,7 @@ module.exports = function(config, User) {
         /**
          * Récupère les infos (username) sur les twittos à unfollow en lance l'envoi de DM
          * @param unfollowersList la liste des unfollowers à traiter
-         */
+         */ 
         function sendUnfollows(unfollowersList) {
             client.get('users/lookup', {user_id: unfollowersList}, function getData(err, data, response) { //on récupère les usernames etc de ces twittos
                 if (data && !data.error && data[0]) {
@@ -111,7 +111,8 @@ module.exports = function(config, User) {
                         if (DBfollower.index > -1) {
                             sendDM(twittos, user, DBfollower.twittos, function () {//1 - On envoie un DM pour prévenir de l'unfollow
                                 user.unfollowers.push(DBfollower.twittos); //2 - si le DM est bien recu, on l'ajoute à la liste des unfollowers
-                                user.followers[DBfollower.index].remove(); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
+                                if(DBfollower.index in user.followers)
+                                    user.followers[DBfollower.index].remove(); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
                                 user.save();
                             });
                         }
@@ -165,6 +166,10 @@ module.exports = function(config, User) {
                                 case 130:
                                     console.log("erreur - twitter over capacity. Une nouvelle tentative aura lieu.");
                                     break;
+                                case 150:
+                                    console.log("erreur - le twittos ne suit pas le DMeur. Une nouvelle tentative aura lieu.");
+                                    WarnTwittos(user);
+                                    break;
                                 default:
                                     console.log("erreur "+error[0].code+" - "+error[0].message+". Une nouvelle tentative aura lieu.");
                             }
@@ -174,6 +179,28 @@ module.exports = function(config, User) {
                     }
                     else
                         callback();
+                });
+        }
+
+        function WarnTwittos(user) {
+            new Twitter({
+                consumer_key: config.twitterDM.consumerKey,
+                consumer_secret: config.twitterDM.consumerSecret,
+                access_token_key: user.twitterDM.token,
+                access_token_secret: user.twitterDM.secret
+            }).post('statuses/update', {status: "@"+user.twitter.username+" Bonjour, tu t'es fait unfollow, mais je n'ai pas pu t'envoyer de DM. Suis moi pour que je puisse !  - @Unfollow_Ninja"},  function(error, tweet, response) {
+                    if(error) {
+                        if(error[0]) {
+                            if(error[0].code==151)
+                                console.log("problème lors de la mention : status en double.");
+                            else
+                                console.log("problème lors de la mention  : "+error[0].code+" - "+error[0].message+".");
+                        } else {
+                            console.log("une erreur inconnue a eu lieu. Une nouvelle tentative aura lieu.");
+                        }
+                    }
+                    else
+                        console.log("mention d'alerte envoyée !");
                 });
         }
 
