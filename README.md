@@ -15,15 +15,15 @@ Le code est proposé sous licences BSD-3 (cf license.txt), vous pouvez donc le m
 ## Installation
 d'abord, installez nodejs si ce n'est pas fait `sudo apt-get install nodeJS mongodb` puis :
 
-1 - installez globalement
-`sudo npm install -g unfollowninja`
+1 - installez globalement  
+`sudo npm install -g unfollowninja`  
 puis tapez `ninja` pour lancer le serveur
 
 ou
 
-2 - installez localement
-`npm install unfollowninja`
-puis `cd node_modules/unfollowninja/`
+2 - installez localement  
+`npm install unfollowninja`  
+puis `cd node_modules/unfollowninja/`  
 enfin tapez `node ninja` pour lancer le serveur.
 
 Pour le laisser tourner en tâche de fond, j'utilise `PM2` + `keymetrics`, vous pouvez aussi utiliser `screen` ou `forever`.
@@ -47,6 +47,6 @@ ma configuration (de gauche à droite) : twitter.photo, twitter.username, follow
 5. Envoyez-moi un pull request :D
 
 ## History
-1.1.0 - optimisations mémoire
-1.0.0-19 - corrections de bugs cf commits
+1.1.0 - optimisations mémoire  
+1.0.0-19 - corrections de bugs cf commits  
 1.0.0 - version initiale
