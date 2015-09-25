@@ -75,9 +75,7 @@ module.exports = function(config, User) {
                                             user.followers.push({id: follower});
                                         });
                                     }
-                                    user.save(function (err) {
-                                        if (err) console.log(err);
-                                    });
+                                    user.save(function (err) { if (err) console.log(err); });
                                 });
                             }
 
@@ -123,7 +121,6 @@ module.exports = function(config, User) {
                                     user.unfollowers.push(DBfollower.twittos); //2 - si le DM est bien recu, on l'ajoute à la liste des unfollowers
                                     if(DBfollower.index in user.followers)
                                         user.followers[DBfollower.index].remove(); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
-                                    console.log("ji");
                                 },function() {
                                     nbTreated++; //Si on les a tous traité
                                     if(data.length==nbTreated)
