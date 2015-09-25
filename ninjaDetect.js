@@ -5,11 +5,12 @@ moment.locale('fr');
 
 module.exports = function(config, User) {
 
+
     bots = {}; //Liste des bots, associés à un ID d'user
     var self=this;
 
     //D'abord, on charge les bots déja existants
-    User.find(function (err, users) {
+    User.find(null, {_id:1, twitter:1, twitterDM:1, "followers.id":1}, function (err, users) {
         if (err) return console.error(err);
 
         users.forEach(function(user) {
@@ -18,6 +19,7 @@ module.exports = function(config, User) {
     });
 
     function Bot(user) { //Objet Bot
+        var userObj={};
         var timeOut;
         var self=this;
 
@@ -33,17 +35,17 @@ module.exports = function(config, User) {
          * Vérifie les unfollows, appellé toutes les minutes environ (suivant la limitation de twitter -> le nombre de requetes à faire -> la taille du compte )
          */
         this.checkUnfollow = function() {
-            if(user.twitterDM.id) {
+            if(userObj.twitterDM.id) {
                 var allFollowers=[]; //liste d'IDs des followers à récupérer
-                var oldFollowers=_.pluck(user.followers, 'id'); //liste d'IDs des followers dans la BDD
+                var oldFollowers= userObj.followers; //liste d'IDs des followers dans la BDD
                 var attente;
 
-                client.get('followers/ids', {user_id: user.twitter.id, stringify_ids:true}, function getData(err, data, response) { //On charge une page de 5000 followers
+                client.get('followers/ids', {user_id: userObj.twitter.id, stringify_ids:true}, function getData(err, data, response) { //On charge une page de 5000 followers
                     if (data && data.ids && data.ids.length>0) {
                         allFollowers = allFollowers.concat(data.ids);
 
                         if (data['next_cursor'] > 0) { //si + de 5000 followers -plusieurs pages
-                            client.get('followers/ids', { user_id: user.twitter.id, stringify_ids:true, cursor: data['next_cursor_str']}, getData);
+                            client.get('followers/ids', { user_id: userObj.twitter.id, stringify_ids:true, cursor: data['next_cursor_str']}, getData);
                         } else{ ///Quand on a tout (et qu'on a bien des followers)
 
                             //on traite les UNFOLLOWERS
@@ -57,20 +59,26 @@ module.exports = function(config, User) {
                             var newFollowers = _.difference(allFollowers, oldFollowers);
 
                             if(newFollowers.length>0) {
-                                if(user.followers.length==0) { //Cas d'un nouveau compte
-                                    newFollowers.forEach(function(follower) {
-                                        user.followers.push({id:follower, since:0});
-                                    });
-                                    try { //Si on est sur unfollowninja on lance le module birdyImport pour importer les dates de follow de l'ancienne version
-                                        require('./birdyImport')(user);
-                                    } catch (e) { if (e.code != "MODULE_NOT_FOUND")  throw e; }
+                                self.getUser(function(user) { //On recupere l'utilisateur
+                                    if (user.followers.length == 0) { //Cas d'un nouveau compte
+                                        newFollowers.forEach(function (follower) {
+                                            user.followers.push({id: follower, since: 0});
+                                        });
+                                        try { //Si on est sur unfollowninja on lance le module birdyImport pour importer les dates de follow de l'ancienne version
+                                            require('./birdyImport')(user);
+                                        } catch (e) {
+                                            if (e.code != "MODULE_NOT_FOUND")  throw e;
+                                        }
 
-                                } else {
-                                    newFollowers.forEach(function (follower) { //on les ajoute à la liste des followers
-                                        user.followers.push({id: follower});
+                                    } else {
+                                        newFollowers.forEach(function (follower) { //on les ajoute à la liste des followers
+                                            user.followers.push({id: follower});
+                                        });
+                                    }
+                                    user.save(function (err) {
+                                        if (err) console.log(err);
                                     });
-                                }
-                                user.save();
+                                });
                             }
 
                             attente = (parseInt(response.headers["x-rate-limit-reset"]) - Math.floor(Date.now() / 1000)) / (parseInt(response.headers["x-rate-limit-remaining"]) + 1);
@@ -82,7 +90,7 @@ module.exports = function(config, User) {
                         var errorName="";
                         if(err && err[0] && err[0].code==89)
                             errorName="tokens expirés";
-                        else if("x-rate-limit-reset" in response.headers) {
+                        else if(response && "x-rate-limit-reset" in response.headers) {
                             errorName="rate limit";
                             attente = response.headers["x-rate-limit-reset"] - Math.floor(Date.now() / 1000);
                         }
@@ -90,7 +98,7 @@ module.exports = function(config, User) {
                             console.log(err);
                             errorName = "erreur inconnue";
                         }
-                        console.log(errorName+" sur " + user.twitter.username +" : on patiente " + attente / 60 + " minutes");
+                        console.log(errorName+" sur " + userObj.twitter.username +" : on patiente " + attente / 60 + " minutes");
                         timeOut = setTimeout(self.checkUnfollow, (attente + 1) * 1000);
                     }
 
@@ -106,16 +114,23 @@ module.exports = function(config, User) {
         function sendUnfollows(unfollowersList) {
             client.get('users/lookup', {user_id: unfollowersList}, function getData(err, data, response) { //on récupère les usernames etc de ces twittos
                 if (data && !data.error && data[0]) {
-                    data.forEach(function (twittos) {
-                        var DBfollower = user.getFollower(twittos.id_str);
-                        if (DBfollower.index > -1) {
-                            sendDM(twittos, user, DBfollower.twittos, function () {//1 - On envoie un DM pour prévenir de l'unfollow
-                                user.unfollowers.push(DBfollower.twittos); //2 - si le DM est bien recu, on l'ajoute à la liste des unfollowers
-                                if(DBfollower.index in user.followers)
-                                    user.followers[DBfollower.index].remove(); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
-                                user.save();
-                            });
-                        }
+                    var nbTreated = 0;
+                    self.getUser(function(user) { //On récupère l'utilisateur complet
+                        data.forEach(function (twittos) {
+                            var DBfollower = user.getFollower(twittos.id_str);
+                            if (DBfollower.index > -1) {
+                                sendDM(twittos, user, DBfollower.twittos, function () {//1 - On envoie un DM pour prévenir de l'unfollow
+                                    user.unfollowers.push(DBfollower.twittos); //2 - si le DM est bien recu, on l'ajoute à la liste des unfollowers
+                                    if(DBfollower.index in user.followers)
+                                        user.followers[DBfollower.index].remove(); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
+                                    console.log("ji");
+                                },function() {
+                                    nbTreated++; //Si on les a tous traité
+                                    if(data.length==nbTreated)
+                                        user.save(function (err) {if (err) console.log(err);});
+                                });
+                            }
+                        });
                     });
                 }
             });
@@ -128,7 +143,7 @@ module.exports = function(config, User) {
          * @param DBtwittos l'info sur le follower venant de la BDD
          * @param callback fonction à appeller si le DM est envoyé avec succès/que l'erreur va durer longtemps !
          */
-        function sendDM(twittos, user, DBtwittos, callback) {
+        function sendDM(twittos, user, DBtwittos, callback, done) {
             console.log("@"+user.twitter.username+" a été unfollow, envoi du DM par @"+user.twitterDM.username+" :");
             var follower = user.getFollower(twittos.id_str);
 
@@ -179,6 +194,7 @@ module.exports = function(config, User) {
                     }
                     else
                         callback();
+                    done();
                 });
         }
 
@@ -207,21 +223,37 @@ module.exports = function(config, User) {
         this.remove = function() {
             if(timeOut)
                 clearTimeout(timeOut);
-            console.log("J'arrête de checker les followers de "+("@"+user.twitter.username).blue+" .");
-            delete bots[user._id];
+            console.log("J'arrête de checker les followers de "+("@"+userObj.twitter.username).blue+" .");
+            delete bots[userObj._id];
         };
 
 
-        console.log("Hop, je check les followers de "+("@"+user.twitter.username).cyan+" !");
-        this.checkUnfollow();
+
+
 
         /* getters - setters*/
-        this.getUser = function() {
-            return user;
+        this.getUser = function(callback) {
+            User.findOne({"_id": userObj._id}, function(err, user) {
+                if(user)
+                    callback(user);
+                else
+                    console.log("utilisateur introuvable - "+userObj.twitter.username);
+            });
         };
         this.setUser = function(newUser) {
-            user = newUser;
+            newUser=newUser.toObject(); //on garde le strict minimum (optimisation memoire)
+            delete newUser.unfollowers;
+            newUser.followers = _.pluck(newUser.followers, 'id'); //sous la forme [unnumero, unnumero, unnumero].. Plus econome
+            userObj = newUser;
         };
+
+        this.setUser(user);
+        user=null;
+
+
+
+        console.log("Hop, je check les followers de "+("@"+userObj.twitter.username).cyan+" !");
+        this.checkUnfollow();
     }
 
 

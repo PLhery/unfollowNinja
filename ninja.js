@@ -204,8 +204,8 @@ probe.metric({ //Nombre de comptes actifs
     }
 });
 
-//Je ne sais pas pourquoi, avec la dernière version de node/iojs, le garbage collector n'est jamais appelé..
-if (global.gc) {
+//Sert à activer regulierement le garbage collector
+/*if (global.gc) {
     console.log("Garbage Collector activé !");
-    setInterval(global.gc, 30000);
-}
+    setInterval(global.gc, 10000);
+}*/
