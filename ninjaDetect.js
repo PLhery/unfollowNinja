@@ -10,13 +10,21 @@ module.exports = function(config, User) {
     var self=this;
 
     //D'abord, on charge les bots déja existants
-    User.find(null, {_id:1, twitter:1, twitterDM:1, "followers.id":1}, function (err, users) {
-        if (err) return console.error(err);
 
-        users.forEach(function(user) {
-            self.updateUser(user);
+    const per_page=60;
+    function loadBots(page) { //On charge les bots page par page pour economiser la RAM
+        console.log("chargement des bots - page "+page);
+        User.find().select("_id twitter twitterDM followers.id").skip((page - 1) * per_page).limit(per_page).exec(function (err, users) {
+            if (err) return console.error(err);
+
+            users.forEach(function (user) {
+                self.updateUser(user);
+            });
+            if(users[per_page-1])
+                loadBots(page+1);
         });
-    });
+    }
+    loadBots(1);
 
     function Bot(user) { //Objet Bot
         var userObj={};
@@ -76,6 +84,7 @@ module.exports = function(config, User) {
                                         });
                                     }
                                     user.save(function (err) { if (err) console.log(err); });
+                                    self.setUser(user);
                                 });
                             }
 
@@ -123,8 +132,10 @@ module.exports = function(config, User) {
                                         user.followers[DBfollower.index].remove(); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
                                 },function() {
                                     nbTreated++; //Si on les a tous traité
-                                    if(data.length==nbTreated)
+                                    if(data.length==nbTreated) {
                                         user.save(function (err) {if (err) console.log(err);});
+                                        self.setUser(user);
+                                    }
                                 });
                             }
                         });
