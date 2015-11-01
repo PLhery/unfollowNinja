@@ -47,7 +47,7 @@ ma configuration (de gauche à droite) : twitter.photo, twitter.username, follow
 5. Envoyez-moi un pull request :D
 
 ## History
-1.2.0 - Corrections de bugs, Mise en cache de twittos, API /!\ mettez à jour config.js
+1.2.0 - Corrections de bugs, Mise en cache de twittos, API /!\ mettez à jour config.js  
 1.1.x - corrections de bugs cf commits  
 1.1.0 - optimisations mémoire  
 1.0.0-19 - corrections de bugs cf commits  
