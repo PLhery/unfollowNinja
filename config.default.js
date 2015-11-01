@@ -24,4 +24,26 @@ config.twitterDM = {
     consumerSecret: "quelque chose comme G7fEJCFGQyW1sd9Dj6Jw9qo8HdZH9V6pDz57T8nugSuZslvhd0"
 };
 
+
+/*Mise en cache :
+ * Activer la mise en cache des utilisateurs. Cela met en cache les usernames de tous les followers pour les retrouver en cas de suspension (dans la collection "caches")*/
+
+config.cache = true;
+
+/* Identifiants pour "scanner" tous les users en cache*/
+
+config.twitterCache = { //NinjaSender1
+    consumer_key: config.twitterDM.consumerKey,
+    consumer_secret: config.twitterDM.consumerSecret,
+    access_token_key: "quelque chose comme 1234567899-mKCra2fdsJfp0c3ApGqVVMSG1N8iH0uvRmDGhF9i",
+    access_token_secret: "quelque chose comme lRYW9f7bgGScytdfSVim0edvPGjxpXzZ8z3BkHS6Ooch8"
+};
+
+/* Nombre d'utilisateurs max à scanner/jour (permet d'economiser des ressources) - 0 = illimité = environ 1.5 millions */
+config.maxUsersDay = 300000;
+
+/*limite de DM à envoyer par unité de temps : */
+config.limite = 10; //10 DMs MAX
+config.limitePar = 24; //par période de 24h glissante
+
 module.exports = config;

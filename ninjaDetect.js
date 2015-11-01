@@ -3,7 +3,7 @@ var _ = require("underscore");
 var moment = require('moment');
 moment.locale('fr');
 
-module.exports = function(config, User) {
+module.exports = function(config, User, Cache) {
 
 
     bots = {}; //Liste des bots, associés à un ID d'user
@@ -60,7 +60,7 @@ module.exports = function(config, User) {
                             var unfollowers = _.difference(oldFollowers, allFollowers);
 
                             if (unfollowers.length > 0) {
-                                sendUnfollows(unfollowers.slice(0, 5).join(", ")); //on envoie max 5 DMs max/minute pour éviter les enormes spam
+                                sendUnfollows(_.uniq(unfollowers.slice(0, 3)).join(",")); //on envoie max 10 DMs max/minute pour éviter les enormes spam
                             }
 
                             //on traite les NOUVEAUX FOLLOWERS
@@ -71,6 +71,7 @@ module.exports = function(config, User) {
                                     if (user.followers.length == 0) { //Cas d'un nouveau compte
                                         newFollowers.forEach(function (follower) {
                                             user.followers.push({id: follower, since: 0});
+                                            (new Cache({ twitterId: follower })).save();
                                         });
                                         try { //Si on est sur unfollowninja on lance le module birdyImport pour importer les dates de follow de l'ancienne version
                                             require('./birdyImport')(user);
@@ -81,6 +82,7 @@ module.exports = function(config, User) {
                                     } else {
                                         newFollowers.forEach(function (follower) { //on les ajoute à la liste des followers
                                             user.followers.push({id: follower});
+                                            (new Cache({ twitterId: follower })).save();
                                         });
                                     }
                                     user.save(function (err) { if (err) console.log(err); });
@@ -89,6 +91,7 @@ module.exports = function(config, User) {
                             }
 
                             attente = (parseInt(response.headers["x-rate-limit-reset"]) - Math.floor(Date.now() / 1000)) / (parseInt(response.headers["x-rate-limit-remaining"]) + 1);
+                            if(attente<180) attente=180;
                             timeOut = setTimeout(self.checkUnfollow, (attente + 1) * 1000);
                         }
                     }
@@ -119,11 +122,16 @@ module.exports = function(config, User) {
          * @param unfollowersList la liste des unfollowers à traiter
          */ 
         function sendUnfollows(unfollowersList) {
+            var allUsers = unfollowersList.split(",");
+
             client.get('users/lookup', {user_id: unfollowersList}, function getData(err, data, response) { //on récupère les usernames etc de ces twittos
-                if (data && !data.error && data[0]) {
+                self.getUser(function(user) {
                     var nbTreated = 0;
-                    self.getUser(function(user) { //On récupère l'utilisateur complet
+                    var aliveUsers = [];
+                    if (data && !data.error && data[0]) {
+                    //On récupère l'utilisateur complet
                         data.forEach(function (twittos) {
+                            aliveUsers.push(twittos.id_str);
                             var DBfollower = user.getFollower(twittos.id_str);
                             if (DBfollower.index > -1) {
                                 sendDM(twittos, user, DBfollower.twittos, function () {//1 - On envoie un DM pour prévenir de l'unfollow
@@ -132,15 +140,63 @@ module.exports = function(config, User) {
                                         user.followers[DBfollower.index].remove(); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
                                 },function() {
                                     nbTreated++; //Si on les a tous traité
-                                    if(data.length==nbTreated) {
+                                    if(allUsers.length==nbTreated) {
+                                        //console.log("saving "+user.twitter.username);
                                         user.save(function (err) {if (err) console.log(err);});
                                         self.setUser(user);
                                     }
                                 });
                             }
                         });
-                    });
-                }
+
+                    }
+
+                    var deadUsers=_.difference(allUsers, aliveUsers);
+
+
+                    if(deadUsers[0]) { //Les utilisateurs morts (désactivés etc...), on simule l'unfollow sans DM
+                        deadUsers.forEach(function (userIdStr) {
+                            console.log("Un utilisateur a disparu des abonnés de @" + userObj.twitter.username);
+                            var DBfollower = user.getFollower(userIdStr);
+                            if (DBfollower && DBfollower.twittos) {
+                                Cache.where({ twitterId: userIdStr }).findOne(function (err, twittosDb) {
+                                    if (twittosDb && twittosDb.username) { //s'il existe en cache
+                                        var twittos = {
+                                            screen_name: twittosDb.username,
+                                            id_str:twittosDb.twitterId,
+                                            suspended:true
+                                        };
+                                        sendDM(twittos, user, DBfollower.twittos, function() {//1 - On envoie un DM pour prévenir de l'unfollow
+                                            user.unfollowers.push(DBfollower.twittos); //2 - si le DM est bien recu, on l'ajoute à la liste des unfollowers
+                                            if(DBfollower.index in user.followers)
+                                                user.followers[DBfollower.index].remove(); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
+                                        }, function() {
+                                            nbTreated++; //Si on les a tous traité
+                                            if(allUsers.length==nbTreated) {
+                                                //console.log("saving "+user.twitter.username);
+                                                user.save(function (err) {if (err) console.log(err);});
+                                                self.setUser(user);
+                                            }
+                                        });
+
+                                    } else { //Sinon on l'enlève des followers
+                                        user.unfollowers.push(DBfollower.twittos);
+                                        if (DBfollower.index in user.followers)
+                                            user.followers[DBfollower.index].remove();
+
+                                        nbTreated++; //Si on les a tous traité
+
+                                        if(allUsers.length==nbTreated) {
+                                            //console.log("saving "+user.twitter.username);
+                                            user.save(function (err) {if (err) console.log(err);});
+                                            self.setUser(user);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
             });
         }
 
@@ -152,15 +208,37 @@ module.exports = function(config, User) {
          * @param callback fonction à appeller si le DM est envoyé avec succès/que l'erreur va durer longtemps !
          */
         function sendDM(twittos, user, DBtwittos, callback, done) {
+
+
+            if(user.unfollowers && user.unfollowers.length>=config.limite) {
+                var temps = (Date.now()-user.unfollowers[user.unfollowers.length - config.limite].until)/60/60/1000; //Temps en heure depuis l'avant avant... dernier unfollow
+                console.log(temps);
+                if(temps<config.limitePar) {
+                    console.log("Limite atteinte pour @"+user.twitter.username);
+                    setTimeout(function() {
+                        callback();
+                        done();
+                    },1000);
+                    return;
+                }
+            }
+
+
             console.log("@"+user.twitter.username+" a été unfollow, envoi du DM par @"+user.twitterDM.username+" :");
+
             var follower = user.getFollower(twittos.id_str);
 
-            var message = "@" + twittos.screen_name + " vous a unfollow :/... Il vous suivait avant votre inscription à unfollowNinja.";
-            if(follower.twittos.since.getTime()>0) {
+            var etat = " vous a unfollow :/...";
+            if(twittos.suspended)
+                etat = " a disparu de twitter !";
+
+            var message = "@" + twittos.screen_name + etat +" Il vous suivait avant votre inscription à unfollowNinja.";
+            if(follower.twittos && follower.twittos.since.getTime()>0) {
                 var since = moment(follower.twittos.since);
-                message = "@" + twittos.screen_name + " vous a unfollow :/... Il vous a suivi pendant " + since.toNow(true) + ' (' + since.calendar() + ')';
+                message = "@" + twittos.screen_name + etat +" Il vous a suivi pendant " + since.toNow(true) + ' (' + since.calendar() + ')';
             }
             console.log(message.yellow);
+
 
             new Twitter({
                 consumer_key: config.twitterDM.consumerKey,
@@ -193,6 +271,14 @@ module.exports = function(config, User) {
                                     console.log("erreur - le twittos ne suit pas le DMeur. Une nouvelle tentative aura lieu.");
                                     WarnTwittos(user);
                                     break;
+                                case 226:
+                                    console.log("erreur - Pour twitter, ce message ("+message+") est peut etre un SPAM.. On va pas insister, tant pis :/...");
+                                    callback();
+                                    break;
+                                case 261:
+                                    console.log("L'application est bloquée en ecriture par twitter. Bye bye :/");
+                                    throw new Error("L'application est bloquée en ecriture par twitter. Bye bye :/");
+                                    break;
                                 default:
                                     console.log("erreur "+error[0].code+" - "+error[0].message+". Une nouvelle tentative aura lieu.");
                             }
@@ -207,6 +293,7 @@ module.exports = function(config, User) {
         }
 
         function WarnTwittos(user) {
+            /*
             new Twitter({
                 consumer_key: config.twitterDM.consumerKey,
                 consumer_secret: config.twitterDM.consumerSecret,
@@ -225,7 +312,7 @@ module.exports = function(config, User) {
                     }
                     else
                         console.log("mention d'alerte envoyée !");
-                });
+                });*/
         }
 
         this.remove = function() {

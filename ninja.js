@@ -18,6 +18,7 @@ try {
 }
 
 var _ = require("underscore"); //set d'outils
+var ripemd = require("crypto-js/ripemd160"); //cryptage (pour génerer l'api key)
 
 //déclaration des schémas et modèles de mongoose (gestion de mongoDB)
 var mongoose = require('mongoose');
@@ -25,6 +26,7 @@ var Schema = mongoose.Schema;
 mongoose.connect(config.mongoDB);
 var twitterUser={id:String, username:String, photo:String, token:String, secret:String};
 var userSchema = new Schema({ username: String, twitter: twitterUser, twitterDM: twitterUser, followers: [{id: String, since:{ type: Date, default: Date.now }}], unfollowers: [{id: String, since: Date, until:{ type: Date, default: Date.now }}] });
+
 userSchema.methods.getFollower = function (id) { //Trouve un follower par son ID
     i = _.findIndex(this.followers, { id: id });
     return {
@@ -34,8 +36,12 @@ userSchema.methods.getFollower = function (id) { //Trouve un follower par son ID
 };
 var User = mongoose.model('user', userSchema);
 
-//Implémentation du detecteur d'unfollow ninjaDetect
-var detect = new (require('./ninjaDetect'))(config, User);
+var Cache = mongoose.model('cache', { twitterId: { type: String, unique: true }, username: String, profilePicture: String, createdAt: { type: Date, default: Date.now }, updatedAt: Date});
+
+//Implémentation du detecteur d'unfollow ninjaDetect et de la mise en cache
+var detect = new (require('./ninjaDetect'))(config, User, Cache);
+if(config.cache)
+    require('./ninjaCache')(config, Cache);
 
 //Implémentation d'express et ses plugins (gère la partie web)
 var express = require('express');
@@ -47,6 +53,9 @@ app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(require('express-session')({ secret: config.sessionSecret, resave: true, saveUninitialized: true }));
 app.set('views', __dirname + '/views');
+//API
+app.use('/api', require("./ninjapi")(express, ripemd, User, Cache));
+
 
 //Implémentation de passport et son plugin twitter (gère la connection)
 var passport = require('passport');
@@ -106,6 +115,7 @@ function toLayout(res) { //Permet d'afficher les pages dans le layout
 
 
 //Que fait chaque paaaage...
+
 app.get('/', function(req, res) {
     res.render('step1.ejs', toLayout(res));
 });
@@ -127,6 +137,7 @@ app.get('/step1/auth/callback',
 
 app.get('/step2/', function(req, res) {
     if(req.user) { //Si on est bien connecté
+        req.user.apikey=ripemd(req.user.twitter.token).toString().substring(0, 35);
         if(req.user.twitterDM.id) { //Si on en est déja à l'étape 3
             res.render('step3.ejs',  req.user , toLayout(res));
         } else {
@@ -176,6 +187,10 @@ app.get('/step2/disable', function(req, res){
 try { //Si on est sur unfollowninja, on ajoute le /gift pour donateurs et utilisateurs fidèles
     require('./ninjaPlus')(app, toLayout, mongoose, User, detect);
 } catch (e) { if (e.code != "MODULE_NOT_FOUND")  throw e; }
+
+
+
+
 
 //Définition de la page 404
 app.use(function(req, res, next){
