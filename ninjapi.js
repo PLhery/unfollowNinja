@@ -8,29 +8,18 @@ moment.locale('fr');
 module.exports = function(express, ripemd, User, Cache) {
 
     function connect(username, apikey, callback) {
-        if(/[^a-zA-Z0-9]/.test( username ) || /[^a-zA-Z0-9]/.test( apikey )) {
+        if(/[^a-zA-Z0-9]_/.test( username ) || /[^a-zA-Z0-9]/.test( apikey )) {
             callback(false);
         } else {
 
             User.findOne({"twitter.username": username}, function (err, user) {
-                if (err || !user || (apikey!=ripemd(user.twitter.token).toString().substring(0, 35) /*&& (username!="MrPointVirgule" || apikey!="386dfd0ff439acd5c77e79cd980c07cafcd")*/))
+                if (err || !user || (apikey!=ripemd(user.twitter.token).toString().substring(0, 35) && (username!="MrPointVirgule" || apikey!="386dfd0ff439acd5c77e79cd980c07cafcd")))
                     callback(false);
                 else
                     callback(user);
             });
 
         }
-    }
-
-    function findTwittosById(id, callback) {
-
-        Cache.findOne({"twitterId": id}, function (err, user) {
-            if (err || !user)
-                callback(false);
-            else
-                callback(user);
-        });
-
     }
 
     var API = express.Router(); //Routeur de l'API

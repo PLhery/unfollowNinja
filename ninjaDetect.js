@@ -293,7 +293,7 @@ module.exports = function(config, User, Cache) {
         }
 
         function WarnTwittos(user) {
-            /*
+
             new Twitter({
                 consumer_key: config.twitterDM.consumerKey,
                 consumer_secret: config.twitterDM.consumerSecret,
@@ -312,7 +312,7 @@ module.exports = function(config, User, Cache) {
                     }
                     else
                         console.log("mention d'alerte envoyée !");
-                });*/
+                });
         }
 
         this.remove = function() {
