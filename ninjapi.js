@@ -13,7 +13,7 @@ module.exports = function(express, ripemd, User, Cache) {
         } else {
 
             User.findOne({"twitter.username": username}, function (err, user) {
-                if (err || !user || (apikey!=ripemd(user.twitter.token).toString().substring(0, 35) /*&& (username!="MrPointVirgule" || apikey!="386dfd0ff439acd5c77e79cd980c07cafcd")*/))
+                if (err || !user || apikey!=ripemd(user.twitter.token).toString().substring(0, 35))
                     callback(false);
                 else
                     callback(user);

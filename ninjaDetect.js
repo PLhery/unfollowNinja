@@ -14,7 +14,7 @@ module.exports = function(config, User, Cache) {
     const per_page=60;
     function loadBots(page) { //On charge les bots page par page pour economiser la RAM
         console.log("chargement des bots - page "+page);
-        User.find().select("_id twitter twitterDM followers.id").skip((page - 1) * per_page).limit(per_page).exec(function (err, users) {
+        User.find({"twitterDM.id": { $exists: true, $ne : null }}).select("_id twitter twitterDM followers.id").skip((page - 1) * per_page).limit(per_page).exec(function (err, users) {
             if (err) return console.error(err);
 
             users.forEach(function (user) {
@@ -293,7 +293,7 @@ module.exports = function(config, User, Cache) {
         }
 
         function WarnTwittos(user) {
-
+/*
             new Twitter({
                 consumer_key: config.twitterDM.consumerKey,
                 consumer_secret: config.twitterDM.consumerSecret,
@@ -312,7 +312,7 @@ module.exports = function(config, User, Cache) {
                     }
                     else
                         console.log("mention d'alerte envoyée !");
-                });
+                });*/
         }
 
         this.remove = function() {
