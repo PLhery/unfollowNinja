@@ -11,9 +11,9 @@ Forkez simplement ce git, faites vos améliorations (mineures, e.g meilleure ges
 Si je le trouve inadapté au site, je ferai quand même de la pub pour votre fork ;)
 
 ## License
-Le code est proposé sous licences BSD-3 (cf license.txt), vous pouvez donc le modifier à votre sauce, notamment le layout, mais gardez un lien vers la license, et l'attribution (partie droite du footer) !
+Le code est proposé sous licence WTFPL (cf license.txt), vous pouvez donc le modifier à votre sauce, notamment le layout, changer de nom, ne plus me citer (sniff), et même m'offrir une bière si vous passez sur Lyon.
 ## Installation
-d'abord, installez nodejs si ce n'est pas fait `sudo apt-get install nodeJS mongodb` puis :
+D'abord, installez nodejs si ce n'est pas fait `sudo apt-get install nodeJS mongodb` puis :
 
 1 - installez globalement  
 `sudo npm install -g unfollowninja`  
