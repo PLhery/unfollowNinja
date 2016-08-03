@@ -98,9 +98,15 @@ module.exports = function(config, User, Cache) {
                     else { //en cas d'erreur (rate limit ?) On attend
                         var attente=60*15; //attente par défaut : 15min
                         var errorName="";
-                        if(err && err[0] && err[0].code==89)
-                            errorName="tokens expirés";
-                        else if(response && "x-rate-limit-reset" in response.headers) {
+                        if(err && err[0] && err[0].code==89) { //Tokens expirés
+                            self.getUser(function(user) {
+                                user.twitterDM=null;
+                                user.save(function (err) { if (err) console.log(err); });
+                                self.remove();
+                            });
+
+                            errorName = "tokens expirés";
+                        } else if(response && "x-rate-limit-reset" in response.headers) {
                             errorName="rate limit";
                             attente = response.headers["x-rate-limit-reset"] - Math.floor(Date.now() / 1000);
                         }
@@ -141,7 +147,7 @@ module.exports = function(config, User, Cache) {
                                 },function() {
                                     nbTreated++; //Si on les a tous traité
                                     if(allUsers.length==nbTreated) {
-                                        //console.log("saving "+user.twitter.username);
+                                        console.log("saving "+user.twitter.username);
                                         user.save(function (err) {if (err) console.log(err);});
                                         self.setUser(user);
                                     }
@@ -212,7 +218,6 @@ module.exports = function(config, User, Cache) {
 
             if(user.unfollowers && user.unfollowers.length>=config.limite) {
                 var temps = (Date.now()-user.unfollowers[user.unfollowers.length - config.limite].until)/60/60/1000; //Temps en heure depuis l'avant avant... dernier unfollow
-                console.log(temps);
                 if(temps<config.limitePar) {
                     console.log("Limite atteinte pour @"+user.twitter.username);
                     setTimeout(function() {
@@ -228,14 +233,14 @@ module.exports = function(config, User, Cache) {
 
             var follower = user.getFollower(twittos.id_str);
 
-            var etat = " vous a unfollow :/...";
+            var debut = "@" + twittos.screen_name + " vous a unfollow :/...";
             if(twittos.suspended)
-                etat = " a disparu de twitter !";
+                debut = twittos.screen_name + " a disparu de twitter !";
 
-            var message = "@" + twittos.screen_name + etat +" Il vous suivait avant votre inscription à unfollowNinja.";
+            var message =debut +" Il vous suivait avant votre inscription à unfollowNinja.";
             if(follower.twittos && follower.twittos.since.getTime()>0) {
                 var since = moment(follower.twittos.since);
-                message = "@" + twittos.screen_name + etat +" Il vous a suivi pendant " + since.toNow(true) + ' (' + since.calendar() + ')';
+                message = debut +" Il vous a suivi pendant " + since.toNow(true) + ' (' + since.calendar() + ')';
             }
             console.log(message.yellow);
 
@@ -255,6 +260,8 @@ module.exports = function(config, User, Cache) {
                                     break;
                                 case 64:
                                     console.log("erreur - compte suspendu. Le DM ne sera pas envoyé.");
+                                    user.twitterDM=null;
+                                    updateUser(user);
                                     callback();
                                     break;
                                 case 88:
@@ -262,14 +269,17 @@ module.exports = function(config, User, Cache) {
                                     break;
                                 case 89:
                                     console.log("erreur - tokens du compte de DM invalides. Le DM ne sera pas envoyé.");
+                                    user.twitterDM=null;
+                                    updateUser(user);
                                     callback();
                                     break;
                                 case 130:
                                     console.log("erreur - twitter over capacity. Une nouvelle tentative aura lieu.");
                                     break;
                                 case 150:
-                                    console.log("erreur - le twittos ne suit pas le DMeur. Une nouvelle tentative aura lieu.");
+                                    console.log("erreur - le twittos ne suit pas le DMeur. Faut prévenir "+user.twitter.username+" !");
                                     WarnTwittos(user);
+                                    callback();
                                     break;
                                 case 226:
                                     console.log("erreur - Pour twitter, ce message ("+message+") est peut etre un SPAM.. On va pas insister, tant pis :/...");
@@ -364,7 +374,7 @@ module.exports = function(config, User, Cache) {
             });
         } else {
             if (user._id in bots) {
-                if (user.twitterDM.id) {
+                if (user.twitterDM && user.twitterDM.id) {
                     console.log("dm");
                     bots[user._id].setUser(user);
                 } else {
