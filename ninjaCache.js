@@ -7,14 +7,14 @@ var Async = require('async');
 module.exports = function(config , Cache) {
 console.log("[NINJACACHE] Lancement de la mise en cache...");
 
-    var client = new Twitter(config.twitterCache); //Le client twitter qu'on va utiliser pour mettre � jour le cache
+    var client = new Twitter(config.twitterCache); //Le client twitter qu'on va utiliser pour mettre à jour le cache
 
     function actualiserCache() {
         //console.log("actualisation...");
         Cache.find().limit(100).sort({'updatedAt': 1}).exec(function (err, users) {
             if (err) return console.error("[NINJACACHE]"+err[0]);
 
-            client.get('users/lookup', {user_id: _.pluck(users, 'twitterId').join(",")}, function getData(err, data, response) { //on r�cup�re les usernames etc de ces twittos
+            client.get('users/lookup', {user_id: _.pluck(users, 'twitterId').join(",")}, function getData(err, data, response) { //on récupère les usernames etc de ces twittos
                 if (err && err[0] && err[0].code==215) return console.error("[NINJACACHE]"+"La mise en cache est desactivee - les jetons d'acces incorrects.");
                 if (err) return console.error("[NINJACACHE]"+err);
 
@@ -31,7 +31,7 @@ console.log("[NINJACACHE] Lancement de la mise en cache...");
                             twittosDb.save(function (err) {
                                 if (err) console.log("[NINJACACHE]"+err);
 
-                                users.splice(index, 1); //on l'enl�ve des users
+                                users.splice(index, 1); //on l'enlève des users
                                 callback();
                             });
                             //console.log("saving @" + twittos.screen_name + " ...");

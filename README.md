@@ -34,7 +34,7 @@ Suivez juste les indications, vous devrez créer un fichier de configuration con
 
 ![Screenshot de la console](http://i.imgur.com/McDmGx4.png "Screenshot de la console")
 
-Si vous voulez manager vos utilisateurs, je vous conseil [humongous.io](https://humongous.io)
+Si vous voulez manager vos utilisateurs, je vous conseille [humongous.io](https://humongous.io)
 
 ![Screenshot d'humangous.io](http://i.imgur.com/to4AAw5.png "Screenshot d'humangous.io")
 

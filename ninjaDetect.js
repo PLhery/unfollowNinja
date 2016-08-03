@@ -42,7 +42,7 @@ module.exports = function(config, User, Cache) {
         /**
          * Vérifie les unfollows, appellé toutes les minutes environ (suivant la limitation de twitter -> le nombre de requetes à faire -> la taille du compte )
          */
-        this.checkUnfollow = function() {
+        this.checkUnfollow = function() { // TODO utiliser des PROMESSES car on ne comprend plus très bien l'ordre d'execution...
             if(userObj.twitterDM.id) {
                 var allFollowers=[]; //liste d'IDs des followers à récupérer
                 var oldFollowers= userObj.followers; //liste d'IDs des followers dans la BDD
@@ -60,34 +60,36 @@ module.exports = function(config, User, Cache) {
                             var unfollowers = _.difference(oldFollowers, allFollowers);
 
                             if (unfollowers.length > 0) {
-                                sendUnfollows(_.uniq(unfollowers.slice(0, 3)).join(",")); //on envoie max 10 DMs max/minute pour éviter les enormes spam
-                            }
+                                sendUnfollows(_.uniq(unfollowers.slice(0, 3)).join(","), newFollowers); //on envoie max 10 DMs max/minute pour éviter les enormes spam
+                            } else newFollowers();
 
                             //on traite les NOUVEAUX FOLLOWERS
-                            var newFollowers = _.difference(allFollowers, oldFollowers);
+                            function newFollowers() {
+                                var newFollowers = _.difference(allFollowers, oldFollowers);
 
-                            if(newFollowers.length>0) {
-                                self.getUser(function(user) { //On recupere l'utilisateur
-                                    if (user.followers.length == 0) { //Cas d'un nouveau compte
-                                        newFollowers.forEach(function (follower) {
-                                            user.followers.push({id: follower, since: 0});
-                                            (new Cache({ twitterId: follower })).save();
-                                        });
-                                        try { //Si on est sur unfollowninja on lance le module birdyImport pour importer les dates de follow de l'ancienne version
-                                            require('./birdyImport')(user);
-                                        } catch (e) {
-                                            if (e.code != "MODULE_NOT_FOUND")  throw e;
+                                if(newFollowers.length>0) {
+                                    self.getUser(function(user) { //On recupere l'utilisateur
+                                        if (user.followers.length == 0) { //Cas d'un nouveau compte
+                                            newFollowers.forEach(function (follower) {
+                                                user.followers.push({id: follower, since: 0});
+                                                (new Cache({ twitterId: follower })).save();
+                                            });
+                                            try { //Si on est sur unfollowninja on lance le module birdyImport pour importer les dates de follow de l'ancienne version
+                                                require('./birdyImport')(user);
+                                            } catch (e) {
+                                                if (e.code != "MODULE_NOT_FOUND")  throw e;
+                                            }
+
+                                        } else {
+                                            newFollowers.forEach(function (follower) { //on les ajoute à la liste des followers
+                                                user.followers.push({id: follower});
+                                                (new Cache({ twitterId: follower })).save();
+                                            });
                                         }
-
-                                    } else {
-                                        newFollowers.forEach(function (follower) { //on les ajoute à la liste des followers
-                                            user.followers.push({id: follower});
-                                            (new Cache({ twitterId: follower })).save();
-                                        });
-                                    }
-                                    user.save(function (err) { if (err) console.log(err); });
-                                    self.setUser(user);
-                                });
+                                        user.save(function (err) { if (err) console.log(err); });
+                                        self.setUser(user);
+                                    });
+                                }
                             }
 
                             attente = (parseInt(response.headers["x-rate-limit-reset"]) - Math.floor(Date.now() / 1000)) / (parseInt(response.headers["x-rate-limit-remaining"]) + 1);
@@ -126,8 +128,9 @@ module.exports = function(config, User, Cache) {
         /**
          * Récupère les infos (username) sur les twittos à unfollow en lance l'envoi de DM
          * @param unfollowersList la liste des unfollowers à traiter
+         * @param callback callback
          */ 
-        function sendUnfollows(unfollowersList) {
+        function sendUnfollows(unfollowersList, callback) {
             var allUsers = unfollowersList.split(",");
 
             client.get('users/lookup', {user_id: unfollowersList}, function getData(err, data, response) { //on récupère les usernames etc de ces twittos
@@ -150,6 +153,7 @@ module.exports = function(config, User, Cache) {
                                         console.log("saving "+user.twitter.username);
                                         user.save(function (err) {if (err) console.log(err);});
                                         self.setUser(user);
+                                        callback();
                                     }
                                 });
                             }
@@ -196,6 +200,7 @@ module.exports = function(config, User, Cache) {
                                             //console.log("saving "+user.twitter.username);
                                             user.save(function (err) {if (err) console.log(err);});
                                             self.setUser(user);
+                                            callback()
                                         }
                                     }
                                 });
