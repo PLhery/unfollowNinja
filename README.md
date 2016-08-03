@@ -1,6 +1,8 @@
 # unfollowNinja
 Code d' https://unfollowninja.fr - service web ecrit en nodeJS pour détecter vos unfollows et vous envoyer un DM
 
+[![Dependency Status](https://david-dm.org/PLhery/unfollowNinja.svg)](https://david-dm.org/PLhery/unfollowNinja)
+
 ![Screenshot du site](http://i.imgur.com/rRsa7iy.jpg "Screenshot du site")
 
 ## Motivation
