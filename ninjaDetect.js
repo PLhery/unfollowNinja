@@ -173,7 +173,7 @@ module.exports = function(config, User, Cache) {
                                                             id_str:twittosDb.twitterId,
                                                             suspended:true
                                                         };
-                                                        sendDM(twittos, user, DBfollower.twittos, function() {//1 - On envoie un DM pour prévenir de l'unfollow
+                                                        sendDM(twittos, user, function() {//1 - On envoie un DM pour prévenir de l'unfollow
                                                             user.unfollowers.push(DBfollower.twittos); //2 - si le DM est bien recu, on l'ajoute à la liste des unfollowers
                                                             if(DBfollower.index in user.followers)
                                                                 user.followers[DBfollower.index].remove(); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
