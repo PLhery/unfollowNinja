@@ -1,6 +1,6 @@
 {
   "name": "unfollowninja",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Detectez vos unfollows et envoyez-vous un MP.",
   "author": "MrPointVirgule <paul-louis@outlook.fr> (http://twitter.com/MrPointVirgule)",
   "bin": {
@@ -39,7 +39,8 @@
     "passport": "^0.3.0",
     "passport-twitter": "^1.0.3",
     "php-unserialize": "^0.0.1",
-    "pmx": "^1.0.0",
+    "pmx": "^0.6.2",
+    "q": "^1.4.1",
     "twitter": "^1.2.5",
     "underscore": "^1.8.3"
   },
