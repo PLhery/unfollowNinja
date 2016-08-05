@@ -17,7 +17,7 @@ try {
     process.exit(e.code);
 }
 
-var _ = require("underscore"); //set d'outils
+var _ = require("lodash"); //set d'outils
 var ripemd = require("crypto-js/ripemd160"); //cryptage (pour génerer l'api key)
 
 //déclaration des schémas et modèles de mongoose (gestion de mongoDB)

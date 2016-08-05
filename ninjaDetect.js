@@ -1,5 +1,5 @@
 var Twitter = require('twitter');
-var _ = require("underscore");
+var _ = require("lodash");
 var moment = require('moment');
 moment.locale('fr');
 var Q = require('q');
@@ -140,8 +140,8 @@ module.exports = function(config, User, Cache) {
                                 var sendingDM = Q();
                                 if (data && !data.error && data[0]) {
                                     data.forEach(function (twittos) {
+                                        aliveUsers.push(twittos.id_str);
                                         sendingDM = sendingDM.then(function() { // On envoie les DMs un par un
-                                            aliveUsers.push(twittos.id_str);
                                             var DBfollower = user.getFollower(twittos.id_str); //On récupère l'utilisateur complet
                                             if (DBfollower.index > -1) {
                                                 var deferred = Q.defer();
@@ -157,31 +157,28 @@ module.exports = function(config, User, Cache) {
                                         });
                                     });
                                 }
-                                sendingDM.then(function() {
-                                    var deadUsers=_.difference(allUsers, aliveUsers);
-
-                                    if(deadUsers[0]) { //Les utilisateurs morts (désactivés etc...), on simule l'unfollow sans DM
-                                        deadUsers.forEach(function (userIdStr) {
+                                var deadUsers=_.difference(allUsers, aliveUsers);
+                                if(deadUsers[0]) { //Les utilisateurs morts (désactivés etc...), on simule l'unfollow sans DM
+                                    deadUsers.forEach(function (userIdStr) {
+                                        sendingDM = sendingDM.then(function() {
                                             console.log("Un utilisateur a disparu des abonnés de @" + userObj.twitter.username);
                                             var DBfollower = user.getFollower(userIdStr);
                                             if (DBfollower && DBfollower.twittos) {
                                                 var deferred = Q.defer();
-                                                Cache.where({ twitterId: userIdStr }).findOne(function (err, twittosDb) {
+                                                Cache.where({twitterId: userIdStr}).findOne(function (err, twittosDb) {
                                                     if (twittosDb && twittosDb.username) { //s'il existe en cache
                                                         var twittos = {
                                                             screen_name: twittosDb.username,
-                                                            id_str:twittosDb.twitterId,
-                                                            suspended:true
+                                                            id_str: twittosDb.twitterId,
+                                                            suspended: true
                                                         };
-                                                        sendDM(twittos, user, function() {//1 - On envoie un DM pour prévenir de l'unfollow
+                                                        sendDM(twittos, user, function () {//1 - On envoie un DM pour prévenir de l'unfollow
                                                             user.unfollowers.push(DBfollower.twittos); //2 - si le DM est bien recu, on l'ajoute à la liste des unfollowers
-                                                            if(DBfollower.index in user.followers)
-                                                                user.followers[DBfollower.index].remove(); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
+                                                            user.followers.pull(DBfollower.twittos._id); //3 - et on le supprime des followers pour par avoir de nouveau la notif.
                                                         }, deferred.resolve);
                                                     } else { //Sinon on l'enlève des followers
                                                         user.unfollowers.push(DBfollower.twittos);
-                                                        if (DBfollower.index in user.followers)
-                                                            user.followers[DBfollower.index].remove();
+                                                        user.followers.pull(DBfollower.twittos._id);
 
                                                         deferred.resolve();
                                                     }
@@ -189,8 +186,9 @@ module.exports = function(config, User, Cache) {
                                                 return deferred.promise;
                                             }
                                         });
-                                    }
-                                }).then(function() { //Quand tout est traité
+                                    });
+                                }
+                                sendingDM.then(function() { //Quand tout est traité
                                     user.save(function (err) {if (err) console.log(err);});
                                     console.log('saving 1 - ' + user.twitter.username);
                                     self.setUser(user);
@@ -345,7 +343,7 @@ module.exports = function(config, User, Cache) {
         this.setUser = function(newUser) {
             newUser=newUser.toObject(); //on garde le strict minimum (optimisation memoire)
             delete newUser.unfollowers;
-            newUser.followers = _.pluck(newUser.followers, 'id'); //sous la forme [unnumero, unnumero, unnumero].. Plus econome
+            newUser.followers = _.map(newUser.followers, 'id'); //sous la forme [unnumero, unnumero, unnumero].. Plus econome
             userObj = newUser;
         };
 

@@ -1,7 +1,7 @@
 /**
  * Created by paul- on 31/10/2015.
  */
-var _ = require("underscore");
+var _ = require("lodash");
 var moment = require('moment');
 moment.locale('fr');
 
@@ -47,7 +47,7 @@ module.exports = function(express, ripemd, User, Cache) {
                     var userUnfollowers= user.unfollowers.reverse().slice(0,nombre);
 
                     Cache.find({
-                        'twitterId': { $in: _.pluck(userUnfollowers, 'id')}
+                        'twitterId': { $in: _.map(userUnfollowers, 'id')}
                     }, function (err, docs) {
                         if (!err) {
                             var unfollows=[];
@@ -59,7 +59,7 @@ module.exports = function(express, ripemd, User, Cache) {
                                     twitterID: item.id
                                 };
 
-                                var twittosInfo = _.findWhere(docs, {twitterId: item.id});
+                                var twittosInfo = _.find(docs, {twitterId: item.id});
                                 if(twittosInfo) {
                                     unfollower.user.username=twittosInfo.username;
                                     unfollower.user.profilePic=twittosInfo.profilePicture;

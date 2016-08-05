@@ -1,8 +1,6 @@
-var _ = require("underscore");
+var _ = require("lodash");
 var Twitter = require('twitter');
 var Async = require('async');
-
-
 
 module.exports = function(config , Cache) {
 console.log("[NINJACACHE] Lancement de la mise en cache...");
@@ -14,7 +12,7 @@ console.log("[NINJACACHE] Lancement de la mise en cache...");
         Cache.find().limit(100).sort({'updatedAt': 1}).exec(function (err, users) {
             if (err) return console.error("[NINJACACHE]"+err[0]);
 
-            client.get('users/lookup', {user_id: _.pluck(users, 'twitterId').join(",")}, function getData(err, data, response) { //on récupère les usernames etc de ces twittos
+            client.get('users/lookup', {user_id: _.map(users, 'twitterId').join(",")}, function getData(err, data, response) { //on récupère les usernames etc de ces twittos
                 if (err && err[0] && err[0].code==215) return console.error("[NINJACACHE]"+"La mise en cache est desactivee - les jetons d'acces incorrects.");
                 if (err) return console.error("[NINJACACHE]"+err);
 
