@@ -4,7 +4,8 @@
   "description": "Receive a direct message in a few seconds when someone unfollows you on Twitter",
   "main": "./dist/main.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "watch": "gulp"
   },
   "repository": {
     "type": "git",
@@ -28,9 +29,16 @@
     "typescript": "^2.9.1"
   },
   "dependencies": {
+    "@types/dotenv": "^4.0.3",
     "@types/kue": "^0.11.9",
+    "@types/lodash": "^4.14.109",
+    "@types/redis": "^2.8.6",
     "@types/winston": "^2.3.9",
+    "dotenv": "^6.0.0",
     "kue": "^0.11.6",
+    "lodash": "^4.17.10",
+    "node-redis": "^0.1.7",
+    "redis": "^2.8.0",
     "winston": "^2.4.2"
   }
 }

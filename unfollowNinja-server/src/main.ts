@@ -1,46 +1,69 @@
+require('dotenv').config();
+
 import * as winston from 'winston';
-import * as Kue from 'kue';
-import { isMaster, fork } from 'cluster';
+import * as kue from 'kue';
+import * as cluster from 'cluster';
 import { cpus } from 'os';
 
-const clusterWorkerSize = cpus().length;
-const queue = Kue.createQueue();
+import tasks, { customRateLimits } from './tasks';
 
-const KUE_APP_PORT = 3000;
+const CLUSTER_SIZE = parseInt(process.env.CLUSTER_SIZE) || cpus().length;
+const KUE_APP_PORT = parseInt(process.env.KUE_APP_PORT) || 3000;
+const DEFAULT_RATE_LIMIT = parseInt(process.env.DEFAULT_RATE_LIMIT) || 20;
 
-winston.info('Unfollow ninja - Server');
+const queue = kue.createQueue();
+queue.setMaxListeners(100);
 
-if (isMaster) {
-    queue.on( 'error', function( err ) {
-        winston.error( 'Oops... ', err );
-    });
+queue.on( 'error', function( err: Error ) {
+    winston.error('Oops... ', err);
+});
 
-    winston.info('Launching the %s workers...', clusterWorkerSize);
-    for (var i = 0; i < clusterWorkerSize; i++) {
-        fork();
+if (cluster.isMaster) {
+    winston.info('Unfollow ninja - Server');
+
+    if (KUE_APP_PORT > 0) {
+        kue.app.listen(KUE_APP_PORT, () => {
+            winston.info('Launching kue web server on port %d', KUE_APP_PORT);
+        });
     }
 
-    winston.info('Launching kue web server on port %d', KUE_APP_PORT);
-    Kue.app.listen(KUE_APP_PORT, () => {
-        winston.info('Launching the web server...');
+    function initFailed( err: Error ) {
+        winston.error('Please check that your redis server is launched');
+        process.exit(0);
+    }
+    queue.once( 'error', initFailed);
+
+
+    queue.client.once('connect', () => {
+        queue.removeListener('error', initFailed);
+        winston.info('Connected to the redis server', CLUSTER_SIZE);
+        winston.info('Launching the %s workers...', CLUSTER_SIZE);
+        for (let i = 0; i < CLUSTER_SIZE; i++) {
+            cluster.fork();
+        }
     });
 
-
-    setInterval(() => queue.create('sendWelcomeMessage', {username: 'plhery'}).save(), 1000);
+    // setInterval(() => queue.create('createTwitterTasks', {username: 'plhery'}).save(), 3 * 60 * 1000);
 } else {
-    winston.info('Worker ready');
+    for (let taskName in tasks) {
+        queue.process(
+            taskName,
+            customRateLimits[taskName] || DEFAULT_RATE_LIMIT,
+            tasks[taskName]
+        );
+    }
 
-    queue.process('checkFollowers', 10, function(job, done){
-        job.log('followers checked')
-    });
-    queue.process('updateFollowingID', 10, function(job, done){
-        job.log('follower ID checked')
-    });
-    queue.process('notifyUser', 10, function(job, done){
-        job.log('user notified')
-    });
-    queue.process('sendWelcomeMessage', 10, function(job, done){
-        job.log('user welcomed');
-        winston.info('user welcomed');
+    winston.info('Worker %d ready', cluster.worker.id);
+}
+
+function death() {
+    queue.shutdown( 5000, function(err: Error) {
+        winston.info('Kue shutdown - %s', cluster.isMaster ? 'master' : 'worker ' + cluster.worker.id);
+        if (err) {
+            winston.error(err.message);
+        }
+        process.exit( 0 );
     });
 }
+process.once( 'SIGTERM', death);
+process.once( 'SIGINT', death);
