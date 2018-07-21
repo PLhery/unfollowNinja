@@ -3,7 +3,7 @@ const ts = require("gulp-typescript");
 const tsProject = ts.createProject("tsconfig.json");
 
 gulp.task("default", ["compile"], function () {
-    return gulp.watch("./src/**.ts", ["compile"]);
+    return gulp.watch("./src/**/*.ts", ["compile"]);
 });
 
 

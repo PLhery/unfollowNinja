@@ -33,17 +33,27 @@ if (cluster.isMaster) {
     }
     queue.once( 'error', initFailed);
 
-
     queue.client.once('connect', () => {
         queue.removeListener('error', initFailed);
-        winston.info('Connected to the redis server', CLUSTER_SIZE);
+        winston.info('Connected to the redis server');
+
+        winston.info('Cleaning the previously created delayed jobs');
+        kue.Job.rangeByState( 'delayed', 0, 50000, 'asc', function (err: Error, jobs: kue.Job[]) {
+            jobs.forEach(job => job.remove());
+        });
+
         winston.info('Launching the %s workers...', CLUSTER_SIZE);
         for (let i = 0; i < CLUSTER_SIZE; i++) {
             cluster.fork();
         }
     });
 
-    // setInterval(() => queue.create('createTwitterTasks', {username: 'plhery'}).save(), 3 * 60 * 1000);
+    // watchdog - recommended by Kue
+    queue.watchStuckJobs(1000);
+
+    // every 3 minutes, create the checkFollowers tasks for everyone
+    setInterval(() => queue.create('createTwitterTasks', {}).save(), 3 * 60 * 1000);
+    queue.create('createTwitterTasks', {}).removeOnComplete(true).save();
 } else {
     for (let taskName in tasks) {
         queue.process(

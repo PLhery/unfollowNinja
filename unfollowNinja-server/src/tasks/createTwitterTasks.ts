@@ -1,0 +1,16 @@
+import {DoneCallback, Job, createQueue} from "kue";
+import * as winston from 'winston';
+
+const queue = createQueue();
+
+// Every three minutes, create
+export default function(job: Job,  done: DoneCallback) {
+    winston.info('Generating checkFollowers tasks...');
+
+    // get followers
+    for (let i = 0; i < 10; i++) {
+        queue.create('checkFollowers', {title: 'Check plhery s followers', username: 'plhery' + i}).delay(60000).save();
+    }
+
+    done();
+}
