@@ -1,4 +1,4 @@
-import {DoneCallback, Job, createQueue} from "kue";
+import {createQueue, DoneCallback, Job} from 'kue';
 import logger from '../utils/logger';
 
 const queue = createQueue();

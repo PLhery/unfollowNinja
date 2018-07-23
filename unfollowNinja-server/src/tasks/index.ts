@@ -1,17 +1,17 @@
-import {ProcessCallback} from "kue";
+import {ProcessCallback} from 'kue';
 
-import checkFollowers from "./checkFollowers";
-import sendWelcomeMessage from "./sendWelcomeMessage";
-import notifyUser from "./notifyUser";
-import cacheUsername from "./getFollowerInfos";
-import createTwitterTasks from "./createTwitterTasks";
+import checkFollowers from './checkFollowers';
+import createTwitterTasks from './createTwitterTasks';
+import getFollowerInfos from './getFollowerInfos';
+import notifyUser from './notifyUser';
+import sendWelcomeMessage from './sendWelcomeMessage';
 
 const tasks: {[taskName: string]: ProcessCallback} = {
     checkFollowers,
+    createTwitterTasks,
+    getFollowerInfos,
     notifyUser,
     sendWelcomeMessage,
-    cacheUsername,
-    createTwitterTasks,
 };
 
 export const customRateLimits: {[taskName: string]: number} = {

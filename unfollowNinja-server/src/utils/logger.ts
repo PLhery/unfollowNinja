@@ -1,23 +1,23 @@
+import { worker } from 'cluster';
 import { createLogger, format, transports } from 'winston';
-import { worker } from "cluster";
 
 const workerInfo = worker ? `work ${worker.id}` : 'master';
 
+const customFormat = format.combine(
+    format.colorize(),
+    format.timestamp(),
+    format.splat(),
+    format.printf((info) => `${info.timestamp} ${workerInfo} ${info.level}: ${info.message}`),
+);
+
 const logger = createLogger({
-    transports: [ new transports.Console() ],
     exceptionHandlers: [ new transports.Console() ],
-    format: format.combine(
-        format.colorize(),
-        format.timestamp(),
-        format.splat(),
-        format.printf(info => `${info.timestamp} ${workerInfo} ${info.level}: ${info.message}`)
-    ),
+    format: customFormat,
+    transports: [ new transports.Console() ],
 });
 
 if (typeof global.it === 'function') { // mocha
-    // logger.level = 'warn';
-    logger.warn('hey');
-    logger.info('heyyy');
+    logger.level = 'warn';
 }
 
 export default logger;
