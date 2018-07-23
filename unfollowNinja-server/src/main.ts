@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-import * as winston from 'winston';
+import logger from './utils/logger';
 import * as kue from 'kue';
 import * as cluster from 'cluster';
 import { cpus } from 'os';
@@ -15,34 +15,34 @@ const queue = kue.createQueue();
 queue.setMaxListeners(100);
 
 queue.on( 'error', function( err: Error ) {
-    winston.error('Oops... ', err);
+    logger.error('Oops... ', err);
 });
 
 if (cluster.isMaster) {
-    winston.info('Unfollow ninja - Server');
+    logger.info('Unfollow ninja - Server');
 
     if (KUE_APP_PORT > 0) {
         kue.app.listen(KUE_APP_PORT, () => {
-            winston.info('Launching kue web server on port %d', KUE_APP_PORT);
+            logger.info('Launching kue web server on port %d', KUE_APP_PORT);
         });
     }
 
     function initFailed( err: Error ) {
-        winston.error('Please check that your redis server is launched');
+        logger.error('Please check that your redis server is launched');
         process.exit(0);
     }
     queue.once( 'error', initFailed);
 
     queue.client.once('connect', () => {
         queue.removeListener('error', initFailed);
-        winston.info('Connected to the redis server');
+        logger.info('Connected to the redis server');
 
-        winston.info('Cleaning the previously created delayed jobs');
+        logger.info('Cleaning the previously created delayed jobs');
         kue.Job.rangeByState( 'delayed', 0, 50000, 'asc', function (err: Error, jobs: kue.Job[]) {
             jobs.forEach(job => job.remove());
         });
 
-        winston.info('Launching the %s workers...', CLUSTER_SIZE);
+        logger.info('Launching the %s workers...', CLUSTER_SIZE);
         for (let i = 0; i < CLUSTER_SIZE; i++) {
             cluster.fork();
         }
@@ -63,14 +63,14 @@ if (cluster.isMaster) {
         );
     }
 
-    winston.info('Worker %d ready', cluster.worker.id);
+    logger.info('Worker %d ready', cluster.worker.id);
 }
 
 function death() {
     queue.shutdown( 5000, function(err: Error) {
-        winston.info('Kue shutdown - %s', cluster.isMaster ? 'master' : 'worker ' + cluster.worker.id);
+        logger.info('Kue shutdown - %s', cluster.isMaster ? 'master' : 'worker ' + cluster.worker.id);
         if (err) {
-            winston.error(err.message);
+            logger.error(err.message);
         }
         process.exit( 0 );
     });

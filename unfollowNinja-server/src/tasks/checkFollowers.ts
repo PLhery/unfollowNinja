@@ -1,8 +1,7 @@
 import {DoneCallback, Job} from "kue";
-import * as winston from 'winston';
-import * as cluster from 'cluster';
+import logger from '../utils/logger';
 
 export default function(job: Job,  done: DoneCallback) {
-    winston.info('followers checked %s  worker %d', job.data.username, cluster.worker.id);
+    logger.info('followers checked %s', job.data.username);
     done();
 }

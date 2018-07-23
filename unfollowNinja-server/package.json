@@ -4,7 +4,7 @@
   "description": "Receive a direct message in a few seconds when someone unfollows you on Twitter",
   "main": "./dist/main.js",
   "scripts": {
-    "test": "test",
+    "test": "mocha -r ts-node/register test/**/*.spec.ts",
     "watch": "gulp"
   },
   "repository": {
@@ -24,21 +24,27 @@
   },
   "homepage": "https://github.com/plhery/unfollowNinja#readme",
   "devDependencies": {
+    "@types/chai": "^4.1.4",
+    "@types/mocha": "^5.2.5",
+    "@types/sinon": "^5.0.1",
+    "chai": "^4.1.2",
     "gulp": "^3.9.1",
     "gulp-typescript": "^4.0.2",
-    "typescript": "^2.9.1"
+    "mocha": "^5.2.0",
+    "sinon": "^6.1.4",
+    "ts-node": "^7.0.0",
+    "typescript": "^2.9.2"
   },
   "dependencies": {
     "@types/dotenv": "^4.0.3",
     "@types/kue": "^0.11.9",
-    "@types/lodash": "^4.14.109",
+    "@types/lodash": "^4.14.112",
     "@types/redis": "^2.8.6",
-    "@types/winston": "^2.3.9",
     "dotenv": "^6.0.0",
     "kue": "^0.11.6",
     "lodash": "^4.17.10",
     "node-redis": "^0.1.7",
     "redis": "^2.8.0",
-    "winston": "^2.4.2"
+    "winston": "^3.0.0"
   }
 }
