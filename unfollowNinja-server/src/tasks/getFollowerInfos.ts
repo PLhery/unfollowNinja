@@ -1,5 +1,8 @@
 import {DoneCallback, Job} from 'kue';
+import Task from './task';
 
-export default function(job: Job,  done: DoneCallback) {
-    done();
+export default class extends Task {
+    public run(job: Job,  done: DoneCallback) {
+        done();
+    }
 }

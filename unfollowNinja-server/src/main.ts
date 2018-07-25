@@ -8,6 +8,7 @@ import logger from './utils/logger';
 import Scheduler from './utils/scheduler';
 
 import tasks, { customRateLimits } from './tasks';
+import Task from './tasks/task';
 
 const CLUSTER_SIZE = parseInt(process.env.CLUSTER_SIZE, 10) || cpus().length;
 const KUE_APP_PORT = parseInt(process.env.KUE_APP_PORT, 10) || 3000;
@@ -59,10 +60,11 @@ if (cluster.isMaster) {
     scheduler.start();
 } else {
     for (const taskName in tasks) {
+        const task: Task = new tasks[taskName](redis, queue);
         queue.process(
             taskName,
             customRateLimits[taskName] || DEFAULT_RATE_LIMIT,
-            tasks[taskName],
+            (job, done) => task.run(job, done),
         );
     }
 

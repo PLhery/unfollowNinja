@@ -6,7 +6,7 @@ import getFollowerInfos from './getFollowerInfos';
 import notifyUser from './notifyUser';
 import sendWelcomeMessage from './sendWelcomeMessage';
 
-const tasks: {[taskName: string]: ProcessCallback} = {
+const tasks: {[taskName: string]: any} = {
     checkFollowers,
     createTwitterTasks,
     getFollowerInfos,
