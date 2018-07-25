@@ -1,9 +1,11 @@
 import 'dotenv/config';
 
 import * as cluster from 'cluster';
+import * as Redis from 'ioredis';
 import * as kue from 'kue';
 import { cpus } from 'os';
 import logger from './utils/logger';
+import Scheduler from './utils/scheduler';
 
 import tasks, { customRateLimits } from './tasks';
 
@@ -18,6 +20,7 @@ queue.on( 'error',  ( err: Error ) => {
     logger.error('Oops... ', err);
 });
 
+const redis = new Redis();
 if (cluster.isMaster) {
     logger.info('Unfollow ninja - Server');
 
@@ -52,8 +55,8 @@ if (cluster.isMaster) {
     queue.watchStuckJobs(1000);
 
     // every 3 minutes, create the checkFollowers tasks for everyone
-    setInterval(() => queue.create('createTwitterTasks', {}).save(), 3 * 60 * 1000);
-    queue.create('createTwitterTasks', {}).removeOnComplete(true).save();
+    const scheduler = new Scheduler(redis, queue);
+    scheduler.start();
 } else {
     for (const taskName in tasks) {
         queue.process(
