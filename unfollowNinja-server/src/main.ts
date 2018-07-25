@@ -7,7 +7,7 @@ import { cpus } from 'os';
 import logger from './utils/logger';
 import Scheduler from './utils/scheduler';
 
-import tasks, { customRateLimits } from './tasks';
+import tasks from './tasks';
 import Task from './tasks/task';
 
 const CLUSTER_SIZE = parseInt(process.env.CLUSTER_SIZE, 10) || cpus().length;
@@ -63,7 +63,7 @@ if (cluster.isMaster) {
         const task: Task = new tasks[taskName](redis, queue);
         queue.process(
             taskName,
-            customRateLimits[taskName] || DEFAULT_RATE_LIMIT,
+            DEFAULT_RATE_LIMIT,
             (job, done) => task.run(job, done),
         );
     }

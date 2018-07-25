@@ -14,8 +14,4 @@ const tasks: {[taskName: string]: any} = {
     sendWelcomeMessage,
 };
 
-export const customRateLimits: {[taskName: string]: number} = {
-    cacheUsername: 1, // avoid concurrency
-};
-
 export default tasks;
