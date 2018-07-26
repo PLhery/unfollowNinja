@@ -28,13 +28,25 @@ fs.createReadStream(LEGACY_JSON_FILE_PATH)
             unfollowers += uniqBy(data.unfollowers, 'id').length;
             followers += (data.followers) ? data.followers.length : 0;
 
+            const category = data.twitterDM ? 'enabled' : 'legacy-disabled';
             await Promise.all([
                 redis.zadd('users', timestamp.toString(), id),
-                redis.zadd('users:enabled', timestamp.toString(), id),
+                redis.zadd(`users:${category}`, timestamp.toString(), id),
                 redis.hmset(`user:${id}`, { token, tokenSecret: secret }),
                 redis.zadd('cachedTwittos', timestamp.toString(), id),
                 redis.hmset(`cachedTwitto:${id}`, { picture: photo, username }),
             ]);
+            if (data.followers) {
+                await Promise.all(
+                    data.followers.map((follower: { id: string, _id: any, since: any }) => {
+                        const followTimestamp = Number(new Date(follower.since.$date));
+                        return Promise.all([
+                            redis.zadd(`followers:${id}`, followTimestamp.toString(), follower.id),
+                            redis.zadd(`followers:not-cached:${id}`, followTimestamp.toString(), follower.id),
+                        ]);
+                    }),
+                );
+            }
         }
         return data;
     }))
