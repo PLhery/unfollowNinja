@@ -1,16 +1,22 @@
-import { Redis } from 'ioredis';
-import { createQueue, DoneCallback, Job } from 'kue';
+import { DoneCallback, Job } from 'kue';
 import logger from '../utils/logger';
 import Task from './task';
 
 // Every three minutes, create checkFollowers tasks
 export default class extends Task {
-    public run(job: Job,  done: DoneCallback) {
+    public async run(job: Job,  done: DoneCallback) {
         logger.info('Generating checkFollowers tasks...');
 
-        // get followers
-        for (let i = 0; i < 10; i++) {
-            this.queue.create('checkFollowers', {title: 'Check plhery s followers', username: 'plhery' + i}).save();
+        const users: string[] = await this.redis.zrange('users:enabled', 0, -1);
+
+        for (const userId of users) {
+            const username: string = await this.redis.hget(`cachedTwitto:${userId}`, 'username');
+
+            this.queue
+                .create('checkFollowers', {title: `Check @${username} s followers`, username, userId})
+                .removeOnComplete(true)
+                .priority('low')
+                .save();
         }
 
         done();

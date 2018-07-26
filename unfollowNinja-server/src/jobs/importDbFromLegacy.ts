@@ -28,10 +28,13 @@ fs.createReadStream(LEGACY_JSON_FILE_PATH)
             unfollowers += uniqBy(data.unfollowers, 'id').length;
             followers += (data.followers) ? data.followers.length : 0;
 
-            await redis.zadd('users', timestamp.toString(), id);
-            await redis.hmset(`user:${id}`, { token, secret });
-            await redis.zadd('cachedTwittos', timestamp.toString(), id);
-            await redis.hmset(`cachedTwitto:${id}`, { picture: photo, username });
+            await Promise.all([
+                redis.zadd('users', timestamp.toString(), id),
+                redis.zadd('users:enabled', timestamp.toString(), id),
+                redis.hmset(`user:${id}`, { token, tokenSecret: secret }),
+                redis.zadd('cachedTwittos', timestamp.toString(), id),
+                redis.hmset(`cachedTwitto:${id}`, { picture: photo, username }),
+            ]);
         }
         return data;
     }))

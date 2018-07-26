@@ -7,7 +7,7 @@ import CheckFollowers from '../../src/tasks/checkFollowers';
 winston.transports.Console.level = 'error';
 
 describe('checkFollower task', () => {
-    it('done should be called', () => {
+    it.skip('done should be called', () => {
         const job = new Job('checkFollowers', {username: 'testUsername'});
         const done = fake();
         const task = new CheckFollowers(null, null);

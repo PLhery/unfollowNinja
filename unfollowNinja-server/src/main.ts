@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 import * as cluster from 'cluster';
+import * as getPort from 'get-port';
 import * as Redis from 'ioredis';
 import * as kue from 'kue';
 import { cpus } from 'os';
@@ -12,10 +13,16 @@ import Task from './tasks/task';
 
 const CLUSTER_SIZE = parseInt(process.env.CLUSTER_SIZE, 10) || cpus().length;
 const KUE_APP_PORT = parseInt(process.env.KUE_APP_PORT, 10) || 3000;
-const DEFAULT_RATE_LIMIT = parseInt(process.env.DEFAULT_RATE_LIMIT, 10) || 20;
+const WORKER_RATE_LIMIT = parseInt(process.env.WORKER_RATE_LIMIT, 10) || 25;
+
+if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET) {
+    logger.error('Some required environment variables are missing (CONSUMER_KEY / CONSUMER_SECRET).');
+    logger.error('Make sure you added them in a .env file in you cwd or that you defined them.');
+    process.exit();
+}
 
 const queue = kue.createQueue();
-queue.setMaxListeners(100);
+queue.setMaxListeners(200);
 
 queue.on( 'error',  ( err: Error ) => {
     logger.error('Oops... ', err);
@@ -26,8 +33,10 @@ if (cluster.isMaster) {
     logger.info('Unfollow ninja - Server');
 
     if (KUE_APP_PORT > 0) {
-        kue.app.listen(KUE_APP_PORT, () => {
-            logger.info('Launching kue web server on port %d', KUE_APP_PORT);
+        getPort({port: KUE_APP_PORT}).then((port) => {
+            kue.app.listen(port, () => {
+                logger.info('Launching kue web server on http://localhost:%d', port);
+            });
         });
     }
 
@@ -42,7 +51,10 @@ if (cluster.isMaster) {
         logger.info('Connected to the redis server');
 
         logger.info('Cleaning the previously created delayed jobs');
-        kue.Job.rangeByState( 'delayed', 0, 50000, 'asc', (err: Error, jobs: kue.Job[]) => {
+        kue.Job.rangeByState( 'delayed', 0, -1, 'asc', (err: Error, jobs: kue.Job[]) => {
+            jobs.forEach(job => job.remove());
+        });
+        kue.Job.rangeByState( 'queued', 0, -1, 'asc', (err: Error, jobs: kue.Job[]) => {
             jobs.forEach(job => job.remove());
         });
 
@@ -63,7 +75,7 @@ if (cluster.isMaster) {
         const task: Task = new tasks[taskName](redis, queue);
         queue.process(
             taskName,
-            DEFAULT_RATE_LIMIT,
+            WORKER_RATE_LIMIT,
             (job, done) => task.run(job, done),
         );
     }
