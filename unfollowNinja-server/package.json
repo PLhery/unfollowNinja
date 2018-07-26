@@ -7,7 +7,8 @@
     "test": "npm run lint && npm run specs",
     "specs": "mocha -r ts-node/register test/**/*.spec.ts",
     "lint": "tslint src/*.ts src/***/*.ts test/**/*.ts",
-    "watch": "gulp"
+    "watch": "gulp",
+    "postinstall": "gulp compile"
   },
   "repository": {
     "type": "git",
