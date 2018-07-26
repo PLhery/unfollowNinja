@@ -42,7 +42,7 @@ fs.createReadStream(LEGACY_JSON_FILE_PATH)
                         const followTimestamp = Number(new Date(follower.since.$date));
                         return Promise.all([
                             redis.zadd(`followers:${id}`, followTimestamp.toString(), follower.id),
-                            redis.zadd(`followers:not-cached:${id}`, followTimestamp.toString(), follower.id),
+                            redis.zadd(`followers:not-cached:${id}`, follower.id),
                         ]);
                     }),
                 );
