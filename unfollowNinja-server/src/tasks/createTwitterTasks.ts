@@ -8,6 +8,13 @@ export default class extends Task {
     public async run(job: Job,  done: DoneCallback) {
         logger.info('Generating checkFollowers tasks...');
 
+        const inactiveCFTasks = await promisify((cb) => this.queue.inactiveCount('checkFollowers', cb))();
+        if (inactiveCFTasks > 50) {
+            const error = new Error(`There are ${inactiveCFTasks} queued checkFollowers. ` +
+                'Add some more CPUs/Workers! Skipping this check.');
+            logger.error(error.message);
+            return done(error);
+        }
         const users: string[] = await this.redis.zrange('users:enabled', 0, -1);
 
         for (const userId of users) {
