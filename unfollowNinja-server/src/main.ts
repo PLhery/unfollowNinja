@@ -11,6 +11,11 @@ import Scheduler from './utils/scheduler';
 import tasks from './tasks';
 import Task from './tasks/task';
 
+// these will be deleted before launching the workers
+const CLEAN_TYPES = ['checkFollowers', 'createTwitterTasks', 'getFollowersInfos'];
+const CLEAN_STATES = ['delayed', 'queued'];
+
+// parsing process.env variables
 const CLUSTER_SIZE = parseInt(process.env.CLUSTER_SIZE, 10) || cpus().length;
 const KUE_APP_PORT = parseInt(process.env.KUE_APP_PORT, 10) || 3000;
 const WORKER_RATE_LIMIT = parseInt(process.env.WORKER_RATE_LIMIT, 10) || 25;
@@ -51,13 +56,11 @@ if (cluster.isMaster) {
         logger.info('Connected to the redis server');
 
         logger.info('Cleaning the previously created delayed jobs');
-        kue.Job.rangeByState( 'delayed', 0, -1, 'asc', (err: Error, jobs: kue.Job[]) => {
-            jobs.forEach(job => job.remove());
-        });
-        kue.Job.rangeByState( 'queued', 0, -1, 'asc', (err: Error, jobs: kue.Job[]) => {
-            jobs.forEach(job => job.remove());
-        });
-
+        CLEAN_TYPES.forEach((type) => CLEAN_STATES.forEach((state) =>
+            kue.Job.rangeByType( type, state, 0, -1, 'asc', (err: Error, jobs: kue.Job[]) => {
+                jobs.forEach(job => job.remove());
+            }),
+        ));
         logger.info('Launching the %s workers...', CLUSTER_SIZE);
         for (let i = 0; i < CLUSTER_SIZE; i++) {
             cluster.fork();

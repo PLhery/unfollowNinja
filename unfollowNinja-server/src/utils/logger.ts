@@ -11,9 +11,10 @@ const customFormat = format.combine(
 );
 
 const logger = createLogger({
-    exceptionHandlers: [ new transports.Console() ],
     format: customFormat,
+    level: 'debug',
     transports: [ new transports.Console() ],
+    exceptionHandlers: [ new transports.Console() ],
 });
 
 if (typeof global.it === 'function') { // mocha

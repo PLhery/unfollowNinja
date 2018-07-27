@@ -4,7 +4,6 @@ jobs:
     working_directory: ~/unfollowNinja/unfollowNinja-server
     docker:
     - image: circleci/node:8.11.3
-    - image: redis:4.0.10
     steps:
     - checkout:
         path: ~/unfollowNinja

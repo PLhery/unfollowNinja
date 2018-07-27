@@ -1,3 +1,4 @@
+
 // This job parses db export and import it in redis.
 // It will be useful to - benchmark against the legacy backend & migrate from the legacy backend
 import 'dotenv/config';
@@ -32,7 +33,7 @@ fs.createReadStream(LEGACY_JSON_FILE_PATH)
             await Promise.all([
                 redis.zadd('users', timestamp.toString(), id),
                 redis.zadd(`users:${category}`, timestamp.toString(), id),
-                redis.hmset(`user:${id}`, { token, tokenSecret: secret }),
+                redis.hmset(`user:${id}`, { lang: 'fr', token, tokenSecret: secret }),
                 redis.zadd('cachedTwittos', timestamp.toString(), id),
                 redis.hmset(`cachedTwitto:${id}`, { picture: photo, username }),
             ]);
@@ -41,8 +42,8 @@ fs.createReadStream(LEGACY_JSON_FILE_PATH)
                     data.followers.map((follower: { id: string, _id: any, since: any }) => {
                         const followTimestamp = Number(new Date(follower.since.$date));
                         return Promise.all([
-                            redis.zadd(`followers:${id}`, followTimestamp.toString(), follower.id),
-                            redis.zadd(`followers:not-cached:${id}`, follower.id),
+                            redis.zadd(`followers:${id}`, '0', follower.id),
+                            redis.zadd(`followers:not-cached:${id}`, followTimestamp.toString(), follower.id),
                         ]);
                     }),
                 );

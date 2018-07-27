@@ -1,6 +1,10 @@
 import { DoneCallback, Job } from 'kue';
+import { difference } from 'lodash';
 import * as Twit from 'twit';
+import { promisify } from 'util';
 import logger from '../utils/logger';
+import { IUnfollowerInfo } from '../utils/types';
+import { twitterSnowflakeToTime } from '../utils/utils';
 import Task from './task';
 
 export default class extends Task {
@@ -8,12 +12,12 @@ export default class extends Task {
         const { username, userId } = job.data;
         const { token, tokenSecret } = await this.redis.hgetall(`user:${userId}`);
 
-        logger.info('checking %s s followers', job.data.username);
+        logger.debug('checking %s s followers', job.data.username);
 
         const nextCheckTime = parseInt(await this.redis.get(`nextCheckTime:${userId}`), 10) || 0;
         const startedAt = Number(job.started_at);
         if (startedAt < nextCheckTime) {
-            logger.info('checkFollowers @%s - skipping this check.', username);
+            logger.debug('checkFollowers @%s - skipping this check.', username);
             return done();
         } // don't check every minute if the user has more than 5000 followers : we can only get 5000 followers/minute
 
@@ -36,7 +40,7 @@ export default class extends Task {
                     // this may happen for ex if someone needs a 2nd requests in the 15th check of the 15minutes window
                     return done(new Error('No twitter requests remaining to pursue the job.'));
                 }
-                // @ts-ignore
+                // @ts-ignore (stringify_ids not in @types/twit)
                 const result = await twit.get('followers/ids', {cursor, stringify_ids: true});
                 cursor = result.data.next_cursor_str;
                 requests++;
@@ -54,6 +58,8 @@ export default class extends Task {
                 // minus 30s because we can trigger it a bit before the ideal time
             }
             await this.redis.set(`nextCheckTime:${userId}`, newNextCheckTime.toString());
+
+            await this.detectUnfollows(userId, username, followers);
         } catch (err) {
             if (!err.twitterReply) {
                 logger.error(err);
@@ -64,6 +70,59 @@ export default class extends Task {
             }
         }
         done();
+    }
+
+    private async detectUnfollows(userId: string, username: string, followers: string[]) {
+        const formerFollowers: string[] = await this.redis.zrange(`followers:${userId}`, 0, -1);
+        const newFollowers = difference(followers, formerFollowers);
+        const unfollowers = difference(formerFollowers, followers);
+
+        logger.debug('%s had %d followers and now has %d followers (+%d -%d)',
+            username, formerFollowers.length, followers.length, newFollowers.length, unfollowers.length);
+
+        // add new followers
+        await Promise.all(
+            newFollowers.map((followerId) => Promise.all([ // add new followers
+                this.redis.zadd(`followers:${userId}`, '0', followerId),
+                this.redis.zadd(`followers:not-cached:${userId}`, Date.now().toString(), followerId),
+            ])),
+        );
+
+        const unfollowersInfo: IUnfollowerInfo[] = [];
+
+        // remove unfollowers
+        await Promise.all(
+            unfollowers.map(async (unfollowerId) => {
+                const snowflakeId = await this.redis.zscore(`followers:${userId}`, unfollowerId);
+                const followTime = twitterSnowflakeToTime(snowflakeId) ||
+                    parseInt(await this.redis.zscore(`followers:not-cached:${userId}`, unfollowerId), 10);
+                const unfInfo: IUnfollowerInfo = {
+                    id: unfollowerId,
+                    followTime,
+                    unfollowTime: Date.now(),
+                };
+                unfollowersInfo.push(unfInfo);
+
+                return Promise.all([
+                    this.redis.zrem(`followers:${userId}`, unfollowerId),
+                    this.redis.zrem(`followers:not-cached:${userId}`, unfollowerId),
+                    this.redis.lpush(`unfollowers:${userId}`, JSON.stringify(unfInfo)),
+                ]);
+            }),
+        );
+
+        await promisify((cb) =>
+            this.queue
+                .create('notifyUser', {
+                    title: `Notify @${username} that he's been unfollowed by ` +
+                        unfollowersInfo.map((u) => u.id).toString(),
+                    userId,
+                    username,
+                    unfollowersInfo,
+                })
+                .removeOnComplete(true)
+                .save(cb),
+        )();
     }
 
     // return true if the error is really unexpected / the job will be kept in the "failed" section

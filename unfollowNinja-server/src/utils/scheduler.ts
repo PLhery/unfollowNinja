@@ -26,8 +26,8 @@ export default class Scheduler {
             .then((value) => {
                 this.schedulerId = value;
 
-                // every 3 minutes, create the checkFollowers tasks for everyone
-                this.intervalId = setInterval(() => this.createTwitterTasks(), 3 * 60 * 1000);
+                // every 2 minutes, create the checkFollowers tasks for everyone
+                this.intervalId = setInterval(() => this.createTwitterTasks(), 2 * 60 * 1000);
                 this.createTwitterTasks();
             });
     }
