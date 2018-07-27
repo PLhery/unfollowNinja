@@ -2,9 +2,11 @@ import 'dotenv/config';
 
 import * as cluster from 'cluster';
 import * as getPort from 'get-port';
+import { Server } from 'http';
 import * as Redis from 'ioredis';
 import * as kue from 'kue';
 import { cpus } from 'os';
+import { promisify } from 'util';
 import logger from './utils/logger';
 import Scheduler from './utils/scheduler';
 
@@ -13,7 +15,7 @@ import Task from './tasks/task';
 
 // these will be deleted before launching the workers
 const CLEAN_TYPES = ['checkFollowers', 'createTwitterTasks', 'getFollowersInfos'];
-const CLEAN_STATES = ['delayed', 'queued'];
+const CLEAN_STATES = ['delayed', 'inactive'];
 
 // parsing process.env variables
 const CLUSTER_SIZE = parseInt(process.env.CLUSTER_SIZE, 10) || cpus().length;
@@ -34,12 +36,14 @@ queue.on( 'error',  ( err: Error ) => {
 });
 
 const redis = new Redis();
+let scheduler: Scheduler;
+let kueWebServer: Server;
 if (cluster.isMaster) {
     logger.info('Unfollow ninja - Server');
 
     if (KUE_APP_PORT > 0) {
         getPort({port: KUE_APP_PORT}).then((port) => {
-            kue.app.listen(port, () => {
+            kueWebServer = kue.app.listen(port, () => {
                 logger.info('Launching kue web server on http://localhost:%d', port);
             });
         });
@@ -54,24 +58,28 @@ if (cluster.isMaster) {
     queue.client.once('connect', () => {
         queue.removeListener('error', initFailed);
         logger.info('Connected to the redis server');
-
-        logger.info('Cleaning the previously created delayed jobs');
-        CLEAN_TYPES.forEach((type) => CLEAN_STATES.forEach((state) =>
-            kue.Job.rangeByType( type, state, 0, -1, 'asc', (err: Error, jobs: kue.Job[]) => {
-                jobs.forEach(job => job.remove());
-            }),
-        ));
-        logger.info('Launching the %s workers...', CLUSTER_SIZE);
-        for (let i = 0; i < CLUSTER_SIZE; i++) {
-            cluster.fork();
-        }
     });
+
+    logger.info('Cleaning the previously created delayed jobs');
+    Promise.all(CLEAN_TYPES.map((type) => Promise.all(CLEAN_STATES.map((state) =>
+            promisify(kue.Job.rangeByType)(type, state, 0, -1, 'asc')
+                .then((jobs: kue.Job[]) => Promise.all(
+                    jobs.map(job => promisify((cb) => job.remove(cb))()),
+                )),
+        ),
+    )))
+        .then(() => {
+            logger.info('Launching the %s workers...', CLUSTER_SIZE);
+            for (let i = 0; i < CLUSTER_SIZE; i++) {
+                cluster.fork();
+            }
+        });
 
     // watchdog - recommended by Kue
     queue.watchStuckJobs(1000);
 
     // every 3 minutes, create the checkFollowers tasks for everyone
-    const scheduler = new Scheduler(redis, queue);
+    scheduler = new Scheduler(redis, queue);
     scheduler.start();
 } else {
     for (const taskName in tasks) {
@@ -87,12 +95,22 @@ if (cluster.isMaster) {
 }
 
 function death() {
+    process.removeAllListeners(); // be sure death is not called twice (sigterm & sigint)
+    if (cluster.isMaster) {
+        scheduler.stop();
+        if (kueWebServer) {
+            kueWebServer.close();
+        }
+    }
     queue.shutdown( 5000, (err: Error) => {
         logger.info('Kue shutdown - %s', cluster.isMaster ? 'master' : 'worker ' + cluster.worker.id);
         if (err) {
             logger.error(err.message);
         }
-        process.exit( 0 );
+        redis.disconnect();
+        if (cluster.isWorker) {
+            process.exit(0);
+        }
     });
 }
 process.once( 'SIGTERM', death);

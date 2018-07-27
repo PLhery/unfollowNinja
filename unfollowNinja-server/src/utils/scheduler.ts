@@ -32,12 +32,20 @@ export default class Scheduler {
             });
     }
 
+    public stop() {
+        if (!this.started) {
+            return;
+        }
+        clearInterval(this.intervalId);
+        this.started = false;
+    }
+
     private createTwitterTasks() {
         this.redis.get('scheduler_id')
             .then((lastSchedulerId) => {
                 if (parseInt(lastSchedulerId, 10) !== this.schedulerId) {
                     logger.warn('A new scheduler has been launched, cancelling this one...');
-                    clearInterval(this.intervalId);
+                    this.stop();
                     return;
                 }
                 this.queue
