@@ -4,6 +4,7 @@
   "description": "Receive a direct message in a few seconds when someone unfollows you on Twitter",
   "main": "./dist/main.js",
   "scripts": {
+    "start": "node .",
     "test": "npm run lint && npm run specs",
     "specs": "mocha -r ts-node/register test/**/*.spec.ts",
     "lint": "tslint src/*.ts src/***/*.ts test/**/*.ts",
