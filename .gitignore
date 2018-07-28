@@ -64,3 +64,6 @@ dist/
 
 # intellij idea
 .idea/
+
+# test reports
+test-results/

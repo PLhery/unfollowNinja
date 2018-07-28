@@ -37,6 +37,7 @@
     "gulp": "^3.9.1",
     "gulp-typescript": "^4.0.2",
     "jest": "^23.4.2",
+    "jest-junit": "^5.1.0",
     "jsonstream": "^1.0.3",
     "sinon": "^6.1.4",
     "ts-jest": "^23.0.1",
