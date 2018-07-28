@@ -9,9 +9,15 @@ export function redisMock() {
         zpush: jest.fn(),
 
         get: stub(),
+        hget: stub(),
         hgetall: stub(),
         zrange: stub(),
         zscore: stub(),
+
+        totalWriteCall() {
+            return [this.set, this.lpush, this.zadd, this.zrem, this.zpush]
+                .reduce((p, c) => p + c.mock.calls.length, 0);
+        },
     };
 }
 
@@ -20,5 +26,8 @@ export function queueMock() {
         create: jest.fn().mockReturnThis(),
         removeOnComplete: jest.fn().mockReturnThis(),
         save: jest.fn().mockImplementation((cb) => cb()),
+        priority: jest.fn().mockReturnThis(),
+
+        inactiveCount: stub(),
     };
 }

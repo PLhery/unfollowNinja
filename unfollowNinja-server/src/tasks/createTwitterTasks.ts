@@ -1,11 +1,11 @@
-import { DoneCallback, Job } from 'kue';
+import { Job } from 'kue';
 import { promisify } from 'util';
 import logger from '../utils/logger';
 import Task from './task';
 
 // Every three minutes, create checkFollowers tasks
 export default class extends Task {
-    public async run(job: Job,  done: DoneCallback) {
+    public async run(job: Job) {
         logger.info('Generating checkFollowers tasks...');
 
         const inactiveCFTasks = await promisify((cb) => this.queue.inactiveCount('checkFollowers', cb))();
@@ -13,7 +13,7 @@ export default class extends Task {
             const error = new Error(`There are ${inactiveCFTasks} queued checkFollowers. ` +
                 'Add some more CPUs/Workers! Skipping this check.');
             logger.error(error.message);
-            return done(error);
+            return error;
         }
         const users: string[] = await this.redis.zrange('users:enabled', 0, -1);
 
@@ -28,7 +28,5 @@ export default class extends Task {
                 .save(cb),
             )();
         }
-
-        done();
     }
 }

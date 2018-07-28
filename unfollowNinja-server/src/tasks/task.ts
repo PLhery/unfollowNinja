@@ -10,5 +10,5 @@ export default abstract class Task {
         this.queue = queue;
     }
 
-    public abstract run(job: Job,  done: DoneCallback): void;
+    public abstract run(job: Job): Promise<Error|void>;
 }

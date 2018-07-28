@@ -87,7 +87,7 @@ if (cluster.isMaster) {
         queue.process(
             taskName,
             WORKER_RATE_LIMIT,
-            (job, done) => task.run(job, done),
+            (job, done) => task.run(job).then((err) => done(err)).catch((err) => done(err)),
         );
     }
 

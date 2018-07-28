@@ -6,10 +6,8 @@ gulp.task("default", ["compile"], function () {
     return gulp.watch("./src/**/*.ts", ["compile"]);
 });
 
-
-
 gulp.task("compile", function () {
-    return tsProject.src()
+    return gulp.src("./src/**/*.ts")
         .pipe(tsProject())
         .js.pipe(gulp.dest("dist"));
 });

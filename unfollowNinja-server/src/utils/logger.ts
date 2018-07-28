@@ -21,7 +21,7 @@ const logger = createLogger({
     transports: [
         new transports.Console({
             format: format.combine(format.colorize(), customFormat),
-            level: testEnv ? 'info' : 'debug',
+            level: testEnv ? 'warn' : 'debug',
         }),
         !testEnv && new transports.File({
             ...fileParams,

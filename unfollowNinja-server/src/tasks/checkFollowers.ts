@@ -1,4 +1,4 @@
-import { DoneCallback, Job } from 'kue';
+import { Job } from 'kue';
 import { difference, flatMap } from 'lodash';
 import * as Twit from 'twit';
 import { promisify } from 'util';
@@ -8,7 +8,7 @@ import { twitterSnowflakeToTime } from '../utils/utils';
 import Task from './task';
 
 export default class extends Task {
-    public async run(job: Job,  done: DoneCallback) {
+    public async run(job: Job) {
         const { username, userId } = job.data;
         const { token, tokenSecret } = await this.redis.hgetall(`user:${userId}`);
 
@@ -18,7 +18,7 @@ export default class extends Task {
         const startedAt = Number(job.started_at);
         if (startedAt < nextCheckTime) {
             logger.debug('checkFollowers @%s - skipping this check.', username);
-            return done();
+            return;
         } // don't check every minute if the user has more than 5000 followers : we can only get 5000 followers/minute
 
         const twit = new Twit({
@@ -36,10 +36,10 @@ export default class extends Task {
             let resetTime: number;
             while (cursor !== '0') {
                 if (remainingRequests === 0) {
-                    logger.error('checkFollowers @%s - No twitter requests remaining to pursue the job.', username);
                     // this may happen for ex if someone needs a 2nd requests in the 15th check of the 15minutes window
                     await this.redis.set(`nextCheckTime:${userId}`, resetTime.toString());
-                    return done(new Error('No twitter requests remaining to pursue the job.'));
+                    // noinspection ExceptionCaughtLocallyJS
+                    throw new Error('No twitter requests remaining to pursue the job.');
                 }
                 // @ts-ignore (stringify_ids not in @types/twit)
                 const result = await twit.get('followers/ids', {cursor, stringify_ids: true});
@@ -63,14 +63,15 @@ export default class extends Task {
             await this.detectUnfollows(job, followers);
         } catch (err) {
             if (!err.twitterReply) {
-                logger.error(err.stack);
-                return done(err);
+                logger.error('checkFollowers @%s - %s', username, err.stack);
+                throw err;
             } else {
-                return this.manageTwitterErrors(err.twitterReply, username, userId)
-                    .then((unexpected) => unexpected ? done(err) : done());
+                const unexpected = await this.manageTwitterErrors(err.twitterReply, username, userId);
+                if (unexpected) {
+                    throw err;
+                }
             }
         }
-        done();
     }
 
     private async detectUnfollows(job: Job, followers: string[]) {
