@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node .",
     "test": "npm run lint && npm run specs",
-    "specs": "mocha -r ts-node/register test/**/*.spec.ts",
+    "specs": "jest --notify",
     "lint": "tslint src/*.ts src/***/*.ts test/**/*.ts",
     "watch": "gulp",
     "postinstall": "gulp compile"
@@ -28,19 +28,18 @@
   },
   "homepage": "https://github.com/plhery/unfollowNinja#readme",
   "devDependencies": {
-    "@types/chai": "^4.1.4",
     "@types/event-stream": "^3.3.34",
+    "@types/jest": "^23.3.1",
     "@types/jsonstream": "^0.8.30",
-    "@types/mocha": "^5.2.5",
     "@types/node": "^10.5.2",
     "@types/sinon": "^5.0.1",
-    "chai": "^4.1.2",
     "event-stream": "^3.3.4",
     "gulp": "^3.9.1",
     "gulp-typescript": "^4.0.2",
+    "jest": "^23.4.2",
     "jsonstream": "^1.0.3",
-    "mocha": "^5.2.0",
     "sinon": "^6.1.4",
+    "ts-jest": "^23.0.1",
     "ts-node": "^7.0.0",
     "tslint": "^5.11.0",
     "typescript": "^2.9.2"

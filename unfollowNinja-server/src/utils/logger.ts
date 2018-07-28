@@ -14,40 +14,38 @@ const fileParams = {
     maxFiles: 200,
 };
 
+const testEnv = typeof it === 'function'; // jest
+
 const logger = createLogger({
     format: customFormat,
     transports: [
         new transports.Console({
             format: format.combine(format.colorize(), customFormat),
-            level: 'debug',
+            level: testEnv ? 'info' : 'debug',
         }),
-        new transports.File({
+        !testEnv && new transports.File({
             ...fileParams,
             filename: 'logs/info.log',
             level: 'info',
         }),
-        new transports.File({
+        !testEnv && new transports.File({
             ...fileParams,
             filename: 'logs/error.log',
             level: 'error',
         }),
-        new transports.File({
+        !testEnv && new transports.File({
             ...fileParams,
             filename: 'logs/debug.log',
             level: 'debug',
         }),
-    ],
+    ].filter(t => t),
     exceptionHandlers: [
         new transports.Console(),
-        new transports.File({
+        !testEnv && new transports.File({
             ...fileParams,
             filename: 'logs/exceptions.log',
         }),
-    ],
+    ].filter(t => t),
 });
-
-if (typeof global.it === 'function') { // mocha
-    logger.level = 'warn';
-}
 
 export default logger;

@@ -1,5 +1,3 @@
-import {ProcessCallback} from 'kue';
-
 import checkFollowers from './checkFollowers';
 import createTwitterTasks from './createTwitterTasks';
 import getFollowerInfos from './getFollowerInfos';

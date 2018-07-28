@@ -1,5 +1,5 @@
 import { DoneCallback, Job } from 'kue';
-import { difference } from 'lodash';
+import { difference, flatMap } from 'lodash';
 import * as Twit from 'twit';
 import { promisify } from 'util';
 import logger from '../utils/logger';
@@ -38,6 +38,7 @@ export default class extends Task {
                 if (remainingRequests === 0) {
                     logger.error('checkFollowers @%s - No twitter requests remaining to pursue the job.', username);
                     // this may happen for ex if someone needs a 2nd requests in the 15th check of the 15minutes window
+                    await this.redis.set(`nextCheckTime:${userId}`, resetTime.toString());
                     return done(new Error('No twitter requests remaining to pursue the job.'));
                 }
                 // @ts-ignore (stringify_ids not in @types/twit)
@@ -57,12 +58,12 @@ export default class extends Task {
                 newNextCheckTime = startedAt + (resetTime - startedAt) / (remainingChecks + 1) - 30000;
                 // minus 30s because we can trigger it a bit before the ideal time
             }
-            await this.redis.set(`nextCheckTime:${userId}`, newNextCheckTime.toString());
+            await this.redis.set(`nextCheckTime:${userId}`, Math.floor(newNextCheckTime).toString());
 
-            await this.detectUnfollows(userId, username, followers);
+            await this.detectUnfollows(job, followers);
         } catch (err) {
             if (!err.twitterReply) {
-                logger.error(err);
+                logger.error(err.stack);
                 return done(err);
             } else {
                 return this.manageTwitterErrors(err.twitterReply, username, userId)
@@ -72,7 +73,9 @@ export default class extends Task {
         done();
     }
 
-    private async detectUnfollows(userId: string, username: string, followers: string[]) {
+    private async detectUnfollows(job: Job, followers: string[]) {
+        const { username, userId } = job.data;
+
         const formerFollowers: string[] = await this.redis.zrange(`followers:${userId}`, 0, -1);
         const newFollowers = difference(followers, formerFollowers);
         const unfollowers = difference(formerFollowers, followers);
@@ -80,49 +83,47 @@ export default class extends Task {
         logger.debug('%s had %d followers and now has %d followers (+%d -%d)',
             username, formerFollowers.length, followers.length, newFollowers.length, unfollowers.length);
 
-        // add new followers
-        await Promise.all(
-            newFollowers.map((followerId) => Promise.all([ // add new followers
-                this.redis.zadd(`followers:${userId}`, '0', followerId),
-                this.redis.zadd(`followers:not-cached:${userId}`, Date.now().toString(), followerId),
-            ])),
-        );
+        if (newFollowers.length > 0) { // add new followers
+            await Promise.all([
+                this.redis.zadd(`followers:${userId}`, ...flatMap(newFollowers, followerId => ['0', followerId])),
+                this.redis.zadd(`followers:not-cached:${userId}`,
+                    ...flatMap(newFollowers, followerId => [job.started_at.toString(), followerId])),
+            ]);
+        }
 
-        const unfollowersInfo: IUnfollowerInfo[] = [];
+        if (unfollowers.length > 0) { // remove unfollowers
+            const unfollowersInfo = await Promise.all(
+                unfollowers.map(async (unfollowerId): Promise<IUnfollowerInfo> => {
+                    const snowflakeId = await this.redis.zscore(`followers:${userId}`, unfollowerId);
+                    const followTime = twitterSnowflakeToTime(snowflakeId) ||
+                        parseInt(await this.redis.zscore(`followers:not-cached:${userId}`, unfollowerId), 10);
 
-        // remove unfollowers
-        await Promise.all(
-            unfollowers.map(async (unfollowerId) => {
-                const snowflakeId = await this.redis.zscore(`followers:${userId}`, unfollowerId);
-                const followTime = twitterSnowflakeToTime(snowflakeId) ||
-                    parseInt(await this.redis.zscore(`followers:not-cached:${userId}`, unfollowerId), 10);
-                const unfInfo: IUnfollowerInfo = {
-                    id: unfollowerId,
-                    followTime,
-                    unfollowTime: Date.now(),
-                };
-                unfollowersInfo.push(unfInfo);
+                    return {
+                        id: unfollowerId,
+                        followTime,
+                        unfollowTime: Number(job.started_at),
+                    };
+                }),
+            );
 
-                return Promise.all([
-                    this.redis.zrem(`followers:${userId}`, unfollowerId),
-                    this.redis.zrem(`followers:not-cached:${userId}`, unfollowerId),
-                    this.redis.lpush(`unfollowers:${userId}`, JSON.stringify(unfInfo)),
-                ]);
-            }),
-        );
-
-        await promisify((cb) =>
-            this.queue
-                .create('notifyUser', {
-                    title: `Notify @${username} that he's been unfollowed by ` +
-                        unfollowersInfo.map((u) => u.id).toString(),
-                    userId,
-                    username,
-                    unfollowersInfo,
-                })
-                .removeOnComplete(true)
-                .save(cb),
-        )();
+            await Promise.all([
+                this.redis.zrem(`followers:${userId}`, ...unfollowersInfo.map(info => info.id)),
+                this.redis.zrem(`followers:not-cached:${userId}`, ...unfollowersInfo.map(info => info.id)),
+                this.redis.lpush(`unfollowers:${userId}`, ...unfollowersInfo.map(info => JSON.stringify(info))),
+                promisify((cb) =>
+                    this.queue
+                        .create('notifyUser', {
+                            title: `Notify @${username} that he's been unfollowed by ` +
+                                unfollowersInfo.map((u) => u.id).toString(),
+                            userId,
+                            username,
+                            unfollowersInfo,
+                        })
+                        .removeOnComplete(true)
+                        .save(cb),
+                )(),
+            ]);
+        }
     }
 
     // return true if the error is really unexpected / the job will be kept in the "failed" section
