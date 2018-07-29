@@ -18,18 +18,20 @@ module.exports = {
   clearMocks: true,
 
   // Indicates whether the coverage information should be collected while executing the test
-  // collectCoverage: false,
+  collectCoverage: true,
 
   // An array of glob patterns indicating a set of files for which coverage information should be collected
-  // collectCoverageFrom: null,
+  collectCoverageFrom: [
+      "src/tasks/*.ts"
+  ],
 
   // The directory where Jest should output its coverage files
-  // coverageDirectory: "coverage",
+  coverageDirectory: "test-results/coverage",
 
   // An array of regexp pattern strings used to skip coverage collection
-  // coveragePathIgnorePatterns: [
-  //   "/node_modules/"
-  // ],
+  coveragePathIgnorePatterns: [
+    "index.ts"
+  ],
 
   // A list of reporter names that Jest uses when writing coverage reports
   // coverageReporters: [
@@ -92,7 +94,11 @@ module.exports = {
   // projects: null,
 
   // Use this configuration option to add custom reporters to Jest
-  reporters: [ "default", [ "jest-junit", { output: "./test-results/jest/results.xml" } ] ],
+  reporters: [
+      "default",
+      [ "jest-junit", { output: "./test-results/junit/results.xml" } ],
+      [ "jest-html-reporter", { outputPath: "./test-results/tests/test-report.html" }]
+  ],
 
   // Automatically reset mock state between every test
   // resetMocks: false,
