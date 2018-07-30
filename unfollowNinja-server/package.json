@@ -52,12 +52,15 @@
     "@types/ioredis": "^3.2.13",
     "@types/kue": "^0.11.9",
     "@types/lodash": "^4.14.115",
+    "@types/moment": "^2.13.0",
     "@types/twit": "^2.2.18",
+    "big-integer": "^1.6.32",
     "dotenv": "^6.0.0",
     "get-port": "^4.0.0",
     "ioredis": "^3.2.2",
     "kue": "^0.11.6",
     "lodash": "^4.17.10",
+    "moment": "^2.22.2",
     "twit": "^2.2.11",
     "winston": "^3.0.0"
   }

@@ -14,7 +14,7 @@ import tasks from './tasks';
 import Task from './tasks/task';
 
 // these will be deleted before launching the workers
-const CLEAN_TYPES = ['checkFollowers', 'createTwitterTasks', 'getFollowersInfos'];
+const CLEAN_TYPES = ['checkFollowers', 'createTwitterTasks', 'getFollowersInfos', 'cacheFollowers'];
 const CLEAN_STATES = ['delayed', 'inactive'];
 
 // parsing process.env variables
@@ -87,7 +87,14 @@ if (cluster.isMaster) {
         queue.process(
             taskName,
             WORKER_RATE_LIMIT,
-            (job, done) => task.run(job).then((err) => done(err)).catch((err) => done(err)),
+            (job, done) => {
+                task.run(job)
+                    .then(() => done())
+                    .catch((err) => {
+                        logger.error(`An error happened with ${taskName} / @${job.data.username || ''}: ${err.stack}`);
+                        done(err);
+                    });
+            },
         );
     }
 

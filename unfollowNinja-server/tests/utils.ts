@@ -11,6 +11,7 @@ export function redisMock() {
         get: stub(),
         hget: stub(),
         hgetall: stub(),
+        zcard: stub(),
         zrange: stub(),
         zscore: stub(),
 

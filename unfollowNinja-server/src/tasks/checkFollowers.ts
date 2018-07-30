@@ -4,13 +4,12 @@ import * as Twit from 'twit';
 import { promisify } from 'util';
 import logger from '../utils/logger';
 import { IUnfollowerInfo } from '../utils/types';
-import { twitterSnowflakeToTime } from '../utils/utils';
+import {getTwit, twitterSnowflakeToTime} from '../utils/utils';
 import Task from './task';
 
 export default class extends Task {
     public async run(job: Job) {
         const { username, userId } = job.data;
-        const { token, tokenSecret } = await this.redis.hgetall(`user:${userId}`);
 
         logger.debug('checking %s s followers', job.data.username);
 
@@ -21,12 +20,7 @@ export default class extends Task {
             return;
         } // don't check every minute if the user has more than 5000 followers : we can only get 5000 followers/minute
 
-        const twit = new Twit({
-            access_token:         token,
-            access_token_secret:  tokenSecret,
-            consumer_key:         process.env.CONSUMER_KEY,
-            consumer_secret:      process.env.CONSUMER_SECRET,
-        });
+        const twit = await getTwit(this.redis, userId);
 
         let requests = 0;
         let cursor = '-1';
@@ -41,8 +35,7 @@ export default class extends Task {
                     // noinspection ExceptionCaughtLocallyJS
                     throw new Error('No twitter requests remaining to pursue the job.');
                 }
-                // @ts-ignore (stringify_ids not in @types/twit)
-                const result = await twit.get('followers/ids', {cursor, stringify_ids: true});
+                const result: any = await twit.get('followers/ids', {cursor, stringify_ids: true} as Twit.Params);
                 cursor = result.data.next_cursor_str;
                 requests++;
 
@@ -63,7 +56,6 @@ export default class extends Task {
             await this.detectUnfollows(job, followers);
         } catch (err) {
             if (!err.twitterReply) {
-                logger.error('checkFollowers @%s - %s', username, err.stack);
                 throw err;
             } else {
                 const unexpected = await this.manageTwitterErrors(err.twitterReply, username, userId);
@@ -89,7 +81,8 @@ export default class extends Task {
                 this.redis.zadd(`followers:${userId}`, ...flatMap(newFollowers, followerId => ['0', followerId])),
                 this.redis.zadd(`followers:not-cached:${userId}`,
                     ...flatMap(newFollowers, followerId => [job.started_at.toString(), followerId])),
-            ]);
+                this.redis.set(`followersList:${userId}`, JSON.stringify(followers)),
+            ]); // followersList should be in Twitter's order (useful for cacheFollowers)
         }
 
         if (unfollowers.length > 0) { // remove unfollowers
