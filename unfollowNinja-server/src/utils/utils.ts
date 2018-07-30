@@ -4,7 +4,8 @@ import { Redis } from 'ioredis';
 import * as Twit from 'twit';
 
 export function twitterSnowflakeToTime(snowflakeId: string): number {
-    const TWEPOCH = 1288834974657; // from https://github.com/twitter/snowflake/... https://git.io/fNzsb
+    // const TWEPOCH = 1288834974657; // from https://github.com/twitter/snowflake/... https://git.io/fNzsb
+    const TWEPOCH = 1149719482000; // determined empirically
     // tslint:disable-next-line:no-bitwise
     return snowflakeId ? bigInt(snowflakeId).shiftRight(22).valueOf() + TWEPOCH : null;
 }
