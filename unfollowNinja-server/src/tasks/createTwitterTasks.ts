@@ -1,5 +1,6 @@
-import { Job } from 'kue';
-import { promisify } from 'util';
+import {Job} from 'kue';
+import {promisify} from 'util';
+import { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
 import Task from './task';
 
@@ -17,10 +18,10 @@ export default class extends Task {
             logger.error(error.message);
             throw error;
         }
-        const users: string[] = await this.redis.zrange('users:enabled', 0, -1);
+        const users: string[] = await this.dao.getUserIdsByCategory(UserCategory.enabled);
 
         for (const userId of users) {
-            const username: string = await this.redis.hget(`cachedTwitto:${userId}`, 'username');
+            const username: string = await this.dao.getCachedUsername(userId);
 
             await promisify((cb) =>
                 this.queue
@@ -30,8 +31,7 @@ export default class extends Task {
                 .save(cb),
             )();
 
-            const remainingFollowers = Number(await this.redis.zcard(`followers:not-cached:${userId}`));
-            if (remainingFollowers > 0) {
+            if (await this.dao.getUserDao(userId).getHasNotCachedFollowers()) {
                 await promisify((cb) =>
                     this.queue
                         .create('cacheFollowers', {title: `cache @${username} s followers`, username, userId})

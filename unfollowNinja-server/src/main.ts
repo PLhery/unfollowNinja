@@ -3,15 +3,14 @@ import 'dotenv/config';
 import * as cluster from 'cluster';
 import * as getPort from 'get-port';
 import { Server } from 'http';
-import * as Redis from 'ioredis';
 import * as kue from 'kue';
 import { cpus } from 'os';
 import { promisify } from 'util';
-import logger from './utils/logger';
-import Scheduler from './utils/scheduler';
-
+import Dao from './dao/dao';
 import tasks from './tasks';
 import Task from './tasks/task';
+import logger from './utils/logger';
+import Scheduler from './utils/scheduler';
 
 // these will be deleted before launching the workers
 const CLEAN_TYPES = ['checkFollowers', 'createTwitterTasks', 'getFollowersInfos', 'cacheFollowers'];
@@ -35,7 +34,7 @@ queue.on( 'error',  ( err: Error ) => {
     logger.error('Oops... ', err);
 });
 
-const redis = new Redis();
+const dao = new Dao();
 let scheduler: Scheduler;
 let kueWebServer: Server;
 if (cluster.isMaster) {
@@ -79,11 +78,11 @@ if (cluster.isMaster) {
     queue.watchStuckJobs(1000);
 
     // every 3 minutes, create the checkFollowers tasks for everyone
-    scheduler = new Scheduler(redis, queue);
+    scheduler = new Scheduler(dao, queue);
     scheduler.start();
 } else {
     for (const taskName in tasks) {
-        const task: Task = new tasks[taskName](redis, queue);
+        const task: Task = new tasks[taskName](dao, queue);
         queue.process(
             taskName,
             WORKER_RATE_LIMIT,
@@ -114,7 +113,7 @@ function death() {
         if (err) {
             logger.error(err.message);
         }
-        redis.disconnect();
+        dao.disconnect();
         if (cluster.isWorker) {
             process.exit(0);
         }

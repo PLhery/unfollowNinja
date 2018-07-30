@@ -1,35 +1,33 @@
-import { Redis } from 'ioredis';
 import { Queue } from 'kue';
+import { promisify } from 'util';
+import Dao from '../dao/dao';
 import logger from './logger';
 
 // Launch createTwitterTasks every 3 minutes
 export default class Scheduler {
     private schedulerId: number;
-    private redis: Redis;
+    private dao: Dao;
     private queue: Queue;
     private intervalId: NodeJS.Timer;
     private started: boolean;
 
-    constructor(redis: Redis, queue: Queue) {
-        this.redis = redis;
+    constructor(dao: Dao, queue: Queue) {
+        this.dao = dao;
         this.queue = queue;
         this.started = false;
     }
 
-    public start() {
+    public async start(): Promise<void> {
         if (this.started) {
             return;
         }
         this.started = true;
         // makes sure that only one scheduler is running (the app could be launched twice)
-        this.redis.incr('scheduler_id')
-            .then((value) => {
-                this.schedulerId = value;
+        this.schedulerId = await this.dao.incrSchedulerId();
 
-                // every 2 minutes, create the checkFollowers tasks for everyone
-                this.intervalId = setInterval(() => this.createTwitterTasks(), 2 * 60 * 1000);
-                this.createTwitterTasks();
-            });
+        // every 2 minutes, create the checkFollowers tasks for everyone
+        this.intervalId = setInterval(() => this.createTwitterTasks(), 2 * 60 * 1000);
+        return this.createTwitterTasks();
     }
 
     public stop() {
@@ -40,18 +38,15 @@ export default class Scheduler {
         this.started = false;
     }
 
-    private createTwitterTasks() {
-        this.redis.get('scheduler_id')
-            .then((lastSchedulerId) => {
-                if (parseInt(lastSchedulerId, 10) !== this.schedulerId) {
-                    logger.warn('A new scheduler has been launched, cancelling this one...');
-                    this.stop();
-                    return;
-                }
-                this.queue
-                    .create('createTwitterTasks', {})
-                    .removeOnComplete(true)
-                    .save();
-            });
+    private async createTwitterTasks(): Promise<void> {
+        if (await this.dao.getSchedulerId() !== this.schedulerId) {
+            logger.warn('A new scheduler has been launched, cancelling this one...');
+            this.stop();
+            return;
+        }
+        await promisify((cb) => this.queue
+            .create('createTwitterTasks', {})
+            .removeOnComplete(true)
+            .save(cb))();
     }
 }

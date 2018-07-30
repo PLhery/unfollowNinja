@@ -1,12 +1,13 @@
 import {Redis} from 'ioredis';
 import {DoneCallback, Job, Queue} from 'kue';
+import Dao from '../dao/dao';
 
 export default abstract class Task {
-    protected redis: Redis;
+    protected dao: Dao;
     protected queue: Queue;
 
-    constructor(redis: Redis, queue: Queue) {
-        this.redis = redis;
+    constructor(dao: Dao, queue: Queue) {
+        this.dao = dao;
         this.queue = queue;
     }
 
