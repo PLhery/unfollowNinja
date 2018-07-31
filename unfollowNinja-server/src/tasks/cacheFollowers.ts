@@ -41,7 +41,7 @@ export default class extends Task {
         try {
             const result: any = await twit.get('followers/list', {
                 cursor, count, skip_status: true, include_user_entities: false,
-            } as Params);
+            });
 
             const users: Twitter.User[] = result.data.users;
             const next_cursor_str: string = result.data.next_cursor_str;

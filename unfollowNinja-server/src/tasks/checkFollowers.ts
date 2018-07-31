@@ -35,7 +35,7 @@ export default class extends Task {
                     // noinspection ExceptionCaughtLocallyJS
                     throw new Error('No twitter requests remaining to pursue the job.');
                 }
-                const result: any = await twit.get('followers/ids', {cursor, stringify_ids: true} as Twit.Params);
+                const result: any = await twit.get('followers/ids', {cursor, stringify_ids: true});
                 cursor = result.data.next_cursor_str;
                 requests++;
 
