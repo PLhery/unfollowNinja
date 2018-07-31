@@ -1,24 +1,33 @@
-import { stub } from 'sinon';
-
-export function redisMock() {
+export function userDaoMock() {
+    const twit = twitMock();
     return {
-        set: jest.fn(),
-        lpush: jest.fn(),
-        zadd: jest.fn(),
-        zrem: jest.fn(),
-        zpush: jest.fn(),
+        twit,
+        getTwit: jest.fn().mockResolvedValue(twit),
 
-        get: stub(),
-        hget: stub(),
-        hgetall: stub(),
-        zcard: stub(),
-        zrange: stub(),
-        zscore: stub(),
+        setNextCheckTime: jest.fn(),
+        updateFollowers: jest.fn(),
+        setFollowerSnowflakeId: jest.fn(),
+        addUnfollowers: jest.fn(),
 
-        totalWriteCall() {
-            return [this.set, this.lpush, this.zadd, this.zrem, this.zpush]
-                .reduce((p, c) => p + c.mock.calls.length, 0);
-        },
+        getNextCheckTime: jest.fn(),
+        getFollowers: jest.fn(),
+        getFollowerSnowflakeId: jest.fn(),
+        getFollowTime: jest.fn(),
+        getHasNotCachedFollowers: jest.fn(),
+        getCachedFollowers: jest.fn(),
+    };
+}
+
+export function daoMock() {
+    const userDao = { '01': userDaoMock(), '02': userDaoMock(), '03': userDaoMock() };
+    return {
+        userDao,
+        getUserDao: jest.fn().mockImplementation((id: '01'|'02'|'03') => userDao[id]),
+
+        addTwittoToCache: jest.fn(),
+
+        getUserIdsByCategory: jest.fn().mockResolvedValue(['01', '02', '03']),
+        getCachedUsername: jest.fn(),
     };
 }
 
@@ -29,6 +38,12 @@ export function queueMock() {
         save: jest.fn().mockImplementation((cb) => cb()),
         priority: jest.fn().mockReturnThis(),
 
-        inactiveCount: stub(),
+        inactiveCount: jest.fn(),
+    };
+}
+
+export function twitMock() {
+    return {
+        get: jest.fn(),
     };
 }

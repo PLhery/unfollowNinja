@@ -17,7 +17,7 @@ const fileParams = {
 
 const testEnv = typeof it === 'function'; // jest
 
-fs.exists( './logs', (exists) => !exists && fs.mkdirSync('./logs'));
+fs.exists( './logs', (exists) => !exists && fs.mkdir('./logs', () => null));
 
 const logger = createLogger({
     format: customFormat,

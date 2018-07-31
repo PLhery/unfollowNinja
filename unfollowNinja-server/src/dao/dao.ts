@@ -20,10 +20,6 @@ export default class Dao {
         return this.redis.disconnect();
     }
 
-    public getRedis() {
-        return this.redis;
-    }
-
     public getUserDao(userId: string) {
         return new UserDao(userId, this.redis);
     }
