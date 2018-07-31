@@ -9,7 +9,10 @@
     "specs": "jest --notify",
     "lint": "tslint src/*.ts src/***/*.ts test/**/*.ts",
     "watch": "gulp",
-    "postinstall": "gulp compile"
+    "postinstall": "gulp compile",
+    "kue-ui": "kue-dashboard -p 3000",
+    "importDbFromLegacy": "node ./dist/jobs/importDbFromLegacy",
+    "cleanKue": "node ./dist/jobs/cleanKue"
   },
   "repository": {
     "type": "git",
@@ -48,7 +51,6 @@
   },
   "dependencies": {
     "@types/dotenv": "^4.0.3",
-    "@types/get-port": "^3.2.0",
     "@types/ioredis": "^3.2.13",
     "@types/kue": "^0.11.9",
     "@types/lodash": "^4.14.115",
@@ -56,7 +58,6 @@
     "@types/twit": "^2.2.18",
     "big-integer": "^1.6.32",
     "dotenv": "^6.0.0",
-    "get-port": "^4.0.0",
     "ioredis": "^3.2.2",
     "kue": "^0.11.6",
     "lodash": "^4.17.10",

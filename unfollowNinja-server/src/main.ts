@@ -1,7 +1,6 @@
 import 'dotenv/config';
 
 import * as cluster from 'cluster';
-import * as getPort from 'get-port';
 import { Server } from 'http';
 import * as kue from 'kue';
 import { cpus } from 'os';
@@ -18,7 +17,6 @@ const CLEAN_STATES = ['delayed', 'inactive'];
 
 // parsing process.env variables
 const CLUSTER_SIZE = parseInt(process.env.CLUSTER_SIZE, 10) || cpus().length;
-const KUE_APP_PORT = parseInt(process.env.KUE_APP_PORT, 10) || 3000;
 const WORKER_RATE_LIMIT = parseInt(process.env.WORKER_RATE_LIMIT, 10) || 25;
 
 if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET) {
@@ -36,17 +34,8 @@ queue.on( 'error',  ( err: Error ) => {
 
 const dao = new Dao();
 let scheduler: Scheduler;
-let kueWebServer: Server;
 if (cluster.isMaster) {
     logger.info('Unfollow ninja - Server');
-
-    if (KUE_APP_PORT > 0) {
-        getPort({port: KUE_APP_PORT}).then((port) => {
-            kueWebServer = kue.app.listen(port, () => {
-                logger.info('Launching kue web server on http://localhost:%d', port);
-            });
-        });
-    }
 
     function initFailed( err: Error ) {
         logger.error('Please check that your redis server is launched');
@@ -104,9 +93,6 @@ function death() {
     process.removeAllListeners(); // be sure death is not called twice (sigterm & sigint)
     if (cluster.isMaster) {
         scheduler.stop();
-        if (kueWebServer) {
-            kueWebServer.close();
-        }
     }
     queue.shutdown( 5000, (err: Error) => {
         logger.info('Kue shutdown - %s', cluster.isMaster ? 'master' : 'worker ' + cluster.worker.id);

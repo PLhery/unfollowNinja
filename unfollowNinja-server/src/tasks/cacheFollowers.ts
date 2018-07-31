@@ -1,5 +1,5 @@
 import { Job } from 'kue';
-import { intersection, last } from 'lodash';
+import { difference, last } from 'lodash';
 import * as moment from 'moment';
 import { Params, Twitter } from 'twit';
 import logger from '../utils/logger';
@@ -12,21 +12,21 @@ export default class extends Task {
         const { username, userId } = job.data;
         const userDao = this.dao.getUserDao(userId);
 
-        const [ shouldBeCached, followersList] = await Promise.all([
-            userDao.getNotCachedFollowers(),
-            userDao.getFollowersOrdered(),
+        const [ cachedFollowers, followers] = await Promise.all([
+            userDao.getCachedFollowers(),
+            userDao.getFollowers(),
         ]);
 
-        const targetId: string = intersection(followersList, shouldBeCached)[0]; // most recent not cached follower
+        const targetId: string = difference(followers, cachedFollowers)[0]; // most recent not cached follower
 
         if (typeof targetId !== 'string') { // no cached follower
             return;
         }
         logger.debug(`Caching a new follower for @${username}. Target: ${targetId}`);
 
-        const targetIndex = followersList.indexOf(targetId);
+        const targetIndex = followers.indexOf(targetId);
         const cursor = (targetIndex > 0) ?
-            await userDao.getFollowerSnowflakeId(followersList[targetIndex - 1]) : '-1';
+            await userDao.getFollowerSnowflakeId(followers[targetIndex - 1]) : '-1';
 
         if (cursor === '0' || typeof cursor !== 'string') { // there was a problem somewhere...
             throw new Error('An unexpected error happened: no valid cursor found.');
@@ -48,8 +48,7 @@ export default class extends Task {
             const previous_cursor_str: string = result.data.previous_cursor_str;
 
             if (users.length === 0) {
-                // noinspection ExceptionCaughtLocallyJS
-                throw new Error('An unexpected error happened: no user could be cached.');
+                return;
             }
             await Promise.all(users.map((user) =>
                 this.dao.addTwittoToCache({
@@ -62,14 +61,14 @@ export default class extends Task {
                 const user = users[0];
                 await userDao.setFollowerSnowflakeId(user.id_str, previous_cursor_str.substr(1));
                 const followDate = moment(twitterSnowflakeToTime(previous_cursor_str.substr(1))).calendar();
-                logger.debug(`cached ${user.id_str} - @${user.screen_name} (followed ${username} on ${followDate})`);
+                logger.debug(`cached ${user.id_str} - @${user.screen_name} (followed @${username}: ${followDate})`);
                 users.shift();
             }
             if (next_cursor_str !== '0' && users.length > 0) {
                 const user = last(users);
                 await userDao.setFollowerSnowflakeId(user.id_str, next_cursor_str);
                 const followDate = moment(twitterSnowflakeToTime(next_cursor_str)).calendar();
-                logger.debug(`cached ${user.id_str} - @${user.screen_name} (followed ${username} on ${followDate})`);
+                logger.debug(`cached ${user.id_str} - @${user.screen_name} (followed @${username}: ${followDate})`);
             }
         } catch (err) { // ignore twitter errors, already managed by checkFollowers
             if (!err.twitterReply) {

@@ -2,7 +2,6 @@ import * as Redis from 'ioredis';
 import { ITwittoInfo, IUserEgg, IUserParams } from '../utils/types';
 import UserDao from './userDao';
 
-// export type UserCategory = 'enabled' | 'revoked' | 'suspended' | 'disabled';
 export enum UserCategory {
     enabled,
     suspended,
@@ -11,7 +10,7 @@ export enum UserCategory {
 }
 
 export default class Dao {
-    private redis: Redis.Redis;
+    private readonly redis: Redis.Redis;
 
     constructor(redis = new Redis()) {
         this.redis = redis;
@@ -19,6 +18,10 @@ export default class Dao {
 
     public disconnect() {
         return this.redis.disconnect();
+    }
+
+    public getRedis() {
+        return this.redis;
     }
 
     public getUserDao(userId: string) {
@@ -51,23 +54,28 @@ export default class Dao {
     }
 
     public async getUserIdsByCategory(category: UserCategory): Promise<string[]> {
-        return this.redis.zrange('users', category, category);
+        return this.redis.zrangebyscore('users', category, category);
     }
 
     public async getCachedTwitto(userId: string): Promise<ITwittoInfo> {
-        const [username, picture] = await this.redis.hmget(`cachedTwitto:${userId}`, 'username', 'picture');
+        const [username, picture] = await this.redis.hmget('cachedTwittos', `${userId}:username`, `${userId}:picture`);
         return username !== null ? {id: userId, username, picture} : null;
     }
 
     public async getCachedUsername(userId: string): Promise<string> {
-        return this.redis.hget(`cachedTwitto:${userId}`, 'username');
+        return this.redis.hget('cachedTwittos', `${userId}:username`);
     }
 
     public async addTwittoToCache(twittoInfo: ITwittoInfo, time = Date.now()): Promise<void> {
         const { id, username, picture } = twittoInfo;
         await Promise.all([
-            this.redis.zadd('cachedTwittos', time.toString(), id),
-            this.redis.hmset(`cachedTwitto:${id}`, 'username', username, 'picture', picture),
+            this.redis.zadd('cachedTwittosIds', time.toString(), id),
+            this.redis.hmset(`cachedTwittos`, `${id}:username`, username, `${id}:picture`, picture),
         ]);
+    }
+
+    // set the total numbers of unique unfollowers detected in the previous unfollowninja backend
+    public async setTotalUnfollowersLegacy(nbUnfollowers: number): Promise<void> {
+        return this.redis.set('total-unfollowers-legacy', nbUnfollowers.toString());
     }
 }

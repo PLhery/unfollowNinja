@@ -6,8 +6,8 @@ import {twitterSnowflakeToTime} from '../utils/utils';
 import { UserCategory } from './dao';
 
 export default class UserDao {
-    private redis: Redis.Redis;
-    private userId: string;
+    private readonly redis: Redis.Redis;
+    private readonly userId: string;
 
     constructor(userId: string, redis = new Redis()) {
         this.redis = redis;
@@ -47,57 +47,47 @@ export default class UserDao {
         });
     }
 
-    // list of follower IDs stored during last checkFollowers
+    // list of follower IDs stored during last checkFollowers (in Twitter's order)
+    // return null if there are no IDs
     public async getFollowers(): Promise<string[]> {
-        return this.redis.zrange(`followers:${this.userId}`, 0, -1);
+        return JSON.parse(await this.redis.get(`followers:${this.userId}`));
     }
 
-    // list of follower IDs in Twitter's order
-    public async getFollowersOrdered(): Promise<string[]> {
-        return JSON.parse(await this.redis.get(`followersList:${this.userId}`));
-    }
-
-    // we need all the followers (2nd param) in Twitter's order to know their position to be able..
-    // ..to cache their snowflakeId (if someone was disabled an re enabled it can appear in the middle)
-    // addedTime is a timestamp in ms
-    public async addFollowers(newFollowers: string[], followers: string[], addedTime: number|string): Promise<void> {
+    public async updateFollowers(
+        followers: string[], // every follower, in Twitter's order
+        newFollowers: string[], // followers to add
+        unfollowers: string[], // followers to remove
+        addedTime: number, // timestamp in ms for new followers
+    ): Promise<void> {
         const notCachedDict = fromPairs(newFollowers.map(followerId => [followerId, addedTime.toString()]));
         await Promise.all([
-            this.redis.zadd(`followers:${this.userId}`, ...flatMap(newFollowers, followerId => ['0', followerId])),
-            this.redis.hmset(`followers:not-cached:${this.userId}`, notCachedDict),
-            this.redis.set(`followersList:${this.userId}`, JSON.stringify(followers)),
-        ]);
-    }
-
-    // unfollowers: followers to remove
-    // folloers: every follower, in Twitter's order
-    public async removeFollowers(unfollowers: string[], followers: string[]): Promise<void> {
-        await Promise.all([
-            this.redis.zrem(`followers:${this.userId}`, ...unfollowers),
-            this.redis.hdel(`followers:not-cached:${this.userId}`, ...unfollowers),
-            this.redis.set(`followersList:${this.userId}`, JSON.stringify(followers)),
+            this.redis.set(`followers:${this.userId}`, JSON.stringify(followers)),
+            this.redis.set(`followers:count:${this.userId}`, followers.length.toString()),
+            newFollowers.length > 0 && this.redis.hmset(`followers:follow-time::${this.userId}`, notCachedDict),
+            unfollowers.length > 0 && this.redis.hdel(`followers:follow-time::${this.userId}`, ...unfollowers),
+            unfollowers.length > 0 && this.redis.hdel(`followers:snowflake-ids:${this.userId}`, ...unfollowers),
+            unfollowers.length > 0 && this.redis.incrby('total-unfollowers', unfollowers.length),
         ]);
     }
 
     public async setFollowerSnowflakeId(followerId: string, snowflakeId: string): Promise<void> {
         await Promise.all([
-            this.redis.zadd(`followers:${this.userId}`, snowflakeId, followerId),
-            this.redis.zrem(`followers:not-cached:${this.userId}`, followerId),
+            this.redis.hset(`followers:snowflake-ids:${this.userId}`, followerId, snowflakeId),
+            this.redis.hdel(`followers:follow-time:${this.userId}`, followerId),
         ]);
     }
 
     // get twitter cached snowflakeId (containing the follow timing information)
     // returns null if not cached yet
     public async getFollowerSnowflakeId(followerId: string): Promise<string> {
-        // TODO improve this (Number(bigInt) is not exact)
-        return Number(await this.redis.zscore(`followers:${this.userId}`, followerId)).toString();
+        return this.redis.hget(`followers:snowflake-ids:${this.userId}`, followerId);
     }
 
     // get the timestamp (in ms) when the follower followed the user.
     // determined from the cached snowflakeId or from the time it was added in DB
     public async getFollowTime(followerId: string): Promise<number> {
         return twitterSnowflakeToTime(await this.getFollowerSnowflakeId(followerId)) ||
-            Number(await this.redis.zscore(`followers:not-cached:${this.userId}`, followerId));
+            Number(await this.redis.hget(`followers:follow-time:${this.userId}`, followerId));
     }
 
     // Add some unfollowers to the list of unfollowers (without removing them from the followers)
@@ -107,10 +97,17 @@ export default class UserDao {
 
     // return true if some followers were never cached by cacheFollowers
     public async getHasNotCachedFollowers(): Promise<boolean> {
-        return Number(await this.redis.hlen(`followers:not-cached:${this.userId}`)) > 0;
+        const nbCached = Number(await this.redis.hlen(`followers:snowflake-ids:${this.userId}`));
+        const nbFollowers = Number(await this.redis.get(`followers:count:${this.userId}`));
+        return nbCached < nbFollowers;
     }
 
-    public async getNotCachedFollowers(): Promise<string[]> {
-        return this.redis.hkeys(`followers:not-cached:${this.userId}`);
+    public async addFollowTimes(notCachedFollowers: Array<{followTime: string, id: string}>): Promise<void> {
+        const notCachedDict = fromPairs(notCachedFollowers.map(f => [f.followTime, f.id]));
+        await this.redis.hmset(`followers:follow-time:${this.userId}`, notCachedDict);
+    }
+
+    public async getCachedFollowers(): Promise<string[]> {
+        return this.redis.hkeys(`followers:snowflake-ids:${this.userId}`);
     }
 }

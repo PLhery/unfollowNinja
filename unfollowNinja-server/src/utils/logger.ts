@@ -1,4 +1,5 @@
 import { worker } from 'cluster';
+import * as fs from 'fs';
 import { createLogger, format, transports } from 'winston';
 
 const workerInfo = worker ? `work ${worker.id}` : 'master';
@@ -15,6 +16,8 @@ const fileParams = {
 };
 
 const testEnv = typeof it === 'function'; // jest
+
+fs.exists( './logs', (exists) => !exists && fs.mkdirSync('./logs'));
 
 const logger = createLogger({
     format: customFormat,

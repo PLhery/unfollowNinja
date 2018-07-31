@@ -71,16 +71,17 @@ export default class extends Task {
         const { username, userId } = job.data;
         const userDao = this.dao.getUserDao(userId);
 
-        const formerFollowers: string[] = await userDao.getFollowers();
+        let newUser = false;
+        let formerFollowers: string[] = await userDao.getFollowers();
+        if (formerFollowers === null) {
+            newUser = true;
+            formerFollowers = [];
+        }
         const newFollowers = difference(followers, formerFollowers);
         const unfollowers = difference(formerFollowers, followers);
 
         logger.debug('%s had %d followers and now has %d followers (+%d -%d)',
             username, formerFollowers.length, followers.length, newFollowers.length, unfollowers.length);
-
-        if (newFollowers.length > 0) { // add new followers
-           await userDao.addFollowers(newFollowers, followers, job.started_at);
-        }
 
         if (unfollowers.length > 0) { // remove unfollowers
             const unfollowersInfo = await Promise.all(
@@ -94,7 +95,6 @@ export default class extends Task {
             );
 
             await Promise.all([
-                userDao.removeFollowers(unfollowersInfo.map(info => info.id), followers),
                 userDao.addUnfollowers(unfollowersInfo),
                 promisify((cb) =>
                     this.queue
@@ -108,7 +108,10 @@ export default class extends Task {
                         .removeOnComplete(true)
                         .save(cb),
                 )(),
+                userDao.updateFollowers(followers, newFollowers, unfollowers, newUser ? 0 : Number(job.started_at)),
             ]);
+        } else if (newFollowers.length > 0) {
+            await userDao.updateFollowers(followers, newFollowers, unfollowers, newUser ? 0 : Number(job.started_at));
         }
     }
 

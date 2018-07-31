@@ -9,8 +9,11 @@ export default class extends Task {
     public async run(job: Job) {
         logger.info('Generating checkFollowers & cacheFollowers tasks...');
 
-        const inactiveCheckFTasks = Number(await promisify((cb) => this.queue.inactiveCount('checkFollowers', cb))());
-        const inactiveCacheFTasks = Number(await promisify((cb) => this.queue.inactiveCount('cacheFollowers', cb))());
+        const [ inactiveCheckFTasks, inactiveCacheFTasks] = await Promise.all([
+            promisify((cb) => this.queue.inactiveCount('checkFollowers', cb))().then(Number),
+            promisify((cb) => this.queue.inactiveCount('cacheFollowers', cb))().then(Number),
+        ]);
+
         if ((inactiveCheckFTasks + inactiveCacheFTasks) > 50) {
             const error = new Error(`There are ${inactiveCheckFTasks} queued checkFollowers` +
                 ` and ${inactiveCacheFTasks} queued cacheFollowers.` +
