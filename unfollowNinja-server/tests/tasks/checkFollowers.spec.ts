@@ -66,6 +66,18 @@ describe('checkFollowers task', () => {
         expect(userDao.setNextCheckTime).toBeCalled();
     });
 
+    test('new user - two new followers', async () => {
+        userDao.getFollowers.mockResolvedValue(null);
+        mockTwitterReply(['123', '234']);
+        await task.run(job);
+        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(userDao.updateFollowers).toHaveBeenCalledTimes(1);
+        expect(userDao.updateFollowers).toBeCalledWith(
+            ['123', '234'], ['123', '234'], [], 0,
+        );
+        expect(userDao.setNextCheckTime).toBeCalled();
+    });
+
     test('two new followers, two unfollowers', async () => {
         mockTwitterReply(['345', '456']);
         await task.run(job);
