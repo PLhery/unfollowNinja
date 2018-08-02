@@ -36,8 +36,9 @@ export default class Dao {
 
     public async addUser(userEgg: IUserEgg): Promise<void> {
         userEgg = {category: UserCategory.enabled, ...userEgg};
-        const { id, category, username, picture, added_at, lang, token, tokenSecret } = userEgg;
-        const params: IUserParams = { added_at, lang, token, tokenSecret };
+        const { id, category, username, picture,
+            added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret } = userEgg;
+        const params: IUserParams = { added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret };
         await Promise.all([
             this.redis.zadd('users', category.toString(), id),
             this.redis.hmset(`user:${id}`, params),
@@ -66,7 +67,8 @@ export default class Dao {
         const { id, username, picture } = twittoInfo;
         await Promise.all([
             this.redis.zadd('cachedTwittosIds', time.toString(), id),
-            this.redis.hmset(`cachedTwittos`, `${id}:username`, username, `${id}:picture`, picture),
+            picture && this.redis.hmset(`cachedTwittos`, `${id}:username`, username, `${id}:picture`, picture),
+            !picture && this.redis.hmset(`cachedTwittos`, `${id}:username`, username),
         ]);
     }
 

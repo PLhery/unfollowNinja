@@ -37,6 +37,11 @@ fs.createReadStream(LEGACY_JSON_FILE_PATH)
                 token,
                 tokenSecret: secret,
                 username,
+                ...data.twitterDM ? {
+                    dmId: data.twitterDM.id,
+                    dmToken: data.twitterDM.token,
+                    dmTokenSecret: data.twitterDM.secret,
+                } : {},
             });
             if (data.followers) {
                 const userDao = dao.getUserDao(id);

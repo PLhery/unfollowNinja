@@ -1,7 +1,7 @@
 import * as Redis from 'ioredis';
 import {flatMap, fromPairs} from 'lodash';
 import * as Twit from 'twit';
-import {IUnfollowerInfo} from '../utils/types';
+import {IUnfollowerInfo, Lang} from '../utils/types';
 import {twitterSnowflakeToTime} from '../utils/utils';
 import { UserCategory } from './dao';
 
@@ -45,6 +45,21 @@ export default class UserDao {
             consumer_key:         process.env.CONSUMER_KEY,
             consumer_secret:      process.env.CONSUMER_SECRET,
         });
+    }
+
+    // get DM twitter instance with refreshed user's credentials
+    public async getDmTwit(): Promise<Twit> {
+        const [ dmToken, dmTokenSecret ] = await this.redis.hmget(`user:${this.userId}`, 'dmToken', 'dmTokenSecret');
+        return new Twit({
+            access_token: dmToken,
+            access_token_secret: dmTokenSecret,
+            consumer_key: process.env.DM_CONSUMER_KEY,
+            consumer_secret: process.env.DM_CONSUMER_SECRET,
+        });
+    }
+
+    public async getLang(): Promise<Lang> {
+        return await this.redis.hget(`user:${this.userId}`, 'lang') as Lang;
     }
 
     // list of follower IDs stored during last checkFollowers (in Twitter's order)

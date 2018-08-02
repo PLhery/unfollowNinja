@@ -9,5 +9,6 @@ gulp.task("default", ["compile"], function () {
 gulp.task("compile", function () {
     return gulp.src("./src/**/*.ts")
         .pipe(tsProject())
+        .on('error', () => {})
         .js.pipe(gulp.dest("dist"));
 });

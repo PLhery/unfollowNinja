@@ -17,10 +17,15 @@ const CLEAN_STATES = ['delayed', 'inactive'];
 
 // parsing process.env variables
 const CLUSTER_SIZE = parseInt(process.env.CLUSTER_SIZE, 10) || cpus().length;
-const WORKER_RATE_LIMIT = parseInt(process.env.WORKER_RATE_LIMIT, 10) || 25;
+const WORKER_RATE_LIMIT = parseInt(process.env.WORKER_RATE_LIMIT, 10) || 20;
 
 if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET) {
     logger.error('Some required environment variables are missing (CONSUMER_KEY / CONSUMER_SECRET).');
+    logger.error('Make sure you added them in a .env file in you cwd or that you defined them.');
+    process.exit();
+}
+if (!process.env.DM_CONSUMER_KEY || !process.env.DM_CONSUMER_SECRET) {
+    logger.error('Some required environment variables are missing (DM_CONSUMER_KEY / DM_CONSUMER_SECRET).');
     logger.error('Make sure you added them in a .env file in you cwd or that you defined them.');
     process.exit();
 }

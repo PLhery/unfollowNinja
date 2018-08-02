@@ -95,7 +95,6 @@ export default class extends Task {
             );
 
             await Promise.all([
-                userDao.addUnfollowers(unfollowersInfo),
                 promisify((cb) =>
                     this.queue
                         .create('notifyUser', {
