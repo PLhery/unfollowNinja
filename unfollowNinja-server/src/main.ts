@@ -1,7 +1,6 @@
 import 'dotenv/config';
 
 import * as cluster from 'cluster';
-import { Server } from 'http';
 import * as kue from 'kue';
 import { cpus } from 'os';
 import { promisify } from 'util';
@@ -17,7 +16,7 @@ const CLEAN_STATES = ['delayed', 'inactive'];
 
 // parsing process.env variables
 const CLUSTER_SIZE = parseInt(process.env.CLUSTER_SIZE, 10) || cpus().length;
-const WORKER_RATE_LIMIT = parseInt(process.env.WORKER_RATE_LIMIT, 10) || 20;
+const WORKER_RATE_LIMIT = parseInt(process.env.WORKER_RATE_LIMIT, 10) || 15;
 
 if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET) {
     logger.error('Some required environment variables are missing (CONSUMER_KEY / CONSUMER_SECRET).');

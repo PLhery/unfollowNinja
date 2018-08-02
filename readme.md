@@ -34,14 +34,52 @@ The main goal of this update is to be able to do 1 check every one or two minute
 - clone the repo `git clone git@github.com:PLhery/unfollowNinja.git`
 - `cd unfollowNinja/unfollowNinja-server`
 - install the dependencies `npm install`
-- create a .env file with these params: CONSUMER_KEY, CONSUMER_SECRET (and optionally CLUSTER_SIZE, KUE_APP_PORT, WORKER_RATE_LIMIT)
+- create a .env file (see [.env file](#.env-file))
 - launch the program `npm start`
 
-Logs are saved in the 'logs' folder.
+If you made some changes to the code, you can launch a new instance before exiting the former one to prevent downtime.
 
+Logs are saved in the 'logs' folder.
+,
+You can also launch the kue dashboaord to monitor tasks with `npm run kue-ui`
+
+## .env file
+You can create a .env in unfollowNinja-server to set some parameters:
+```
+CONSUMER_KEY=xxx
+CONSUMER_SECRET=xxx
+DM_CONSUMER_KEY=xxx
+DM_CONSUMER_SECRET=xxx
+
+# optionally:
+CLUSTER_SIZE=2 #Number of workers, defaults to number of CPUs
+WORKER_RATE_LIMIT=15 #Number of unique tasks managed at the same time, defaults to 15
+BETA_USERS=unfollowninja #List of usernames that have access to beta features
+```
+
+You can also set these parameters as environment variables.
+
+## TODO
+
+currently : followers are checked for everyone, DM are sent to beta users
+
+  - more tests (task/notifyUser, dao tests)
+  - add an API / an https server
+  - link that https server to the former UI
+  - develop a static landing page with some explanation
+  - develop a one-page react (or vue) page to manage preferences / see unfollowers.
+  
 ## Contribute
 
 Open an issue with your suggestions or assign yourself to an existing issue
+
+### Translate the app to your language
+
+- Fork the project
+- copy unfollowNinja-server/en.json to youLanguageCode.json
+- fill translations
+- change line 3 of unfollowNinja-server/src/utils/types.ts and add your language code
+- commit and submit a pull request
 
 ## History
 1.x.x - corrections de bugs cf commits  
