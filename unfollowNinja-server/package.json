@@ -1,0 +1,70 @@
+{
+  "name": "unfollowninja",
+  "version": "2.0.0",
+  "description": "Receive a direct message in a few seconds when someone unfollows you on Twitter",
+  "main": "./dist/main.js",
+  "scripts": {
+    "start": "node .",
+    "test": "npm run lint && npm run specs",
+    "specs": "jest",
+    "lint": "tslint src/*.ts src/***/*.ts test/**/*.ts",
+    "watch": "gulp",
+    "postinstall": "gulp compile",
+    "kue-ui": "kue-dashboard -p 3000",
+    "importDbFromLegacy": "node ./dist/jobs/importDbFromLegacy",
+    "cleanKue": "node ./dist/jobs/cleanKue"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/plhery/unfollowNinja.git"
+  },
+  "keywords": [
+    "twitter",
+    "unfollow",
+    "ninja",
+    "unfollowninja"
+  ],
+  "author": "plhery (https://twitter.com/plhery)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/plhery/unfollowNinja/issues"
+  },
+  "homepage": "https://github.com/plhery/unfollowNinja#readme",
+  "devDependencies": {
+    "@types/event-stream": "^3.3.34",
+    "@types/jest": "^23.3.1",
+    "@types/jsonstream": "^0.8.30",
+    "@types/node": "^10.5.5",
+    "event-stream": "^3.3.4",
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^5.0.0-alpha.3",
+    "jest": "^23.4.2",
+    "jest-html-reporter": "^2.4.2",
+    "jest-junit": "^5.1.0",
+    "jsonstream": "^1.0.3",
+    "ts-jest": "^23.0.1",
+    "ts-node": "^7.0.0",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.1"
+  },
+  "dependencies": {
+    "@types/dotenv": "^4.0.3",
+    "@types/i18n": "^0.8.3",
+    "@types/ioredis": "^3.2.13",
+    "@types/kue": "^0.11.9",
+    "@types/lodash": "^4.14.115",
+    "@types/moment": "^2.13.0",
+    "@types/node-emoji": "^1.8.0",
+    "@types/twit": "^2.2.19",
+    "big-integer": "^1.6.34",
+    "dotenv": "^6.0.0",
+    "i18n": "^0.8.3",
+    "ioredis": "^3.2.2",
+    "kue": "^0.11.6",
+    "lodash": "^4.17.10",
+    "moment": "^2.22.2",
+    "node-emoji": "^1.8.1",
+    "twit": "^2.2.11",
+    "winston": "^3.0.0"
+  }
+}

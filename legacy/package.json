@@ -2,7 +2,7 @@
   "name": "unfollowninja",
   "version": "1.2.5",
   "description": "Detectez vos unfollows et envoyez-vous un MP.",
-  "author": "MrPointVirgule <paul-louis@outlook.fr> (http://twitter.com/MrPointVirgule)",
+  "author": "plhery (https://twitter.com/plhery)",
   "bin": {
     "ninja": "ninja.js"
   },
