@@ -118,7 +118,7 @@ export default class UserDao {
     }
 
     public async addFollowTimes(notCachedFollowers: Array<{followTime: string, id: string}>): Promise<void> {
-        const notCachedDict = fromPairs(notCachedFollowers.map(f => [f.followTime, f.id]));
+        const notCachedDict = fromPairs(notCachedFollowers.map(f => [f.id, f.followTime]));
         await this.redis.hmset(`followers:follow-time:${this.userId}`, notCachedDict);
     }
 

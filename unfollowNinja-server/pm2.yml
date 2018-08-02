@@ -1,0 +1,4 @@
+apps:
+- script   : .
+  name: ninja
+  kill_timeout: 6000
