@@ -22,7 +22,6 @@ export default class extends Task {
         if (typeof targetId !== 'string') { // no cached follower
             return;
         }
-        logger.debug(`Caching a new follower for @${username}. Target: ${targetId}`);
 
         const targetIndex = followers.indexOf(targetId);
         const cursor = (targetIndex > 0) ?
@@ -60,15 +59,12 @@ export default class extends Task {
             if (previous_cursor_str !== '0') {
                 const user = users[0];
                 await userDao.setFollowerSnowflakeId(user.id_str, previous_cursor_str.substr(1));
-                const followDate = moment(twitterCursorToTime(previous_cursor_str)).calendar();
-                logger.debug(`cached ${user.id_str} - @${user.screen_name} (followed @${username}: ${followDate})`);
                 users.shift();
             }
             if (next_cursor_str !== '0' && users.length > 0) {
                 const user = last(users);
                 await userDao.setFollowerSnowflakeId(user.id_str, next_cursor_str);
                 const followDate = moment(twitterCursorToTime(next_cursor_str)).calendar();
-                logger.debug(`cached ${user.id_str} - @${user.screen_name} (followed @${username}: ${followDate})`);
             }
         } catch (err) { // ignore twitter errors, already managed by checkFollowers
             if (!err.twitterReply) {

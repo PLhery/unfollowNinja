@@ -13,10 +13,7 @@ export default class extends Task {
         const userDao = this.dao.getUserDao(userId);
         const startedAt = Number(job.started_at);
 
-        logger.debug('checking %s s followers', job.data.username);
-
         if (startedAt < await userDao.getNextCheckTime()) {
-            logger.debug('checkFollowers @%s - skipping this check.', username);
             return;
         } // don't check every minute if the user has more than 5000 followers : we can only get 5000 followers/minute
 
@@ -80,8 +77,10 @@ export default class extends Task {
         const newFollowers = difference(followers, formerFollowers);
         const unfollowers = difference(formerFollowers, followers);
 
-        logger.debug('%s had %d followers and now has %d followers (+%d -%d)',
-            username, formerFollowers.length, followers.length, newFollowers.length, unfollowers.length);
+        if (newFollowers.length > 0 || unfollowers.length > 0) {
+            logger.debug('%s had %d followers and now has %d followers (+%d -%d)',
+                username, formerFollowers.length, followers.length, newFollowers.length, unfollowers.length);
+        }
 
         if (unfollowers.length > 0) { // remove unfollowers
             const unfollowersInfo = await Promise.all(
