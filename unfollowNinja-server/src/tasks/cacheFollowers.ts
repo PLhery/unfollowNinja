@@ -3,7 +3,7 @@ import { difference, last } from 'lodash';
 import * as moment from 'moment';
 import { Params, Twitter } from 'twit';
 import logger from '../utils/logger';
-import { twitterSnowflakeToTime } from '../utils/utils';
+import { twitterCursorToTime } from '../utils/utils';
 import Task from './task';
 
 // get follower's username + profilePic AND use cursors to get their snowflake ID (to have the exact follow date)
@@ -60,14 +60,14 @@ export default class extends Task {
             if (previous_cursor_str !== '0') {
                 const user = users[0];
                 await userDao.setFollowerSnowflakeId(user.id_str, previous_cursor_str.substr(1));
-                const followDate = moment(twitterSnowflakeToTime(previous_cursor_str.substr(1))).calendar();
+                const followDate = moment(twitterCursorToTime(previous_cursor_str)).calendar();
                 logger.debug(`cached ${user.id_str} - @${user.screen_name} (followed @${username}: ${followDate})`);
                 users.shift();
             }
             if (next_cursor_str !== '0' && users.length > 0) {
                 const user = last(users);
                 await userDao.setFollowerSnowflakeId(user.id_str, next_cursor_str);
-                const followDate = moment(twitterSnowflakeToTime(next_cursor_str)).calendar();
+                const followDate = moment(twitterCursorToTime(next_cursor_str)).calendar();
                 logger.debug(`cached ${user.id_str} - @${user.screen_name} (followed @${username}: ${followDate})`);
             }
         } catch (err) { // ignore twitter errors, already managed by checkFollowers

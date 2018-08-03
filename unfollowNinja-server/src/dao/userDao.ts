@@ -1,8 +1,8 @@
 import * as Redis from 'ioredis';
-import {flatMap, fromPairs} from 'lodash';
+import { fromPairs } from 'lodash';
 import * as Twit from 'twit';
-import {IUnfollowerInfo, Lang} from '../utils/types';
-import {twitterSnowflakeToTime} from '../utils/utils';
+import { IUnfollowerInfo, Lang } from '../utils/types';
+import { twitterCursorToTime } from '../utils/utils';
 import { UserCategory } from './dao';
 
 export default class UserDao {
@@ -101,7 +101,7 @@ export default class UserDao {
     // get the timestamp (in ms) when the follower followed the user.
     // determined from the cached snowflakeId or from the time it was added in DB
     public async getFollowTime(followerId: string): Promise<number> {
-        return twitterSnowflakeToTime(await this.getFollowerSnowflakeId(followerId)) ||
+        return twitterCursorToTime(await this.getFollowerSnowflakeId(followerId)) ||
             Number(await this.redis.hget(`followers:follow-time:${this.userId}`, followerId));
     }
 
