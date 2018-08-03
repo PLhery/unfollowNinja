@@ -15,8 +15,8 @@ const CLEAN_TYPES = ['checkFollowers', 'createTwitterTasks', 'getFollowersInfos'
 const CLEAN_STATES = ['delayed', 'inactive'];
 
 // parsing process.env variables
-const CLUSTER_SIZE = parseInt(process.env.CLUSTER_SIZE, 10) || cpus().length;
-const WORKER_RATE_LIMIT = parseInt(process.env.WORKER_RATE_LIMIT, 10) || 15;
+const CLUSTER_SIZE = Number(process.env.CLUSTER_SIZE) || cpus().length;
+const WORKER_RATE_LIMIT = Number(process.env.WORKER_RATE_LIMIT) || 15;
 
 if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET) {
     logger.error('Some required environment variables are missing (CONSUMER_KEY / CONSUMER_SECRET).');

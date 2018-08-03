@@ -55,6 +55,7 @@ DM_CONSUMER_SECRET=xxx
 CLUSTER_SIZE=2 #Number of workers, defaults to number of CPUs
 WORKER_RATE_LIMIT=15 #Number of unique tasks managed at the same time, defaults to 15
 BETA_USERS=unfollowninja #List of usernames that have access to beta features
+MINUTES_BETWEEN_CHECKS=2 #Number of minutes between every followers check
 ```
 
 You can also set these parameters as environment variables.

@@ -3,6 +3,8 @@ import { promisify } from 'util';
 import Dao from '../dao/dao';
 import logger from './logger';
 
+const MINUTES_BETWEEN_CHECKS = Number(process.env.MINUTES_BETWEEN_CHECKS) || 2;
+
 // Launch createTwitterTasks every 3 minutes
 export default class Scheduler {
     private schedulerId: number;
@@ -26,7 +28,7 @@ export default class Scheduler {
         this.schedulerId = await this.dao.incrSchedulerId();
 
         // every 2 minutes, create the checkFollowers tasks for everyone
-        this.intervalId = setInterval(() => this.createTwitterTasks(), 2 * 60 * 1000);
+        this.intervalId = setInterval(() => this.createTwitterTasks(), MINUTES_BETWEEN_CHECKS * 60 * 1000);
         return this.createTwitterTasks();
     }
 
