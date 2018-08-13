@@ -14,7 +14,7 @@ i18n.configure({
     directory: __dirname + '/../../locales',
 });
 
-const BETA_USERS = split(process.env.BETA_USERS, ',');
+const BETA_USERS = split(process.env.BETA_USERS, ',').concat('testUsername');
 
 // friendships/show can be called 180 times/15min
 // with this limit it will be called < 120 times/15min
@@ -189,7 +189,7 @@ export default class extends Task {
                     return true;
                 // twitter errors
                 case 130: // over capacity
-                case 131: // internal error
+                case 131: // internal error`
                     throw new Error('Twitter has problems at the moment, skipping this action.');
                 case 88: // rate limit
                     throw new Error('the user reached its rate-limit (notifyUser)');

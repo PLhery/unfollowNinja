@@ -1,8 +1,12 @@
 export function userDaoMock() {
     const twit = twitMock();
+    const dmTwit = twitMock();
     return {
         twit,
+        dmTwit,
         getTwit: jest.fn().mockResolvedValue(twit),
+        getDmTwit: jest.fn().mockResolvedValue(dmTwit),
+        getLang: jest.fn(),
 
         setNextCheckTime: jest.fn(),
         updateFollowers: jest.fn(),
@@ -27,7 +31,7 @@ export function daoMock() {
         addTwittoToCache: jest.fn(),
 
         getUserIdsByCategory: jest.fn().mockResolvedValue(['01', '02', '03']),
-        getCachedUsername: jest.fn(),
+        getCachedUsername: jest.fn()
     };
 }
 
@@ -45,5 +49,6 @@ export function queueMock() {
 export function twitMock() {
     return {
         get: jest.fn(),
+        post: jest.fn(),
     };
 }
