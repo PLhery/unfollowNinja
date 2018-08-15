@@ -1,6 +1,6 @@
 import * as i18n from 'i18n';
 import { Job } from 'kue';
-import { defaults, keyBy, split } from 'lodash';
+import { defaults, get, keyBy, split } from 'lodash';
 import * as moment from 'moment';
 import * as emojis from 'node-emoji';
 import { Params, Twitter } from 'twit';
@@ -60,8 +60,12 @@ export default class extends Task {
 
         // know who you're blocking or blocked you
         await Promise.all(unfollowersInfo.map(async unfollower => { // know if we're blocked / if we blocked them
+            let errorCode = null;
             const friendship = await twit.get('friendships/show', {target_id: unfollower.id} as Params)
-                .catch((err) => this.manageTwitterErrors(err, username, userId).then(() => ({}))) as any;
+                .catch(async (err) => {
+                    await this.manageTwitterErrors(err, username, userId);
+                    errorCode = get(err, 'twitterReply.errors[0].code', null);
+                }) as any;
             if (friendship.data && friendship.data.relationship) {
                 if (!unfollower.username) {
                     const { id_str, screen_name } = friendship.data.relationship.target;
@@ -72,11 +76,14 @@ export default class extends Task {
                     });
                 }
                 const {blocking, blocked_by, following, followed_by} = friendship.data.relationship.source;
-                defaults(unfollower, {blocking, blocked_by, following});
+                defaults(unfollower, {blocking, blocked_by, following, followed_by});
                 if (followed_by) {
                     logger.error('An unexpected thing happened: @%s was unfollowed by @%s but followed_by=true',
                         username, unfollower.username);
                 }
+            }
+            if (errorCode !== null) {
+                unfollower.friendship_error_code = errorCode;
             }
         }));
 
