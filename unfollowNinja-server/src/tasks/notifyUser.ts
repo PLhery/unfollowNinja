@@ -65,6 +65,7 @@ export default class extends Task {
                 .catch(async (err) => {
                     await this.manageTwitterErrors(err, username, userId);
                     errorCode = get(err, 'twitterReply.errors[0].code', null);
+                    return {};
                 }) as any;
             if (friendship.data && friendship.data.relationship) {
                 if (!unfollower.username) {
