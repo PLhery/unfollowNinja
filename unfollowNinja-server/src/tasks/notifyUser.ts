@@ -78,10 +78,6 @@ export default class extends Task {
                 }
                 const {blocking, blocked_by, following, followed_by} = friendship.data.relationship.source;
                 defaults(unfollower, {blocking, blocked_by, following, followed_by});
-                if (followed_by) {
-                    logger.error('An unexpected thing happened: @%s was unfollowed by @%s but followed_by=true',
-                        username, unfollower.username);
-                }
             }
             if (errorCode !== null) {
                 unfollower.friendship_error_code = errorCode;
@@ -101,19 +97,27 @@ export default class extends Task {
         logger.debug('@%s has new unfollowers: %s', username, JSON.stringify(unfollowersInfo.concat(leftovers)));
         userDao.addUnfollowers(unfollowersInfo.concat(leftovers));
 
-        const message = this.generateMessage(unfollowersInfo, await userDao.getLang(), leftovers.length);
+        const realUnfollowersInfo = unfollowersInfo.filter(unfollowerInfo => // remove twitter glitches
+            unfollowerInfo.friendship_error_code !== 50 && unfollowerInfo.followed_by !== true,
+        );
 
-        const dmTwit = await userDao.getDmTwit();
-        logger.info('sending a DM to @%s', username);
-        logger.debug('sending a DM to @%s: %s', username, message);
-        if (BETA_USERS.includes(username)) {
-            await dmTwit.post('direct_messages/events/new', {
-                event: {
-                    type: 'message_create',
-                    message_create: {target: {recipient_id: userId}, message_data: {text: message}},
-                },
-            } as Params)
-                .catch((err) => this.manageTwitterErrors(err, username, userId));
+        // TODO: I don't know how to differentiate twitter glitches from disabled account :/
+
+        if (realUnfollowersInfo.length > 0) {
+            const message = this.generateMessage(realUnfollowersInfo, await userDao.getLang(), leftovers.length);
+
+            const dmTwit = await userDao.getDmTwit();
+            logger.info('sending a DM to @%s', username);
+            logger.debug('sending a DM to @%s: %s', username, message);
+            if (BETA_USERS.includes(username)) {
+                await dmTwit.post('direct_messages/events/new', {
+                    event: {
+                        type: 'message_create',
+                        message_create: {target: {recipient_id: userId}, message_data: {text: message}},
+                    },
+                } as Params)
+                    .catch((err) => this.manageTwitterErrors(err, username, userId));
+            }
         }
     }
 
