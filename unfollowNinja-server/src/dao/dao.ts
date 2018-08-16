@@ -74,6 +74,6 @@ export default class Dao {
 
     // set the total numbers of unique unfollowers detected in the previous unfollowninja backend
     public async setTotalUnfollowersLegacy(nbUnfollowers: number): Promise<void> {
-        return this.redis.set('total-unfollowers-legacy', nbUnfollowers.toString());
+        await this.redis.set('total-unfollowers-legacy', nbUnfollowers.toString());
     }
 }
