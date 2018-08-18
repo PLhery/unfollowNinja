@@ -12,20 +12,22 @@ export default class extends Task {
         const { username, userId } = job.data;
         const userDao = this.dao.getUserDao(userId);
 
-        const [ cachedFollowers, followers] = await Promise.all([
+        const [ cachedFollowers, followers, uncachables] = await Promise.all([
             userDao.getCachedFollowers(),
             userDao.getFollowers(),
+            userDao.getUncachableFollowers(),
         ]);
 
-        const targetId: string = difference(followers, cachedFollowers)[0]; // most recent not cached follower
+        const cachableFollowers = difference(followers, uncachables);
+        const targetId: string = difference(cachableFollowers, cachedFollowers)[0]; // most recent not cached follower
 
         if (typeof targetId !== 'string') { // no cached follower
             return;
         }
 
-        const targetIndex = followers.indexOf(targetId);
+        const targetIndex = cachableFollowers.indexOf(targetId);
         const cursor = (targetIndex > 0) ?
-            await userDao.getFollowerSnowflakeId(followers[targetIndex - 1]) : '-1';
+            await userDao.getFollowerSnowflakeId(cachableFollowers[targetIndex - 1]) : '-1';
 
         if (cursor === '0' || typeof cursor !== 'string') { // there was a problem somewhere...
             throw new Error('An unexpected error happened: no valid cursor found.');
@@ -46,9 +48,6 @@ export default class extends Task {
             const next_cursor_str: string = result.data.next_cursor_str;
             const previous_cursor_str: string = result.data.previous_cursor_str;
 
-            if (users.length === 0) {
-                return;
-            }
             await Promise.all(users.map((user) =>
                 this.dao.addTwittoToCache({
                     id: user.id_str,
@@ -56,15 +55,29 @@ export default class extends Task {
                     username: user.screen_name,
                 }, Number(job.started_at)),
             ));
+
+            let targetUpdated = false;
             if (previous_cursor_str !== '0') {
                 const user = users[0];
                 await userDao.setFollowerSnowflakeId(user.id_str, previous_cursor_str.substr(1));
                 users.shift();
+                targetUpdated = targetUpdated || targetId === user.id_str;
             }
             if (next_cursor_str !== '0' && users.length > 0) {
                 const user = last(users);
                 await userDao.setFollowerSnowflakeId(user.id_str, next_cursor_str);
-                const followDate = moment(twitterCursorToTime(next_cursor_str)).calendar();
+                targetUpdated = targetUpdated || targetId === user.id_str;
+            }
+            if (!targetUpdated) { // some IDs weirdly can't be reached / disabled account?
+                // we add them to uncachable set to avoid infinite caching loop
+                await userDao.addUncachableFollower(targetId);
+            }
+
+            // clean cached followers that are not followers anymore
+            const refreshedFollowers = await userDao.getFollowers();
+            const uselessCachedFollowers = difference(cachedFollowers, refreshedFollowers);
+            if (uselessCachedFollowers.length > 0) {
+                userDao.removeFollowerSnowflakeIds(uselessCachedFollowers);
             }
         } catch (err) { // ignore twitter errors, already managed by checkFollowers
             if (!err.twitterReply) {

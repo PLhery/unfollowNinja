@@ -78,9 +78,10 @@ export default class UserDao {
         await Promise.all([
             this.redis.set(`followers:${this.userId}`, JSON.stringify(followers)),
             this.redis.set(`followers:count:${this.userId}`, followers.length.toString()),
-            newFollowers.length > 0 && this.redis.hmset(`followers:follow-time::${this.userId}`, notCachedDict),
-            unfollowers.length > 0 && this.redis.hdel(`followers:follow-time::${this.userId}`, ...unfollowers),
-            unfollowers.length > 0 && this.redis.hdel(`followers:snowflake-ids:${this.userId}`, ...unfollowers),
+            newFollowers.length > 0 && this.redis.hmset(`followers:follow-time:${this.userId}`, notCachedDict),
+            unfollowers.length > 0 && this.redis.hdel(`followers:follow-time:${this.userId}`, ...unfollowers),
+            unfollowers.length > 0 && this.removeFollowerSnowflakeIds(unfollowers),
+            unfollowers.length > 0 && this.redis.srem(`followers:uncachable:${this.userId}`, ...unfollowers),
             unfollowers.length > 0 && this.redis.incrby('total-unfollowers', unfollowers.length),
         ]);
     }
@@ -96,6 +97,19 @@ export default class UserDao {
     // returns null if not cached yet
     public async getFollowerSnowflakeId(followerId: string): Promise<string> {
         return this.redis.hget(`followers:snowflake-ids:${this.userId}`, followerId);
+    }
+
+    public async removeFollowerSnowflakeIds(followerIds: string[]): Promise<void> {
+        await this.redis.hdel(`followers:snowflake-ids:${this.userId}`, ...followerIds);
+    }
+
+    // Some followers ids weirdly can't be cached (disabled?)
+    public async getUncachableFollowers(): Promise<string[]> {
+        return this.redis.smembers(`followers:uncachable:${this.userId}`);
+    }
+
+    public async addUncachableFollower(followerId: string): Promise<void> {
+        await this.redis.sadd(`followers:uncachable:${this.userId}`, followerId);
     }
 
     // get the timestamp (in ms) when the follower followed the user.

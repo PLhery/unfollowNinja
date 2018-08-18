@@ -12,6 +12,7 @@ export function userDaoMock() {
         updateFollowers: jest.fn(),
         setFollowerSnowflakeId: jest.fn(),
         addUnfollowers: jest.fn(),
+        addUncachableFollower: jest.fn(),
 
         getNextCheckTime: jest.fn(),
         getFollowers: jest.fn(),
@@ -19,6 +20,7 @@ export function userDaoMock() {
         getFollowTime: jest.fn(),
         getHasNotCachedFollowers: jest.fn(),
         getCachedFollowers: jest.fn(),
+        getUncachableFollowers: jest.fn(),
     };
 }
 

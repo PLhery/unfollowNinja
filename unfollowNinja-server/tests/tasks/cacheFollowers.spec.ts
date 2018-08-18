@@ -31,6 +31,7 @@ const user3 = {id_str: '345', profile_image_url_https: 'pic3', screen_name: 'use
 describe('cacheFollowers task', () => {
     beforeEach(() => {
         userDao.getFollowers.mockResolvedValue(['123', '234', '345']);
+        userDao.getUncachableFollowers.mockResolvedValue([]);
     });
 
     test('every followers are already cached', async () => {
@@ -38,6 +39,7 @@ describe('cacheFollowers task', () => {
         await task.run(job);
         expect(userDao.getTwit).toHaveBeenCalledTimes(0);
         expect(userDao.setFollowerSnowflakeId).toHaveBeenCalledTimes(0);
+        expect(userDao.addUncachableFollower).toHaveBeenCalledTimes(0);
     });
 
     test('last follower not cached', async () => {
@@ -48,6 +50,7 @@ describe('cacheFollowers task', () => {
         expect(dao.addTwittoToCache).toHaveBeenCalledTimes(1);
         expect(userDao.setFollowerSnowflakeId).toHaveBeenCalledTimes(1);
         expect(userDao.setFollowerSnowflakeId).toBeCalledWith('123', '100');
+        expect(userDao.addUncachableFollower).toHaveBeenCalledTimes(0);
     });
 
     test('first follower not cached', async () => {
@@ -60,6 +63,7 @@ describe('cacheFollowers task', () => {
         expect(dao.addTwittoToCache).toHaveBeenCalledTimes(1);
         expect(userDao.setFollowerSnowflakeId).toHaveBeenCalledTimes(1);
         expect(userDao.setFollowerSnowflakeId).toBeCalledWith('345', '300');
+        expect(userDao.addUncachableFollower).toHaveBeenCalledTimes(0);
     });
 
     test('no followers cached', async () => {
@@ -70,6 +74,7 @@ describe('cacheFollowers task', () => {
         expect(dao.addTwittoToCache).toHaveBeenCalledTimes(1);
         expect(userDao.setFollowerSnowflakeId).toHaveBeenCalledTimes(1);
         expect(userDao.setFollowerSnowflakeId).toBeCalledWith('123', '100');
+        expect(userDao.addUncachableFollower).toHaveBeenCalledTimes(0);
     });
 
     test('2 cached at a time (only last cached)', async () => {
@@ -83,5 +88,17 @@ describe('cacheFollowers task', () => {
         expect(userDao.setFollowerSnowflakeId).toHaveBeenCalledTimes(2);
         expect(userDao.setFollowerSnowflakeId).toBeCalledWith('234', '200');
         expect(userDao.setFollowerSnowflakeId).toBeCalledWith('345', '300');
+        expect(userDao.addUncachableFollower).toHaveBeenCalledTimes(0);
+    });
+
+    test('first follower is uncachable', async () => {
+        userDao.getCachedFollowers.mockResolvedValue(['123', '234']);
+        userDao.getFollowerSnowflakeId.mockResolvedValue('200');
+        mockTwitterReply([], '0', '0');
+        await task.run(job);
+        expect(dao.addTwittoToCache).toHaveBeenCalledTimes(0);
+        expect(userDao.setFollowerSnowflakeId).toHaveBeenCalledTimes(0);
+        expect(userDao.addUncachableFollower).toHaveBeenCalledTimes(1);
+        expect(userDao.addUncachableFollower).toBeCalledWith('345');
     });
 });
