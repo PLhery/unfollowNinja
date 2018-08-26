@@ -1,14 +1,12 @@
 {
 	"{{nbUnfollows}} twitter users unfollowed you:": "{{nbUnfollows}} twitter users unfollowed you:",
-
 	"one of you followers": "one of you followers",
 	"{{username}} unfollowed you {{emoji}}.": "{{username}} unfollowed you {{emoji}}.",
 	"{{username}} has been suspended {{emoji}}.": "{{username}} has been suspended {{emoji}}.",
 	"{{username}} blocked you {{emoji}}💩💩💩💩💩.": "{{username}} blocked you {{emoji}}💩💩💩💩💩.",
 	"You blocked {{username}} {{emoji}}💩💩💩💩💩.": "You blocked {{username}} {{emoji}}💩💩💩💩💩.",
-
 	"This account followed you for {{duration}} ({{{time}}}).": "This account followed you for {{duration}} ({{{time}}}).",
 	"This account followed you before you signed up to @unfollowninja!": "This account followed you before you signed up to @unfollowninja!",
-
-	"and {{nbLeftovers}} more.": "and {{nbLeftovers}} more."
+	"and {{nbLeftovers}} more.": "and {{nbLeftovers}} more.",
+	"All set, welcome to @unfollowNinja {{emoji}}!\nYou will soon know all about your unfollowers here!": "All set, welcome to @unfollowNinja {{emoji}}!\nYou will soon know all about your unfollowers here!"
 }

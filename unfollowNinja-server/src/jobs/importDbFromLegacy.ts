@@ -5,7 +5,9 @@ import 'dotenv/config';
 import * as es from 'event-stream';
 import * as fs from 'fs';
 import * as JSONStream from 'jsonstream';
-import {defer, uniqBy} from 'lodash';
+import * as kue from 'kue';
+import { defer, uniqBy } from 'lodash';
+import { promisify } from 'util';
 
 import Dao, {UserCategory} from '../dao/dao';
 import logger from '../utils/logger';
@@ -13,6 +15,7 @@ import logger from '../utils/logger';
 const LEGACY_JSON_FILE_PATH = process.env.JOBS_LEGACY_JSON_FILE || '';
 
 const dao = new Dao();
+const queue = kue.createQueue();
 
 let i = 0;
 let unfollowers = 0;
@@ -52,11 +55,22 @@ fs.createReadStream(LEGACY_JSON_FILE_PATH)
                     ),
                 ]);
             }
+            await promisify((cb) =>
+                queue
+                    .create('sendWelcomeMessage', {
+                        title: `send welcome message to @${username}`,
+                        userId: id,
+                        username,
+                    })
+                    .removeOnComplete(true)
+                    .save(cb),
+            )();
         }
     }))
     .on('close', () => defer(async () => {
         logger.info('finished - %d users, total followers %d, total unfollowers %d', i, followers, unfollowers);
 
         await dao.setTotalUnfollowersLegacy(unfollowers);
-        await dao.disconnect();
+        dao.disconnect();
+        queue.shutdown(0, () => 0);
     }));
