@@ -1,9 +1,10 @@
 import * as i18n from 'i18n';
 import { Job } from 'kue';
-import { defaults, get, keyBy, split } from 'lodash';
+import { defaults, difference, get, keyBy, split } from 'lodash';
 import * as moment from 'moment';
 import * as emojis from 'node-emoji';
 import { Params, Twitter } from 'twit';
+import { promisify } from 'util';
 import { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
 import { IUnfollowerInfo, Lang } from '../utils/types';
@@ -22,7 +23,7 @@ const MAX_UNFOLLOWERS = 15;
 
 export default class extends Task {
     public async run(job: Job) {
-        const { username, userId } = job.data;
+        const { username, userId, isSecondTry } = job.data;
         logger.debug('notifying @%s...', username);
         const userDao = this.dao.getUserDao(userId);
         const twit = await userDao.getTwit();
@@ -101,7 +102,24 @@ export default class extends Task {
             unfollowerInfo.friendship_error_code !== 50 && unfollowerInfo.followed_by !== true,
         );
 
-        // TODO: I don't know how to differentiate twitter glitches from disabled account :/
+        // If it's the first check, check them again in 15min to be sure that they were really glitches
+        if (!isSecondTry && realUnfollowersInfo.length < unfollowersInfo.length) {
+            const glitchedUnfollowersInfo = difference(unfollowersInfo, realUnfollowersInfo);
+            await promisify((cb) =>
+                this.queue
+                    .create('notifyUser', {
+                        title: `(second check) Notify @${username} that he's been unfollowed by ` +
+                            glitchedUnfollowersInfo.map((u) => u.id).toString(),
+                        userId,
+                        username,
+                        unfollowersInfo: glitchedUnfollowersInfo,
+                        isSecondTry: true,
+                    })
+                    .delay(15 * 60 * 1000)
+                    .removeOnComplete(true)
+                    .save(cb),
+            )();
+        }
 
         if (realUnfollowersInfo.length > 0) {
             const message = this.generateMessage(realUnfollowersInfo, await userDao.getLang(), leftovers.length);

@@ -90,12 +90,26 @@ describe('notifyUser task', () => {
         mockFriendshipShowReply();
         mockFriendshipShowReply(false, false, false, true, 'twitto234');
         await task.run(job);
-        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(queue.save).toHaveBeenCalledTimes(1);
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
             .toBe('@twitto123 unfollowed you 👋.\n' +
                 'This account followed you for 49 years (01/01/1970).');
+    });
+
+    test('one unfollower, one twitter glitch, second try', async () => {
+        unfollowersInfo.push({id: '123', followTime: 100, unfollowTime: 200});
+        unfollowersInfo.push({id: '234', followTime: 200, unfollowTime: 200});
+        mockUsersLookupReply(['123'], ['twitto123']);
+        mockFriendshipShowReply();
+        mockFriendshipShowReply(false, false, false, true, 'twitto234');
+        job.data.isSecondTry = true;
+        await task.run(job);
+        job.data.isSecondTry = false;
+        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
     });
 
     test('one unfollower, one suspended', async () => {
