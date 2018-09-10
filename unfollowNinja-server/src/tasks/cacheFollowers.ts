@@ -1,9 +1,7 @@
 import { Job } from 'kue';
 import { difference, last } from 'lodash';
-import * as moment from 'moment';
-import { Params, Twitter } from 'twit';
+import { Twitter } from 'twit';
 import logger from '../utils/logger';
-import { twitterCursorToTime } from '../utils/utils';
 import Task from './task';
 
 // get follower's username + profilePic AND use cursors to get their snowflake ID (to have the exact follow date)
@@ -57,7 +55,7 @@ export default class extends Task {
             ));
 
             let targetUpdated = false;
-            if (previous_cursor_str !== '0') {
+            if (previous_cursor_str !== '0' && users.length > 0) {
                 const user = users[0];
                 await userDao.setFollowerSnowflakeId(user.id_str, previous_cursor_str.substr(1));
                 users.shift();
