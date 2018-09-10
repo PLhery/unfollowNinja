@@ -71,6 +71,7 @@ fs.createReadStream(LEGACY_JSON_FILE_PATH)
         logger.info('finished - %d users, total followers %d, total unfollowers %d', i, followers, unfollowers);
 
         await dao.setTotalUnfollowersLegacy(unfollowers);
-        dao.disconnect();
-        queue.shutdown(0, () => 0);
+        queue.shutdown(0, () => {
+            dao.disconnect();
+        });
     }));
