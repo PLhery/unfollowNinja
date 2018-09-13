@@ -98,12 +98,14 @@ export default class extends Task {
         logger.debug('@%s has new unfollowers: %s', username, JSON.stringify(unfollowersInfo.concat(leftovers)));
         userDao.addUnfollowers(unfollowersInfo.concat(leftovers));
 
-        const realUnfollowersInfo = unfollowersInfo.filter(unfollowerInfo => // remove twitter glitches
-            unfollowerInfo.friendship_error_code !== 50 && unfollowerInfo.followed_by !== true,
-        );
+        const realUnfollowersInfo = isSecondTry ?
+            unfollowersInfo :
+            unfollowersInfo.filter(unfollowerInfo => // remove twitter glitches
+                unfollowerInfo.friendship_error_code !== 50 && unfollowerInfo.followed_by !== true,
+            );
 
         // If it's the first check, check them again in 15min to be sure that they were really glitches
-        if (!isSecondTry && realUnfollowersInfo.length < unfollowersInfo.length) {
+        if (realUnfollowersInfo.length < unfollowersInfo.length) {
             const glitchedUnfollowersInfo = difference(unfollowersInfo, realUnfollowersInfo);
             await promisify((cb) =>
                 this.queue
