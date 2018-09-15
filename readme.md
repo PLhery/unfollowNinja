@@ -7,6 +7,37 @@ Version 1: https://github.com/PLhery/unfollowNinja/tree/legacy
 
 ![Screenshot](http://i.imgur.com/rRsa7iy.jpg)
 
+## Install
+
+- clone the repo `git clone git@github.com:PLhery/unfollowNinja.git`
+- `cd unfollowNinja/unfollowNinja-server`
+- install the dependencies `npm install`
+- create a .env file (see [.env file](#.env-file))
+- launch the program `npm start`
+
+If you made some changes to the code, you can launch a new instance before exiting the former one to prevent downtime.
+
+Logs are saved in the 'logs' folder.
+
+You can also launch the kue dashboaord to monitor tasks with `npm run kue-ui`
+
+## .env file
+You can create a .env in unfollowNinja-server to set some parameters:
+```
+CONSUMER_KEY=xxx
+CONSUMER_SECRET=xxx
+DM_CONSUMER_KEY=xxx
+DM_CONSUMER_SECRET=xxx
+
+# optionally:
+CLUSTER_SIZE=2 #Number of workers, defaults to number of CPUs
+WORKER_RATE_LIMIT=15 #Number of unique tasks managed at the same time, defaults to 15
+BETA_USERS=unfollowninja #List of usernames that have access to beta features
+MINUTES_BETWEEN_CHECKS=2 #Number of minutes between every followers check
+```
+
+You can also set these parameters as environment variables.
+
 ## Motivation behind V2
 
 TL;DR: Less bugs and faster notifications
@@ -28,43 +59,10 @@ The main goal of this update is to be able to do 1 check every one or two minute
 - Use twitter's SnowFlake IDs to get the exact follow time
 - New UI with more explanation (SEO + people didn't get they had to click on the (1))
 
-
-## Install
-
-- clone the repo `git clone git@github.com:PLhery/unfollowNinja.git`
-- `cd unfollowNinja/unfollowNinja-server`
-- install the dependencies `npm install`
-- create a .env file (see [.env file](#.env-file))
-- launch the program `npm start`
-
-If you made some changes to the code, you can launch a new instance before exiting the former one to prevent downtime.
-
-Logs are saved in the 'logs' folder.
-,
-You can also launch the kue dashboaord to monitor tasks with `npm run kue-ui`
-
-## .env file
-You can create a .env in unfollowNinja-server to set some parameters:
-```
-CONSUMER_KEY=xxx
-CONSUMER_SECRET=xxx
-DM_CONSUMER_KEY=xxx
-DM_CONSUMER_SECRET=xxx
-
-# optionally:
-CLUSTER_SIZE=2 #Number of workers, defaults to number of CPUs
-WORKER_RATE_LIMIT=15 #Number of unique tasks managed at the same time, defaults to 15
-BETA_USERS=unfollowninja #List of usernames that have access to beta features
-MINUTES_BETWEEN_CHECKS=2 #Number of minutes between every followers check
-```
-
-You can also set these parameters as environment variables.
-
 ## TODO
 
 currently : followers are checked for everyone, DM are sent to beta users
 
-  - more tests (task/notifyUser, dao tests)
   - add an API / an https server
   - link that https server to the former UI
   - develop a static landing page with some explanation
@@ -81,12 +79,5 @@ Open an issue with your suggestions or assign yourself to an existing issue
 - fill translations
 - change line 3 of unfollowNinja-server/src/utils/types.ts and add your language code
 - commit and submit a pull request
-
-## History
-1.x.x - corrections de bugs cf commits  
-1.2.0 - Corrections de bugs, Mise en cache de twittos, API /!\ mettez à jour config.js  
-1.1.0 - optimisations mémoire  
-1.0.0-19 - corrections de bugs cf commits  
-1.0.0 - version initiale
 
 [License](./LICENSE.md) (ISC)
