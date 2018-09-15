@@ -3,6 +3,7 @@
 	"one of you followers": "one of you followers",
 	"{{username}} unfollowed you {{emoji}}.": "{{username}} unfollowed you {{emoji}}.",
 	"{{username}} has been suspended {{emoji}}.": "{{username}} has been suspended {{emoji}}.",
+	"{{username}} has left Twitter {{emoji}}." : "{{username}} has left Twitter {{emoji}}.",
 	"{{username}} blocked you {{emoji}}💩💩💩💩💩.": "{{username}} blocked you {{emoji}}💩💩💩💩💩.",
 	"You blocked {{username}} {{emoji}}💩💩💩💩💩.": "You blocked {{username}} {{emoji}}💩💩💩💩💩.",
 	"This account followed you for {{duration}} ({{{time}}}).": "This account followed you for {{duration}} ({{{time}}}).",

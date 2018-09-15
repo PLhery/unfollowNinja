@@ -82,6 +82,10 @@ export default class extends Task {
             }
             if (errorCode !== null) {
                 unfollower.friendship_error_code = errorCode;
+                if (errorCode === 50) {
+                    unfollower.suspended = false;
+                    unfollower.deleted = true;
+                }
             }
         }));
 
@@ -150,6 +154,9 @@ export default class extends Task {
             if (unfollower.suspended) {
                 const emoji = emojis.get('see_no_evil');
                 action = i18n.__('{{username}} has been suspended {{emoji}}.', { username, emoji });
+            } else if (unfollower.deleted) {
+                const emoji = emojis.get('see_no_evil');
+                action = i18n.__('{{username}} has left Twitter {{emoji}}.', { username, emoji });
             } else if (unfollower.blocked_by) {
                 const emoji = emojis.get('no-entry');
                 action = i18n.__('{{username}} blocked you {{emoji}}💩💩💩💩💩.', { username, emoji });

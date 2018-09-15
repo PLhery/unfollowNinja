@@ -12,6 +12,7 @@ export interface IUnfollowerInfo extends IFollowerInfo {
     blocking?: boolean;
     blocked_by?: boolean;
     suspended?: boolean;
+    deleted?: boolean;
     following?: boolean;
     followed_by?: boolean;
     friendship_error_code?: number;
