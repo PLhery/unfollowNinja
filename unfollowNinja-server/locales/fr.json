@@ -3,7 +3,7 @@
 	"one of you followers": "Un twitto",
 	"{{username}} unfollowed you {{emoji}}.": "{{username}} vous a unfollow {{emoji}}.",
 	"{{username}} has been suspended {{emoji}}.": "{{username}} a été suspendu {{emoji}}.",
-	"{{username}} has left Twitter {{emoji}}." : "{{username}} a quittê Twitter {{emoji}}.",
+	"{{username}} has left Twitter {{emoji}}." : "{{username}} a quitté Twitter {{emoji}}.",
 	"{{username}} blocked you {{emoji}}💩💩💩💩💩.": "{{username}} vous a bloqué {{emoji}}💩💩💩💩💩.",
 	"You blocked {{username}} {{emoji}}💩💩💩💩💩.": "Vous avez bloqué {{username}} {{emoji}}💩💩💩💩💩.",
 	"This account followed you for {{duration}} ({{{time}}}).": "Ce compte vous a suivi pendant {{duration}} ({{{time}}}).",

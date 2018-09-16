@@ -21,6 +21,7 @@ export function userDaoMock() {
         getHasNotCachedFollowers: jest.fn(),
         getCachedFollowers: jest.fn(),
         getUncachableFollowers: jest.fn(),
+        getFollowDetectedTime: jest.fn(),
     };
 }
 

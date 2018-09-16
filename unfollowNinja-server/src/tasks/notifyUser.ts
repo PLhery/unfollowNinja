@@ -23,7 +23,7 @@ const MAX_UNFOLLOWERS = 15;
 
 export default class extends Task {
     public async run(job: Job) {
-        const { username, userId, isSecondTry } = job.data;
+        const {username, userId, isSecondTry} = job.data;
         logger.debug('notifying @%s...', username);
         const userDao = this.dao.getUserDao(userId);
         const twit = await userDao.getTwit();
@@ -42,7 +42,7 @@ export default class extends Task {
             include_entities: false,
         }).catch(
             (err) => this.manageTwitterErrors(err, username, userId)
-                .then((stop) => stop ? stopThere = true : { data: []}),
+                .then((stop) => stop ? stopThere = true : {data: []}),
         ) as { data: Twitter.User[] };
 
         if (stopThere) {
@@ -70,7 +70,7 @@ export default class extends Task {
                 }) as any;
             if (friendship.data && friendship.data.relationship) {
                 if (!unfollower.username) {
-                    const { id_str, screen_name } = friendship.data.relationship.target;
+                    const {id_str, screen_name} = friendship.data.relationship.target;
                     unfollower.username = screen_name;
                     await this.dao.addTwittoToCache({
                         id: id_str,
@@ -100,34 +100,39 @@ export default class extends Task {
         }));
 
         logger.debug('@%s has new unfollowers: %s', username, JSON.stringify(unfollowersInfo.concat(leftovers)));
-        userDao.addUnfollowers(unfollowersInfo.concat(leftovers));
 
-        const realUnfollowersInfo = isSecondTry ?
-            unfollowersInfo :
-            unfollowersInfo.filter(unfollowerInfo => // remove twitter glitches
-                unfollowerInfo.friendship_error_code !== 50 && unfollowerInfo.followed_by !== true,
-            );
+        // we remove unfollowers that followed the user < 20min and that "left twitter" (glitches)
+        let realUnfollowersInfo = unfollowersInfo.filter(unfollowerInfo => {
+            const followDuration = unfollowerInfo.unfollowTime - unfollowerInfo.followDetectedTime;
+            return unfollowerInfo.followed_by !== true &&
+                !(unfollowerInfo.deleted && followDuration < 20 * 60 * 1000);
+        });
 
-        // If it's the first check, check them again in 15min to be sure that they were really glitches
-        if (realUnfollowersInfo.length < unfollowersInfo.length) {
-            const glitchedUnfollowersInfo = difference(unfollowersInfo, realUnfollowersInfo);
-            await promisify((cb) =>
-                this.queue
-                    .create('notifyUser', {
-                        title: `(second check) Notify @${username} that he's been unfollowed by ` +
-                            glitchedUnfollowersInfo.map((u) => u.id).toString(),
-                        userId,
-                        username,
-                        unfollowersInfo: glitchedUnfollowersInfo,
-                        isSecondTry: true,
-                    })
-                    .delay(15 * 60 * 1000)
-                    .removeOnComplete(true)
-                    .save(cb),
-            )();
+        if (!isSecondTry) {
+            const potentialGlitches = realUnfollowersInfo.filter(unfollowerInfo => unfollowerInfo.deleted);
+
+            // If it's the first check, check them again in 15min to be sure that they were really glitches
+            if (potentialGlitches.length > 0) {
+                await promisify((cb) =>
+                    this.queue
+                        .create('notifyUser', {
+                            title: `(second check) Notify @${username} that he's been unfollowed by ` +
+                                potentialGlitches.map((u) => u.id).toString(),
+                            userId,
+                            username,
+                            unfollowersInfo: potentialGlitches,
+                            isSecondTry: true,
+                        })
+                        .delay(15 * 60 * 1000)
+                        .removeOnComplete(true)
+                        .save(cb),
+                )();
+                realUnfollowersInfo = difference(realUnfollowersInfo, potentialGlitches);
+            }
         }
 
         if (realUnfollowersInfo.length > 0) {
+            userDao.addUnfollowers(realUnfollowersInfo.concat(leftovers));
             const message = this.generateMessage(realUnfollowersInfo, await userDao.getLang(), leftovers.length);
 
             const dmTwit = await userDao.getDmTwit();

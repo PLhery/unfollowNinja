@@ -89,7 +89,6 @@ export default class UserDao {
     public async setFollowerSnowflakeId(followerId: string, snowflakeId: string): Promise<void> {
         await Promise.all([
             this.redis.hset(`followers:snowflake-ids:${this.userId}`, followerId, snowflakeId),
-            this.redis.hdel(`followers:follow-time:${this.userId}`, followerId),
         ]);
     }
 
@@ -116,7 +115,12 @@ export default class UserDao {
     // determined from the cached snowflakeId or from the time it was added in DB
     public async getFollowTime(followerId: string): Promise<number> {
         return twitterCursorToTime(await this.getFollowerSnowflakeId(followerId)) ||
-            Number(await this.redis.hget(`followers:follow-time:${this.userId}`, followerId));
+            this.getFollowDetectedTime(followerId);
+    }
+
+    // get the timestamp when the follower was added to the db (in ms)
+    public async getFollowDetectedTime(followerId: string): Promise<number> {
+        return Number(await this.redis.hget(`followers:follow-time:${this.userId}`, followerId));
     }
 
     // Add some unfollowers to the list of unfollowers (without removing them from the followers)

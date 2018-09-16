@@ -89,6 +89,7 @@ export default class extends Task {
                         id: unfollowerId,
                         followTime: await userDao.getFollowTime(unfollowerId),
                         unfollowTime: Number(job.started_at),
+                        followDetectedTime: await userDao.getFollowDetectedTime(unfollowerId),
                     };
                 }),
             );

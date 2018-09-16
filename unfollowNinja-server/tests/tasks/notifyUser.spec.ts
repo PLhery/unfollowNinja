@@ -45,11 +45,16 @@ function mockFriendshipShowReply(blocking = false,
     });
 }
 
+function mockFriendshipShowReplyNotFound() {
+    userDao.twit.get.mockRejectedValueOnce({twitterReply: {errors: [{code: 50}]}});
+}
+
 describe('notifyUser task', () => {
     beforeEach(() => {
         unfollowersInfo.splice(0); // empty array
         userDao.getLang.mockResolvedValue('en');
         userDao.dmTwit.post.mockResolvedValue(null);
+        userDao.getFollowDetectedTime.mockResolvedValue(0);
     });
 
     test('one classic unfollower', async () => {
@@ -83,12 +88,27 @@ describe('notifyUser task', () => {
                 'This account followed you before you signed up to @unfollowninja!');
     });
 
-    test('one unfollower, one twitter glitch', async () => {
+    test('one unfollower, one twitter glitch (followed_by=true)', async () => {
         unfollowersInfo.push({id: '123', followTime: 100, unfollowTime: 200});
-        unfollowersInfo.push({id: '234', followTime: 200, unfollowTime: 200});
+        unfollowersInfo.push({id: '234', followTime: 200, unfollowTime: 300});
         mockUsersLookupReply(['123'], ['twitto123']);
         mockFriendshipShowReply();
         mockFriendshipShowReply(false, false, false, true, 'twitto234');
+        await task.run(job);
+        console.log(userDao.addUnfollowers.mock.calls[0][0])
+        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
+        expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
+            .toBe('@twitto123 unfollowed you 👋.\n' +
+                'This account followed you for 49 years (01/01/1970).');
+    });
+
+    test('one unfollower, one potential twitter glitch (user not found)', async () => {
+        unfollowersInfo.push({id: '123', followTime: 100, unfollowTime: 200});
+        unfollowersInfo.push({id: '234', followTime: 200, unfollowTime: 300});
+        mockUsersLookupReply(['123'], ['twitto123']);
+        mockFriendshipShowReply();
+        mockFriendshipShowReplyNotFound();
         await task.run(job);
         expect(queue.save).toHaveBeenCalledTimes(1);
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
@@ -98,7 +118,7 @@ describe('notifyUser task', () => {
                 'This account followed you for 49 years (01/01/1970).');
     });
 
-    test('one unfollower, one twitter glitch, second try', async () => {
+    test('one unfollower, one potential twitter glitch, second try', async () => {
         unfollowersInfo.push({id: '123', followTime: 100, unfollowTime: 200});
         unfollowersInfo.push({id: '234', followTime: 200, unfollowTime: 200});
         mockUsersLookupReply(['123'], ['twitto123']);
