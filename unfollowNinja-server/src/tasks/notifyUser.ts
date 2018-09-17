@@ -101,11 +101,12 @@ export default class extends Task {
 
         logger.debug('@%s has new unfollowers: %s', username, JSON.stringify(unfollowersInfo.concat(leftovers)));
 
-        // we remove unfollowers that followed the user < 20min and that "left twitter" (glitches)
+        // we remove unfollowers that followed the user < 24h and that "left twitter" (glitches very probably)
         let realUnfollowersInfo = unfollowersInfo.filter(unfollowerInfo => {
             const followDuration = unfollowerInfo.unfollowTime - unfollowerInfo.followDetectedTime;
             return unfollowerInfo.followed_by !== true &&
-                !(unfollowerInfo.deleted && followDuration < 20 * 60 * 1000);
+                !(unfollowerInfo.deleted && followDuration < 24 * 60 * 60 * 1000) &&
+                followDuration > 3 * 60 * 1000;
         });
 
         if (!isSecondTry) {
@@ -175,7 +176,7 @@ export default class extends Task {
 
             let followTimeMsg;
             if (unfollower.followTime > 0) {
-                const duration = moment(unfollower.followTime).locale(lang).toNow(true);
+                const duration = moment(unfollower.followTime).locale(lang).to(unfollower.unfollowTime, true);
                 const time = moment(unfollower.followTime).locale(lang).calendar();
                 followTimeMsg = i18n.__('This account followed you for {{duration}} ({{{time}}}).', {duration, time});
             } else {
