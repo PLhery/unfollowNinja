@@ -131,8 +131,9 @@ export default class UserDao {
     // return true if some followers were never cached by cacheFollowers
     public async getHasNotCachedFollowers(): Promise<boolean> {
         const nbCached = Number(await this.redis.hlen(`followers:snowflake-ids:${this.userId}`));
+        const nbUncachable = Number(await this.redis.scard(`followers:uncachable:${this.userId}`));
         const nbFollowers = Number(await this.redis.get(`followers:count:${this.userId}`));
-        return nbCached < nbFollowers;
+        return nbCached + nbUncachable < nbFollowers;
     }
 
     public async addFollowTimes(notCachedFollowers: Array<{followTime: string, id: string}>): Promise<void> {
