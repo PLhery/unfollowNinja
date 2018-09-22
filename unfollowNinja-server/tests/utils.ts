@@ -34,7 +34,7 @@ export function daoMock() {
         addTwittoToCache: jest.fn(),
 
         getUserIdsByCategory: jest.fn().mockResolvedValue(['01', '02', '03']),
-        getCachedUsername: jest.fn()
+        getCachedUsername: jest.fn(),
     };
 }
 

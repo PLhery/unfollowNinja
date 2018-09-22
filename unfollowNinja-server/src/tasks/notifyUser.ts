@@ -55,7 +55,6 @@ export default class extends Task {
             return this.dao.addTwittoToCache({
                 id: user.id_str,
                 username: user.screen_name,
-                picture: user.profile_image_url_https,
             });
         }));
 

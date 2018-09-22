@@ -36,9 +36,7 @@ describe('createTwitterTasks task', () => {
 
     test('too many inactive tasks = no task', async () => {
         queue.inactiveCount.mockImplementation((e, cb) => cb(null, 100));
-        try {
-            await task.run(job);
-        } catch (err) {}
+        await task.run(job).catch((e: Error) => e); // ignore error
         expect(queue.save).toHaveBeenCalledTimes(0);
     });
 });

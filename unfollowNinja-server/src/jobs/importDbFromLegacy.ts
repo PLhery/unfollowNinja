@@ -36,7 +36,6 @@ fs.createReadStream(LEGACY_JSON_FILE_PATH)
                 category: data.twitterDM ? UserCategory.enabled : UserCategory.disabled,
                 id,
                 lang: 'fr',
-                picture: photo,
                 token,
                 tokenSecret: secret,
                 username,
