@@ -36,13 +36,13 @@ export default class Dao {
 
     public async addUser(userEgg: IUserEgg): Promise<void> {
         userEgg = {category: UserCategory.enabled, ...userEgg};
-        const { id, category, username, picture,
+        const { id, category, username,
             added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret } = userEgg;
         const params: IUserParams = { added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret };
         await Promise.all([
             this.redis.zadd('users', category.toString(), id),
             this.redis.hmset(`user:${id}`, params),
-            this.addTwittoToCache({ id, picture, username }, added_at),
+            this.addTwittoToCache({ id, username }, added_at),
         ]);
     }
 
@@ -55,8 +55,8 @@ export default class Dao {
     }
 
     public async getCachedTwitto(userId: string): Promise<ITwittoInfo> {
-        const [username, picture] = await this.redis.hmget('cachedTwittos', `${userId}:username`, `${userId}:picture`);
-        return username !== null ? {id: userId, username, picture} : null;
+        const username = await this.redis.hget('cachedTwittos', `${userId}:username`);
+        return username !== null ? {id: userId, username} : null;
     }
 
     public async getCachedUsername(userId: string): Promise<string> {
@@ -64,11 +64,10 @@ export default class Dao {
     }
 
     public async addTwittoToCache(twittoInfo: ITwittoInfo, time = Date.now()): Promise<void> {
-        const { id, username, picture } = twittoInfo;
+        const { id, username } = twittoInfo;
         await Promise.all([
             this.redis.zadd('cachedTwittosIds', time.toString(), id),
-            picture && this.redis.hmset(`cachedTwittos`, `${id}:username`, username, `${id}:picture`, picture),
-            !picture && this.redis.hmset(`cachedTwittos`, `${id}:username`, username),
+            this.redis.hset(`cachedTwittos`, `${id}:username`, username),
         ]);
     }
 

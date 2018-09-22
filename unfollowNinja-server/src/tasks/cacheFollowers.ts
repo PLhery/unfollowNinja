@@ -49,7 +49,6 @@ export default class extends Task {
             await Promise.all(users.map((user) =>
                 this.dao.addTwittoToCache({
                     id: user.id_str,
-                    picture: user.profile_image_url_https,
                     username: user.screen_name,
                 }, Number(job.started_at)),
             ));

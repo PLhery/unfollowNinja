@@ -24,7 +24,6 @@ export interface IUnfollowerInfo extends IFollowerInfo {
 export interface ITwittoInfo {
     id: string;
     username: string;
-    picture?: string; // profile picture url
 }
 
 export interface IUserParams {

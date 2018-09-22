@@ -125,7 +125,8 @@ export default class UserDao {
 
     // Add some unfollowers to the list of unfollowers (without removing them from the followers)
     public async addUnfollowers(unfollowersInfo: IUnfollowerInfo[]) {
-        await this.redis.lpush(`unfollowers:${this.userId}`, ...unfollowersInfo.map(info => JSON.stringify(info)));
+        // TODO: store this in mongodb
+        // await this.redis.lpush(`unfollowers:${this.userId}`, ...unfollowersInfo.map(info => JSON.stringify(info)));
     }
 
     // return true if some followers were never cached by cacheFollowers
