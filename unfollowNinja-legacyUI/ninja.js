@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
-var pmx = require('pmx').init();//monitoring avec pm2 + keymetrics
 require("colors");
-console.log(("Unfollow NINJAAA".trap+" - le serv'\n\n").yellow);
+console.log(("Unfollow NINJAAA".trap+" - le serv' (legacy)\n\n").yellow);
 
 //On charge la config
 try {
@@ -17,32 +16,6 @@ try {
     process.exit(e.code);
 }
 
-var _ = require("lodash"); //set d'outils
-var ripemd = require("crypto-js/ripemd160"); //cryptage (pour génerer l'api key)
-
-//déclaration des schémas et modèles de mongoose (gestion de mongoDB)
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-mongoose.connect(config.mongoDB);
-var twitterUser={id:String, username:String, photo:String, token:String, secret:String};
-var userSchema = new Schema({ username: String, twitter: twitterUser, twitterDM: twitterUser, followers: [{id: String, since:{ type: Date, default: Date.now }}], unfollowers: [{id: String, since: Date, until:{ type: Date, default: Date.now }}] });
-
-userSchema.methods.getFollower = function (id) { //Trouve un follower par son ID
-    i = _.findIndex(this.followers, { id: id });
-    return {
-        index : i,
-        twittos : this.followers[i]
-    }
-};
-var User = mongoose.model('user', userSchema);
-
-var Cache = mongoose.model('cache', { twitterId: { type: String, unique: true }, username: String, profilePicture: String, createdAt: { type: Date, default: Date.now }, updatedAt: Date});
-
-//Implémentation du detecteur d'unfollow ninjaDetect et de la mise en cache
-var detect = new (require('./ninjaDetect'))(config, User, Cache);
-if(config.cache)
-    require('./ninjaCache')(config, Cache);
-
 //Implémentation d'express et ses plugins (gère la partie web)
 var express = require('express');
 var app = express();
@@ -53,9 +26,6 @@ app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
 app.use(require('express-session')({ secret: config.sessionSecret, resave: true, saveUninitialized: true }));
 app.set('views', __dirname + '/views');
-//API
-app.use('/api', require("./ninjapi")(express, ripemd, User, Cache));
-
 
 //Implémentation de passport et son plugin twitter (gère la connection)
 var passport = require('passport');
@@ -184,12 +154,6 @@ app.get('/step2/disable', function(req, res){
     }
 });
 
-try { //Si on est sur unfollowninja, on ajoute le /gift pour donateurs et utilisateurs fidèles
-    require('./ninjaPlus')(app, toLayout, mongoose, User, detect);
-} catch (e) { if (e.code != "MODULE_NOT_FOUND")  throw e; }
-
-
-
 
 
 //Définition de la page 404
@@ -208,19 +172,3 @@ app.listen(config.port, function () {
     }
     throw err;
 });
-
-
-//Ajout d'indicateurs à keymetrics
-var probe = pmx.probe();
-probe.metric({ //Nombre de comptes actifs
-    name    : 'Comptes actifs',
-    value   : function() {
-        return detect.getNumberofActiveUsers();
-    }
-});
-
-//Sert à activer regulierement le garbage collector
-/*if (global.gc) {
-    console.log("Garbage Collector activé !");
-    setInterval(global.gc, 10000);
-}*/
