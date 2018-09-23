@@ -6,7 +6,7 @@
             </a>
         </div>
         <div class="section__text mdl-cell mdl-cell--10-col mdl-cell--6-col-tablet">
-            <h5>Vous êtes connecté, @<%= twitter.username %> !</h5>
+            <h5><a href="/step1/auth">Vous êtes connecté, @<%= twitter.username %> !</a></h5>
             <p>Connectez-vous à votre compte principal, sur lequel les unfollows seront détéctés.</p>
         </div>
 
@@ -16,7 +16,7 @@
             </a>
         </div>
         <div class="section__text mdl-cell mdl-cell--10-col mdl-cell--6-col-tablet">
-            <h5>@<%= twitterDM.username %> vous enverra vos DMs</h5>
+            <h5><a href="/step2/auth">@<%= twitterDM.username %> vous enverra vos DMs</a></h5>
             <a href="/step2/disable" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect">
                 Désactiver
             </a>
@@ -35,6 +35,5 @@
                             <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
                         </span>
         </div>
-        <p>Vieil utilisateur ou donateur ? Jettez un coup d'oeil <a href="/step2/gift">ici</a>. <small>clé <a href="https://unfollowninja.fr/api/<%= twitter.username %>/<%= apikey %>/unfollow/5" target="_blank" style="color:rgba(0,0,0,.54);">API</a> : <%= apikey %></small></p>
     </div>
 </div>

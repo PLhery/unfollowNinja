@@ -15,10 +15,6 @@ body {
     background: #FF9800;
 }
 
-.introCard >  .chat .avatar {
-    background: #46B6AC;
-}
-
 .stepNumber {
     display: flex;
     justify-content: center;
@@ -75,7 +71,6 @@ footer.mdl-mini-footer {
     border: 5px solid white;
     border-right-color: transparent;
     border-top-color: transparent;
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .discussion .messages {
@@ -100,4 +95,8 @@ footer.mdl-mini-footer {
     right: 0;
     top: 50%;
     margin-top: -109px;
+}
+
+h5 > a {
+    color: rgba(0,0,0,.54);
 }
