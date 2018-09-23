@@ -13,7 +13,9 @@ Version 1: https://github.com/PLhery/unfollowNinja/tree/legacy
 - `cd unfollowNinja/unfollowNinja-server`
 - install the dependencies `npm install`
 - create a .env file (see [.env file](#.env-file))
-- launch the program `npm start`
+- launch the workers `node ./dist/api/workers`
+- launch the api server `node ./dist/api`
+- or launch both in the as a daemon with pm2 `pm2 start pm2.yml`
 
 If you made some changes to the code, you can launch a new instance before exiting the former one to prevent downtime.
 
@@ -30,6 +32,7 @@ DM_CONSUMER_KEY=xxx
 DM_CONSUMER_SECRET=xxx
 
 # optionally:
+API_PORT=2000 # port that the API server should listen to
 CLUSTER_SIZE=2 #Number of workers, defaults to number of CPUs
 WORKER_RATE_LIMIT=15 #Number of unique tasks managed at the same time, defaults to 15
 BETA_USERS=unfollowninja #List of usernames that have access to beta features
