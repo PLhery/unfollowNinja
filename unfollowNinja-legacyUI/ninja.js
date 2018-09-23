@@ -36,32 +36,32 @@ app.use(passport.session());
 //Gestion de la connection etape 1
 passport.use('twitter-step1', new TwitterStrategy({ consumerKey: config.twitter.consumerKey, consumerSecret: config.twitter.consumerSecret, callbackURL: config.URL+"step1/auth/callback"},
     function(token, tokenSecret, profile, done) {
-        User.update({"twitter.id": profile.id}, {twitter: {id: profile.id, username: profile.username, photo: profile.photos[0].value, token: token, secret: tokenSecret} }, { upsert:true }, function(err, raw){
-            if(err)
-                console.log(err);
-            User.findOne({"twitter.id": profile.id}, function(err, user) {
-                detect.updateUser(user);
-                done(err, user);
-            });
-        });
+        const user = {
+            twitter: {id: profile.id, username: profile.username, photo: profile.photos[0].value, token: token, secret: tokenSecret},
+            twitterDM: {},
+        };
+        done(null, user);
     }
 ));
 
 //Gestion de la connection etape 2
 passport.use('twitter-step2', new TwitterStrategy({consumerKey: config.twitterDM.consumerKey, consumerSecret: config.twitterDM.consumerSecret, callbackURL: config.URL+"step2/auth/callback"},
     function(token, tokenSecret, profile, done) {
-        profile.token=token;
+        profile.twitterDM=token;
         profile.secret=tokenSecret;
         done(null, profile);
     }
 ));
 
-//Indique à passport qu'on utilisera mongoose pour stocker les infos utilisateur
+let users = {};
+
+//Indique à passport qu'on utilisera l'api pour stocker les infos utilisateur
 passport.serializeUser(function(user, done) {
-    done(null, user._id);
+    users[user.twitter.id] = user;
+    done(null, user.twitter.id);
 });
 passport.deserializeUser(function(id, done) {
-    User.findById(id, done);
+    done(null, users[id])
 });
 
 
@@ -81,11 +81,6 @@ function toLayout(res) { //Permet d'afficher les pages dans le layout
     };
 }
 
-
-
-
-//Que fait chaque paaaage...
-
 app.get('/', function(req, res) {
     res.render('step1.ejs', toLayout(res));
 });
@@ -101,13 +96,11 @@ app.get('/step1/auth', function(req, res, next) {
 
 app.get('/step1/auth/callback',
     passport.authenticate('twitter-step1', { failureRedirect: '/' }), function(req, res) {
-        req.session.user = req.user._id;
         res.redirect('/step2');
     });
 
 app.get('/step2/', function(req, res) {
     if(req.user) { //Si on est bien connecté
-        req.user.apikey=ripemd(req.user.twitter.token).toString().substring(0, 35);
         if(req.user.twitterDM.id) { //Si on en est déja à l'étape 3
             res.render('step3.ejs',  req.user , toLayout(res));
         } else {
@@ -129,29 +122,17 @@ app.get('/step2/auth', function(req, res, next) {
 
 app.get('/step2/auth/callback',
     passport.authenticate('twitter-step2', { failureRedirect: '/step1/', session: false }), function(req, res) {
-        if(req.user.id && req.session.user) {
-            User.update({"_id": req.session.user}, {twitterDM: {id: req.user.id, username: req.user.username, photo: req.user.photos[0].value, token: req.user.token, secret: req.user.secret}}, function (err, raw) {
-                if (err)
-                    console.log(err);
-                detect.updateUser(req.session.user);
-                res.redirect('/step2');
-            });
-        } else {
-            res.redirect('/step2');
+        if(req.user.id && req.session.passport.user) {
+            users[req.session.passport.user].twitterDM = {id: req.user.id, username: req.user.username, photo: req.user.photos[0].value, token: req.user.token, secret: req.user.secret};
         }
+        res.redirect('/step2');
     });
 
 app.get('/step2/disable', function(req, res){
-    if(req.session.user && req.get("referer") && req.get("referer").indexOf(config.URL+"step2") === 0) { //Si on vient bien du site (contre une XSRF)
-        User.update({"_id": req.session.user}, {twitterDM: null}, function (err, raw) {
-            if (err)
-                console.log(err);
-            detect.updateUser(req.session.user);
-            res.redirect('/step2');
-        });
-    } else {
-        res.redirect("/step2");
+    if(req.session.passport.user && req.get("referer") && req.get("referer").indexOf(config.URL+"step2") === 0) { //Si on vient bien du site (contre une XSRF)
+        users[req.session.passport.user].twitterDM = {};
     }
+    res.redirect("/step2");
 });
 
 
