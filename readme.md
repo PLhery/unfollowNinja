@@ -32,11 +32,13 @@ DM_CONSUMER_KEY=xxx
 DM_CONSUMER_SECRET=xxx
 
 # optionally:
-API_PORT=2000 # port that the API server should listen to
 CLUSTER_SIZE=2 #Number of workers, defaults to number of CPUs
 WORKER_RATE_LIMIT=15 #Number of unique tasks managed at the same time, defaults to 15
 BETA_USERS=unfollowninja #List of usernames that have access to beta features
 MINUTES_BETWEEN_CHECKS=2 #Number of minutes between every followers check
+API_PORT=2000 # port that the API server should listen to
+API_BASE_URL=http://localhost:2000/ # API base url
+API_SESSION_SECRET=session_secret # a string use to secure API sessions
 ```
 
 You can also set these parameters as environment variables.

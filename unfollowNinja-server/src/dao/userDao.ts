@@ -1,7 +1,7 @@
 import * as Redis from 'ioredis';
 import { fromPairs } from 'lodash';
 import * as Twit from 'twit';
-import { IUnfollowerInfo, Lang } from '../utils/types';
+import {IUnfollowerInfo, IUser, IUserParams, Lang} from '../utils/types';
 import { twitterCursorToTime } from '../utils/utils';
 import { UserCategory } from './dao';
 
@@ -34,6 +34,14 @@ export default class UserDao {
     // see above
     public async setNextCheckTime(nextCheckTime: number|string): Promise<void> {
         await this.redis.set(`nextCheckTime:${this.userId}`, nextCheckTime.toString());
+    }
+
+    public async getUserParams(): Promise<IUserParams> {
+        return await this.redis.hgetall(`user:${this.userId}`);
+    }
+
+    public async setTokens(token: string, tokenSecret: string): Promise<void> {
+        await this.redis.hmset(`user:${this.userId}`, { token, tokenSecret });
     }
 
     // get twitter instance with refreshed user's credentials
