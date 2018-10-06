@@ -39,10 +39,12 @@ fs.createReadStream(LEGACY_JSON_FILE_PATH)
                 token,
                 tokenSecret: secret,
                 username,
+                photo,
                 ...data.twitterDM ? {
                     dmId: data.twitterDM.id,
                     dmToken: data.twitterDM.token,
                     dmTokenSecret: data.twitterDM.secret,
+                    dmPhoto: data.twitterDM.photo,
                 } : {},
             });
             if (data.followers) {

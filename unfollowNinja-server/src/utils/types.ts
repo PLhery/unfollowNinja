@@ -31,9 +31,11 @@ export interface IUserParams {
     lang: Lang;
     token: string;
     tokenSecret: string;
+    photo: string;
     dmId?: string;
     dmToken?: string;
     dmTokenSecret?: string;
+    dmPhoto?: string;
 }
 
 export interface IUserEgg extends ITwittoInfo, IUserParams {

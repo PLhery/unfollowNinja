@@ -33,5 +33,5 @@ router.get('/infos', shouldBeLoggedIn, (req, res) => {
 });
 
 router.get('/auth-dm-app', shouldBeLoggedIn, passport.authenticate('twitter-dm', { session: false }), (req, res) => {
-    res.redirect('/v1/is-logged-in');
+    res.redirect('/v1/infos');
 });

@@ -47,12 +47,13 @@ export default function passportConfig() {
 const dao = new Dao();
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser(async (user: any, done) => {
-    const { id, token, tokenSecret, username } = user;
+    const { id, token, tokenSecret, username, photo } = user;
     let params: IUserParams = await dao.getUserDao(id).getUserParams();
     if (typeof params.token === 'undefined') { // new user
         params = {
             added_at: Date.now(),
             lang: 'fr',
+            photo,
             token,
             tokenSecret,
         };

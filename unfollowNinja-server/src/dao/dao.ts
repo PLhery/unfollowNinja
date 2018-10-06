@@ -7,6 +7,7 @@ export enum UserCategory {
     suspended,
     revoked,
     disabled,
+    new,
 }
 
 export default class Dao {
@@ -35,10 +36,11 @@ export default class Dao {
     }
 
     public async addUser(userEgg: IUserEgg): Promise<void> {
-        userEgg = {category: UserCategory.enabled, ...userEgg};
+        userEgg = {category: UserCategory.new, ...userEgg};
         const { id, category, username,
-            added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret } = userEgg;
-        const params: IUserParams = { added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret };
+            added_at, lang, token, tokenSecret, photo, dmId, dmToken, dmTokenSecret, dmPhoto } = userEgg;
+        const params: IUserParams = { added_at, lang, token, tokenSecret, photo,
+            dmId, dmToken, dmTokenSecret, dmPhoto };
         await Promise.all([
             this.redis.zadd('users', category.toString(), id),
             this.redis.hmset(`user:${id}`, params),
