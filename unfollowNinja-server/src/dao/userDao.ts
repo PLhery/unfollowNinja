@@ -40,8 +40,8 @@ export default class UserDao {
         return await this.redis.hgetall(`user:${this.userId}`);
     }
 
-    public async setTokens(token: string, tokenSecret: string): Promise<void> {
-        await this.redis.hmset(`user:${this.userId}`, { token, tokenSecret });
+    public async setUserParams(userParams: Partial<IUserParams>): Promise<void> {
+        await this.redis.hmset(`user:${this.userId}`, userParams);
     }
 
     // get twitter instance with refreshed user's credentials

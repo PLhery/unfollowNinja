@@ -46,25 +46,29 @@ export default function passportConfig() {
 
 const dao = new Dao();
 passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser(async (user: any, done) => {
-    const { id, token, tokenSecret, username, photo } = user;
-    let params: IUserParams = await dao.getUserDao(id).getUserParams();
-    if (typeof params.token === 'undefined') { // new user
-        params = {
-            added_at: Date.now(),
-            lang: 'fr',
-            photo,
-            token,
-            tokenSecret,
-        };
-        await dao.addUser({
-            category: UserCategory.disabled,
-            id,
-            username,
-            ...params,
-        });
-    } else if (params.tokenSecret !== tokenSecret) {
-        await dao.getUserDao(id).setTokens(token, tokenSecret);
-    }
-    done(null, {...user, ...params});
-});
+passport.deserializeUser((user: any, done) =>
+    (async () => {
+        const {id, token, tokenSecret, username, photo} = user;
+        let params: IUserParams = await dao.getUserDao(id).getUserParams();
+        if (typeof params.token === 'undefined') { // new user
+            params = {
+                added_at: Date.now(),
+                lang: 'fr',
+                photo,
+                token,
+                tokenSecret,
+            };
+            await dao.addUser({
+                category: UserCategory.disabled,
+                id,
+                username,
+                ...params,
+            });
+        } else if (params.tokenSecret !== tokenSecret || params.photo !== photo) {
+            await dao.getUserDao(id).setUserParams({token, tokenSecret, photo});
+        }
+        return {...params, ...user};
+    })()
+    .then(fullUser => done(null, fullUser))
+    .catch(error => done(error)),
+);

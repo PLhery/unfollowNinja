@@ -22,10 +22,10 @@ router.get('/auth',  passport.authenticate('twitter'), (req, res) => {
 });
 
 router.get('/infos', shouldBeLoggedIn, (req, res) => {
-    const { username, id, photo, dmId } = req.user;
+    const { username, id, photo, dmId, dmPhoto } = req.user;
     if (dmId) {
         dao.getCachedUsername(dmId).then((dmUsername) => {
-            res.json( { username, id, photo, dmId, dmUsername });
+            res.json( { username, id, photo, dmId, dmUsername, dmPhoto });
         });
     } else {
         res.json( { username, id, photo });
