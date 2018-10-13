@@ -1,6 +1,6 @@
-import { RequestHandler, Router } from 'express';
+import {RequestHandler, Router} from 'express';
 import * as passport from 'passport';
-import Dao from '../dao/dao';
+import Dao, {UserCategory} from '../dao/dao';
 
 const router = Router();
 export default router;
@@ -33,5 +33,27 @@ router.get('/infos', shouldBeLoggedIn, (req, res) => {
 });
 
 router.get('/auth-dm-app', shouldBeLoggedIn, passport.authenticate('twitter-dm', { session: false }), (req, res) => {
-    res.redirect('/v1/infos');
+    const { username, id, photo, token, tokenSecret } = req.user;
+    Promise.all([
+        dao.getUserDao(req.session.passport.user.id).setUserParams({
+            dmId: id,
+            dmPhoto: photo,
+            dmToken: token,
+            dmTokenSecret: tokenSecret,
+        }),
+        dao.getUserDao(req.session.passport.user.id).setCategory(UserCategory.enabled),
+        dao.addTwittoToCache({id, username}),
+    ]).then(() => res.redirect('/v1/infos'));
+});
+
+router.get('/remove-dm-app', shouldBeLoggedIn, (req, res) => {
+    Promise.all([
+        dao.getUserDao(req.session.passport.user.id).setCategory(UserCategory.disabled),
+        dao.getUserDao(req.session.passport.user.id).setUserParams({
+            dmId: null,
+            dmPhoto: null,
+            dmToken: null,
+            dmTokenSecret: null,
+        }),
+    ]).then(() => res.redirect('/v1/infos'));
 });
