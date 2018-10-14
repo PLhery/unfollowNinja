@@ -15,7 +15,7 @@ i18n.configure({
     directory: __dirname + '/../../locales',
 });
 
-const BETA_USERS = split(process.env.BETA_USERS, ',').concat('testUsername');
+// const BETA_USERS = split(process.env.BETA_USERS, ',').concat('testUsername');
 
 // friendships/show can be called 180 times/15min
 // with this limit it will be called < 120 times/15min
@@ -138,15 +138,13 @@ export default class extends Task {
             const dmTwit = await userDao.getDmTwit();
             logger.info('sending a DM to @%s', username);
             logger.debug('sending a DM to @%s: %s', username, message);
-            if (BETA_USERS.includes(username)) {
-                await dmTwit.post('direct_messages/events/new', {
-                    event: {
-                        type: 'message_create',
-                        message_create: {target: {recipient_id: userId}, message_data: {text: message}},
-                    },
-                } as Params)
-                    .catch((err) => this.manageTwitterErrors(err, username, userId));
-            }
+            await dmTwit.post('direct_messages/events/new', {
+                event: {
+                    type: 'message_create',
+                    message_create: {target: {recipient_id: userId}, message_data: {text: message}},
+                },
+            } as Params)
+                .catch((err) => this.manageTwitterErrors(err, username, userId));
         }
     }
 
