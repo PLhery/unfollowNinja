@@ -27,7 +27,7 @@ app.use(session({
     secret: API_SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: API_BASE_URL.startsWith('https://'), domain: COOKIE_DOMAIN },
+    cookie: { secure: false, domain: COOKIE_DOMAIN },
 }));
 
 app.use(passport.initialize());
