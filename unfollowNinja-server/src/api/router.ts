@@ -1,5 +1,7 @@
 import {RequestHandler, Router} from 'express';
+import * as kue from 'kue';
 import * as passport from 'passport';
+import { promisify } from 'util';
 import Dao, {UserCategory} from '../dao/dao';
 
 const router = Router();
@@ -16,6 +18,7 @@ const shouldBeLoggedIn: RequestHandler = (req, res, next) => {
 };
 
 const dao = new Dao();
+const queue = kue.createQueue();
 
 router.get('/', (req, res) => res.json({message: 'Unfollow ninja API is up!'}));
 
@@ -45,6 +48,16 @@ router.get('/auth-dm-app', shouldBeLoggedIn, passport.authenticate('twitter-dm',
         }),
         dao.getUserDao(req.session.passport.user.id).setCategory(UserCategory.enabled),
         dao.addTwittoToCache({id, username}),
+        promisify((cb) =>
+            queue
+                .create('sendWelcomeMessage', {
+                    title: `send welcome message to @${username}`,
+                    userId: id,
+                    username,
+                })
+                .removeOnComplete(true)
+                .save(cb),
+        )(),
     ]).then(() => res.redirect(AUTH_REDIRECT));
 });
 
