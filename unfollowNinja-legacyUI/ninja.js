@@ -16,6 +16,7 @@ try {
     process.exit(e.code);
 }
 
+const request = require('request').defaults({jar: true});
 //Implémentation d'express et ses plugins (gère la partie web)
 var express = require('express');
 var app = express();
@@ -24,46 +25,9 @@ app.use(require('compression')()); //compresse les données en gzip
 app.use(require('morgan')('tiny')); //affiche les logs de connection dans la console
 app.use(require('cookie-parser')());
 app.use(require('body-parser').urlencoded({ extended: true }));
-app.use(require('express-session')({ secret: config.sessionSecret, resave: true, saveUninitialized: true }));
 app.set('views', __dirname + '/views');
 
-//Implémentation de passport et son plugin twitter (gère la connection)
-var passport = require('passport');
-var TwitterStrategy = require('passport-twitter').Strategy;
-app.use(passport.initialize());
-app.use(passport.session());
-
-//Gestion de la connection etape 1
-passport.use('twitter-step1', new TwitterStrategy({ consumerKey: config.twitter.consumerKey, consumerSecret: config.twitter.consumerSecret, callbackURL: config.URL+"step1/auth/callback"},
-    function(token, tokenSecret, profile, done) {
-        const user = {
-            twitter: {id: profile.id, username: profile.username, photo: profile.photos[0].value, token: token, secret: tokenSecret},
-            twitterDM: {},
-        };
-        done(null, user);
-    }
-));
-
-//Gestion de la connection etape 2
-passport.use('twitter-step2', new TwitterStrategy({consumerKey: config.twitterDM.consumerKey, consumerSecret: config.twitterDM.consumerSecret, callbackURL: config.URL+"step2/auth/callback"},
-    function(token, tokenSecret, profile, done) {
-        profile.twitterDM=token;
-        profile.secret=tokenSecret;
-        done(null, profile);
-    }
-));
-
 let users = {};
-
-//Indique à passport qu'on utilisera l'api pour stocker les infos utilisateur
-passport.serializeUser(function(user, done) {
-    users[user.twitter.id] = user;
-    done(null, user.twitter.id);
-});
-passport.deserializeUser(function(id, done) {
-    done(null, users[id])
-});
-
 
 //Vérifie qu'on est sur le bon domaine, sinon on redirige !
 app.get('/*', function(req, res, next) {
@@ -81,58 +45,55 @@ function toLayout(res) { //Permet d'afficher les pages dans le layout
     };
 }
 
-app.get('/', function(req, res) {
-    res.render('step1.ejs', toLayout(res));
-});
-app.get('/step1/auth', function(req, res, next) {
-    passport.authenticate('twitter-step1', function(err, user, info) {
-        if(err) {
-            console.error("Une erreur est survenue : #01 vérifiez les tokens/secret de l'app de connexion ! ".red.bgWhite);
-            res.send("Une erreur est survenue #01 ! Si vous êtes administrateur du site, vérifiez la console !");
-        }
-    })(req, res, next);
-});
-
-
-app.get('/step1/auth/callback',
-    passport.authenticate('twitter-step1', { failureRedirect: '/' }), function(req, res) {
-        res.redirect('/step2');
-    });
-
-app.get('/step2/', function(req, res) {
-    if(req.user) { //Si on est bien connecté
-        if(req.user.twitterDM.id) { //Si on en est déja à l'étape 3
-            res.render('step3.ejs',  req.user , toLayout(res));
-        } else {
-            res.render('step2.ejs', req.user, toLayout(res));
-        }
-    } else {
-        res.redirect('/');
+function getNinjaInfos(req, res, next) {
+    const jar = request.jar();
+    if(!req.cookies['connect.sid']) {
+        req.ninjaInfos = {};
+        return next();
     }
+    const cookie = request.cookie('connect.sid=' + req.cookies['connect.sid']);
+    jar.setCookie(cookie, config.API_URL);
+
+    request({url: config.API_URL + "v1/infos", jar}, (error, response, body) => {
+        req.ninjaInfos = JSON.parse(body);
+        next();
+    });
+}
+
+app.get('/', getNinjaInfos, function(req, res) {
+    if (!req.ninjaInfos.id) {
+        return res.render('step1.ejs', toLayout(res));
+    }
+    if (!req.ninjaInfos.dmId) {
+        return res.render('step2.ejs', req.ninjaInfos, toLayout(res));
+    }
+    res.render('step3.ejs', req.ninjaInfos, toLayout(res));
+});
+
+
+app.get('/step1/auth', function(req, res, next) {
+    res.redirect(config.API_URL + "v1/auth");
 });
 
 app.get('/step2/auth', function(req, res, next) {
-    passport.authenticate('twitter-step2', function(err, user, info) {
-        if(err) {
-            console.error("Une erreur est survenue : #02 vérifiez les tokens/secret de l'app d'envoi de DM ! ".red.bgWhite);
-            res.send("Une erreur est survenue #02 ! Si vous êtes administrateur du site, vérifiez la console !");
-        }
-    })(req, res, next);
+    res.redirect(config.API_URL + "v1/auth-dm-app");
 });
 
-app.get('/step2/auth/callback',
-    passport.authenticate('twitter-step2', { failureRedirect: '/step1/', session: false }), function(req, res) {
-        if(req.user.id && req.session.passport.user) {
-            users[req.session.passport.user].twitterDM = {id: req.user.id, username: req.user.username, photo: req.user.photos[0].value, token: req.user.token, secret: req.user.secret};
-        }
-        res.redirect('/step2');
-    });
-
 app.get('/step2/disable', function(req, res){
-    if(req.session.passport.user && req.get("referer") && req.get("referer").indexOf(config.URL+"step2") === 0) { //Si on vient bien du site (contre une XSRF)
-        users[req.session.passport.user].twitterDM = {};
+    if(req.get("referer") && req.get("referer").indexOf(config.URL) === 0) { //Si on vient bien du site (contre une XSRF)
+        const jar = request.jar();
+        if(!req.cookies['connect.sid']) {
+            req.ninjaInfos = {};
+            return res.redirect("/");
+        }
+        const cookie = request.cookie('connect.sid=' + req.cookies['connect.sid']);
+        jar.setCookie(cookie, config.API_URL);
+
+        request({url: config.API_URL + "v1/remove-dm-app", jar}, (error, response, body) => {
+            req.ninjaInfos = body;
+            res.redirect("/");
+        });
     }
-    res.redirect("/step2");
 });
 
 
@@ -148,7 +109,7 @@ app.listen(config.port, function () {
     console.log("Yo, j'écoute le port " + config.port.toString().underline);
 }).on('error', function(err) {
     if(err.code = "EACCESS") {
-        console.error(("Une erreur est survenue : le port "+config.port+" déja utilisé ou est reservé à root, lancez donc l'appli en tant que root ou changez de port !").red.bgWhite+"\n\n");
+        console.error(("Une erreur est survenue : le port "+config.port+" déja utilisée, changez de port !").red.bgWhite+"\n\n");
         process.exit(err.code);
     }
     throw err;

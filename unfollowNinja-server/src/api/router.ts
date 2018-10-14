@@ -5,6 +5,8 @@ import Dao, {UserCategory} from '../dao/dao';
 const router = Router();
 export default router;
 
+const AUTH_REDIRECT = process.env.AUTH_REDIRECT || 'http://localhost:8080/';
+
 const shouldBeLoggedIn: RequestHandler = (req, res, next) => {
     if (!req.session.passport || !req.session.passport.user) {
         res.status(400);
@@ -18,7 +20,7 @@ const dao = new Dao();
 router.get('/', (req, res) => res.json({message: 'Unfollow ninja API is up!'}));
 
 router.get('/auth',  passport.authenticate('twitter'), (req, res) => {
-    res.redirect('/v1/infos');
+    res.redirect(AUTH_REDIRECT);
 });
 
 router.get('/infos', shouldBeLoggedIn, (req, res) => {
@@ -43,7 +45,7 @@ router.get('/auth-dm-app', shouldBeLoggedIn, passport.authenticate('twitter-dm',
         }),
         dao.getUserDao(req.session.passport.user.id).setCategory(UserCategory.enabled),
         dao.addTwittoToCache({id, username}),
-    ]).then(() => res.redirect('/v1/infos'));
+    ]).then(() => res.redirect(AUTH_REDIRECT));
 });
 
 router.get('/remove-dm-app', shouldBeLoggedIn, (req, res) => {

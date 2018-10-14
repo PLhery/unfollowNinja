@@ -39,6 +39,7 @@ MINUTES_BETWEEN_CHECKS=2 #Number of minutes between every followers check
 API_PORT=2000 # port that the API server should listen to
 API_BASE_URL=http://localhost:2000/ # API base url
 API_SESSION_SECRET=session_secret # a string use to secure API sessions
+AUTH_REDIRECT=http://localhost:8080/ # URL called after a succesful auth
 ```
 
 You can also set these parameters as environment variables.

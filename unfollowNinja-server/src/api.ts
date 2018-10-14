@@ -16,6 +16,7 @@ passportConfig();
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:2000/`;
 const API_PORT = Number(process.env.API_PORT) || 2000;
 const API_SESSION_SECRET = process.env.API_SESSION_SECRET || 'session_secret';
+const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -25,8 +26,8 @@ app.use(session({
     store: new RedisStore({}),
     secret: API_SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
-    cookie: { secure: API_BASE_URL.startsWith('https://') },
+    saveUninitialized: true,
+    cookie: { secure: API_BASE_URL.startsWith('https://'), domain: COOKIE_DOMAIN },
 }));
 
 app.use(passport.initialize());

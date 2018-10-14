@@ -33,11 +33,9 @@
     "morgan": "^1.6.1",
     "on-finished": "^2.3.0",
     "on-headers": "^1.0.0",
-    "passport": "^0.3.0",
-    "passport-twitter": "^1.0.3",
     "php-unserialize": "^0.0.1",
     "q": "^1.4.1",
-    "twitter": "^1.2.5"
+    "request": "^2.88.0"
   },
   "preferGlobal": true,
   "analyze": true,
