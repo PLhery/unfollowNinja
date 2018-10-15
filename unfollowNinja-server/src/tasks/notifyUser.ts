@@ -161,11 +161,11 @@ export default class extends Task {
                 const emoji = emojis.get('see_no_evil');
                 action = i18n.__('{{username}} has left Twitter {{emoji}}.', { username, emoji });
             } else if (unfollower.blocked_by) {
-                const emoji = emojis.get('no-entry');
-                action = i18n.__('{{username}} blocked you {{emoji}}💩💩💩💩💩.', { username, emoji });
+                const emoji = emojis.get('no_entry');
+                action = i18n.__('{{username}} blocked you {{emoji}}.', { username, emoji });
             } else if (unfollower.blocking) {
-                const emoji = emojis.get('poop');
-                action = i18n.__('You blocked {{username}} {{emoji}}💩💩💩💩💩.', { username, emoji });
+                const emoji = emojis.get('poop').repeat(3);
+                action = i18n.__('You blocked {{username}} {{emoji}}.', { username, emoji });
             } else {
                 const emoji = emojis.get(unfollower.following ? 'broken_heart' : 'wave');
                 action = i18n.__('{{username}} unfollowed you {{emoji}}.', { username, emoji });
