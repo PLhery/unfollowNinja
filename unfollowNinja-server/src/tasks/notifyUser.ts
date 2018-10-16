@@ -105,7 +105,7 @@ export default class extends Task {
             const followDuration = unfollowerInfo.unfollowTime - unfollowerInfo.followDetectedTime;
             return unfollowerInfo.followed_by !== true &&
                 !(unfollowerInfo.deleted && followDuration < 24 * 60 * 60 * 1000) &&
-                followDuration > 3 * 60 * 1000;
+                followDuration > 7 * 60 * 1000;
         });
 
         if (!isSecondTry) {
