@@ -229,6 +229,10 @@ export default class extends Task {
                     logger.warn('@%s is suspended. removing him from the list...', username);
                     await userDao.setCategory(UserCategory.suspended);
                     return true;
+                case 150:
+                    logger.warn('@%s does not accept DMs. removing him from the list...', username);
+                    await userDao.setCategory(UserCategory.dmclosed);
+                    return true;
                 // twitter errors
                 case 130: // over capacity
                 case 131: // internal error`

@@ -7,7 +7,7 @@ export enum UserCategory {
     suspended,
     revoked,
     disabled,
-    new,
+    dmclosed,
 }
 
 export default class Dao {
@@ -36,7 +36,7 @@ export default class Dao {
     }
 
     public async addUser(userEgg: IUserEgg): Promise<void> {
-        userEgg = {category: UserCategory.new, ...userEgg};
+        userEgg = {category: UserCategory.enabled, ...userEgg};
         const { id, category, username,
             added_at, lang, token, tokenSecret, photo, dmId, dmToken, dmTokenSecret, dmPhoto } = userEgg;
         const params: IUserParams = { added_at, lang, token, tokenSecret, photo,
