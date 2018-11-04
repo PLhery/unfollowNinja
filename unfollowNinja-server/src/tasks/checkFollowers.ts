@@ -38,7 +38,15 @@ export default class extends Task {
 
                 remainingRequests = Number(result.resp.headers['x-rate-limit-remaining']);
                 resetTime = Number(result.resp.headers['x-rate-limit-reset']) * 1000;
-                followers.push(...result.data.ids);
+                // goal: understand "TypeError: Cannot read property 'Symbol(Symbol.iterator)' of followers.push"
+                // TODO remove this try-catch
+                try {
+                    followers.push(...result.data.ids);
+                } catch (err) {
+                    logger.error('unexpected exception on followers.push');
+                    logger.error(result.data);
+                    throw err;
+                }
             }
             // Compute next time we can do the X requests
             const remainingChecks = Math.floor(remainingRequests / requests);
