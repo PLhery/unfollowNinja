@@ -29,7 +29,11 @@ export default class Scheduler {
 
         // every 2 minutes, create the checkFollowers tasks for everyone
         this.intervalId = setInterval(() => this.createTwitterTasks(), MINUTES_BETWEEN_CHECKS * 60 * 1000);
-        return this.createTwitterTasks();
+        await this.createTwitterTasks();
+
+        // twice a day, reenable suspended followers
+        this.intervalId = setInterval(() => this.createDailyTasks(), 12 * 60 * 60 * 1000);
+        await this.createDailyTasks();
     }
 
     public stop() {
@@ -48,6 +52,18 @@ export default class Scheduler {
         }
         await promisify((cb) => this.queue
             .create('createTwitterTasks', {})
+            .removeOnComplete(true)
+            .save(cb))();
+    }
+
+    private async createDailyTasks(): Promise<void> {
+        if (await this.dao.getSchedulerId() !== this.schedulerId) {
+            logger.warn('A new scheduler has been launched, cancelling this one...');
+            this.stop();
+            return;
+        }
+        await promisify((cb) => this.queue
+            .create('reenableFollowers', {})
             .removeOnComplete(true)
             .save(cb))();
     }

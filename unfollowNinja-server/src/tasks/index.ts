@@ -2,6 +2,7 @@ import cacheFollowers from './cacheFollowers';
 import checkFollowers from './checkFollowers';
 import createTwitterTasks from './createTwitterTasks';
 import notifyUser from './notifyUser';
+import reenableFollowers from './reenableFollowers';
 import sendWelcomeMessage from './sendWelcomeMessage';
 
 const tasks: {[taskName: string]: any} = {
@@ -9,6 +10,7 @@ const tasks: {[taskName: string]: any} = {
     checkFollowers,
     createTwitterTasks,
     notifyUser,
+    reenableFollowers,
     sendWelcomeMessage,
 };
 
