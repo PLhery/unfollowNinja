@@ -62,6 +62,11 @@ export default class extends Task {
             await this.detectUnfollows(job, followers);
         } catch (err) {
             if (!err.twitterReply) {
+                // network error
+                if (err.code === 'EAI_AGAIN' || err.code === 'ETIMEDOUT') {
+                    logger.warn('@%s - check skipped because of a network error.', username);
+                    return;
+                }
                 throw err;
             } else {
                 const unexpected = await this.manageTwitterErrors(err.twitterReply, username, userId);
