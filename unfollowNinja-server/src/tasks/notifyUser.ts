@@ -49,6 +49,12 @@ export default class extends Task {
             return;
         }
 
+        if (!Array.isArray(usersLookup.data)) {
+            logger.warn('@%s - expected userLookup.data to be an array, was %s instead.',
+                username, JSON.stringify(usersLookup.data));
+            return;
+        }
+
         await Promise.all(usersLookup.data.map(user => {
             unfollowersMap[user.id_str].suspended = false;
             unfollowersMap[user.id_str].username = user.screen_name;
