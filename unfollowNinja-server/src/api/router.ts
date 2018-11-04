@@ -48,6 +48,7 @@ router.get('/auth-dm-app', shouldBeLoggedIn, passport.authenticate('twitter-dm',
         }),
         dao.getUserDao(req.session.passport.user.id).setCategory(UserCategory.enabled),
         dao.addTwittoToCache({id, username}),
+    ]).then(
         promisify((cb) =>
             queue
                 .create('sendWelcomeMessage', {
@@ -57,8 +58,8 @@ router.get('/auth-dm-app', shouldBeLoggedIn, passport.authenticate('twitter-dm',
                 })
                 .removeOnComplete(true)
                 .save(cb),
-        )(),
-    ]).then(() => res.redirect(AUTH_REDIRECT));
+        ),
+    ).then(() => res.redirect(AUTH_REDIRECT));
 });
 
 router.get('/remove-dm-app', shouldBeLoggedIn, (req, res) => {
