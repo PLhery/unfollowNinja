@@ -14,8 +14,8 @@ export default class extends Task {
             const [ twit, twitDM, username ] =
                 await Promise.all([userDao.getTwit(), userDao.getDmTwit(), this.dao.getCachedUsername(userId)]);
 
-            await twit.get('statuses/user_timeline')
-                .then(() => twitDM.get('statuses/user_timeline'))
+            await twit.get('followers/ids')
+                .then(() => twitDM.get('followers/ids'))
                 .then(() => {
                     logger.debug('suspension check - @%s is not suspended anymore :)', username);
                     return userDao.setCategory(UserCategory.enabled);
