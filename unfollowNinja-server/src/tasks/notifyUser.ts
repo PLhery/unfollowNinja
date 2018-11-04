@@ -1,7 +1,7 @@
 import * as i18n from 'i18n';
 import { Job } from 'kue';
 import { defaults, difference, get, keyBy, split } from 'lodash';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 import * as emojis from 'node-emoji';
 import { Params, Twitter } from 'twit';
 import { promisify } from 'util';
@@ -14,6 +14,8 @@ i18n.configure({
     locales: ['en', 'fr'],
     directory: __dirname + '/../../locales',
 });
+
+moment.tz.setDefault('Europe/Paris');
 
 // const BETA_USERS = split(process.env.BETA_USERS, ',').concat('testUsername');
 
