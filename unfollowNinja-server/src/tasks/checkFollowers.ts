@@ -44,7 +44,7 @@ export default class extends Task {
                     followers.push(...result.data.ids);
                 } catch (err) {
                     logger.error('unexpected exception on followers.push');
-                    logger.error(result.data);
+                    logger.error(JSON.stringify(result));
                     throw err;
                 }
             }
