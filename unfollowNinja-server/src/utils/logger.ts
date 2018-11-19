@@ -42,6 +42,11 @@ const logger = createLogger({
             filename: 'logs/debug.log',
             level: 'debug',
         }),
+        !testEnv && new transports.File({
+            ...fileParams,
+            filename: 'logs/warn.log',
+            level: 'warn',
+        }),
     ].filter(t => t),
     exceptionHandlers: [
         new transports.Console(),
