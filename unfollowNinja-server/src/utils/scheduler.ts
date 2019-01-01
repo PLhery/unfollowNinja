@@ -11,6 +11,7 @@ export default class Scheduler {
     private dao: Dao;
     private queue: Queue;
     private intervalId: NodeJS.Timer;
+    private dailyIntervalId: NodeJS.Timer;
     private started: boolean;
 
     constructor(dao: Dao, queue: Queue) {
@@ -32,7 +33,7 @@ export default class Scheduler {
         await this.createTwitterTasks();
 
         // twice a day, reenable suspended followers
-        this.intervalId = setInterval(() => this.createDailyTasks(), 12 * 60 * 60 * 1000);
+        this.dailyIntervalId = setInterval(() => this.createDailyTasks(), 12 * 60 * 60 * 1000);
         await this.createDailyTasks();
     }
 
@@ -41,6 +42,7 @@ export default class Scheduler {
             return;
         }
         clearInterval(this.intervalId);
+        clearInterval(this.dailyIntervalId);
         this.started = false;
     }
 

@@ -98,7 +98,7 @@ function death() {
     if (cluster.isMaster) {
         scheduler.stop();
     }
-    queue.shutdown( 5000, (err: Error) => {
+    queue.shutdown( 9000, (err: Error) => {
         logger.info('Kue shutdown - %s', cluster.isMaster ? 'master' : 'worker ' + cluster.worker.id);
         if (err) {
             logger.error(err.message);
