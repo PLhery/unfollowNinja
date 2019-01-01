@@ -12,7 +12,7 @@ const customFormat = format.combine(
 );
 
 const fileParams = {
-    maxsize: 5000000, // 5MB
+    maxsize: 20000000, // 20MB
     maxFiles: 200,
 };
 
