@@ -4,25 +4,34 @@ import {UserCategory} from '../dao/dao';
 import logger from '../utils/logger';
 import Task from './task';
 
-// reenable followers disabled because they were suspended
+// reenable followers disabled because they were suspended or had a token issue
 export default class extends Task {
     public async run(job: Job) {
-        const userIds = await this.dao.getUserIdsByCategory(UserCategory.suspended);
+        [
+            UserCategory.suspended,
+            UserCategory.revoked,
+            // UserCategory.dmclosed TODO
+        ]
+            .forEach(async category => {
+                for (const userId in this.dao.getUserIdsByCategory(category)) {
+                    await this.checkAccountValid(userId, UserCategory.suspended);
+                }
+            });
+    }
 
-        for (const userId of userIds) {
-            const userDao = this.dao.getUserDao(userId);
-            const [ twit, twitDM, username ] =
-                await Promise.all([userDao.getTwit(), userDao.getDmTwit(), this.dao.getCachedUsername(userId)]);
+    private async checkAccountValid(userId: string, category: UserCategory) {
+        const userDao = this.dao.getUserDao(userId);
+        const [ twit, twitDM, username ] =
+            await Promise.all([userDao.getTwit(), userDao.getDmTwit(), this.dao.getCachedUsername(userId)]);
 
-            await twit.get('followers/ids')
-                .then(() => twitDM.get('followers/ids'))
-                .then(() => {
-                    logger.debug('suspension check - @%s is not suspended anymore :)', username);
-                    return userDao.setCategory(UserCategory.enabled);
-                })
-                .catch(() => {
-                    logger.debug('suspension check - @%s is still suspended', username);
-                });
-        }
+        await twit.get('followers/ids')
+            .then(() => twitDM.get('followers/ids'))
+            .then(() => {
+                logger.debug('suspension check - @%s is not ' + UserCategory[category] + ' anymore :)', username);
+                return userDao.setCategory(UserCategory.enabled);
+            })
+            .catch(() => {
+                logger.debug('suspension check - @%s is still ' + UserCategory[category], username);
+            });
     }
 }
