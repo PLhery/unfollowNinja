@@ -2,8 +2,7 @@
 https://unfollow.ninja
 : Receive a direct message in a few seconds when someone unfollows you on Twitter
 
-Version 2 - Still in development  
-Version 1: https://github.com/PLhery/unfollowNinja/tree/legacy
+Legacy version: https://github.com/PLhery/unfollowNinja/tree/legacy
 
 ![Screenshot](http://i.imgur.com/rRsa7iy.jpg)
 
@@ -40,6 +39,7 @@ API_PORT=2000 # port that the API server should listen to
 API_BASE_URL=http://localhost:2000/ # API base url
 API_SESSION_SECRET=session_secret # a string use to secure API sessions
 AUTH_REDIRECT=http://localhost:8080/ # URL called after a succesful auth
+SENTRY_DSN= # sentry DSN, if sentry is enabled
 ```
 
 You can also set these parameters as environment variables.
@@ -67,10 +67,6 @@ The main goal of this update is to be able to do 1 check every one or two minute
 
 ## TODO
 
-currently : followers are checked for everyone, DM are sent to beta users
-
-  - add an API / an https server
-  - link that https server to the former UI
   - develop a static landing page with some explanation
   - develop a one-page react (or vue) page to manage preferences / see unfollowers.
   

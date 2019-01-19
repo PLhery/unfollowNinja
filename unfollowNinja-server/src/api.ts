@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import * as Sentry from '@sentry/node';
 import * as bodyParser from 'body-parser';
 import * as connectRedis from 'connect-redis';
 import * as express from 'express';
@@ -13,10 +14,14 @@ import logger, { setLoggerPrefix } from './utils/logger';
 setLoggerPrefix('api');
 passportConfig();
 
-const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:2000/`;
 const API_PORT = Number(process.env.API_PORT) || 2000;
 const API_SESSION_SECRET = process.env.API_SESSION_SECRET || 'session_secret';
 const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
+const SENTRY_DSN = process.env.SENTRY_DSN || undefined;
+
+if (SENTRY_DSN) {
+    Sentry.init({ dsn: SENTRY_DSN });
+}
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
