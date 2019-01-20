@@ -14,7 +14,7 @@ export default class extends Task {
         ]
             .forEach(async category => {
                 for (const userId in this.dao.getUserIdsByCategory(category)) {
-                    await this.checkAccountValid(userId, UserCategory.suspended);
+                    await this.checkAccountValid(userId, category);
                 }
             });
     }
