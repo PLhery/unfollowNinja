@@ -13,7 +13,7 @@ export default class extends Task {
             // UserCategory.dmclosed TODO
         ]
             .forEach(async category => {
-                for (const userId in this.dao.getUserIdsByCategory(category)) {
+                for (const userId in await this.dao.getUserIdsByCategory(category)) {
                     await this.checkAccountValid(userId, category);
                 }
             });
