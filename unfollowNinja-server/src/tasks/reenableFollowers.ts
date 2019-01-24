@@ -4,19 +4,22 @@ import {UserCategory} from '../dao/dao';
 import logger from '../utils/logger';
 import Task from './task';
 
+const CATEGORIES_TO_CHECK = [
+    UserCategory.suspended,
+    UserCategory.revoked,
+    // UserCategory.dmclosed TODO
+];
+
 // reenable followers disabled because they were suspended or had a token issue
 export default class extends Task {
     public async run(job: Job) {
-        [
-            UserCategory.suspended,
-            UserCategory.revoked,
-            // UserCategory.dmclosed TODO
-        ]
-            .forEach(async category => {
+        return Promise.all(
+            CATEGORIES_TO_CHECK.map(async category => {
                 for (const userId in await this.dao.getUserIdsByCategory(category)) {
                     await this.checkAccountValid(userId, category);
                 }
-            });
+            }),
+        ).then(() => null);
     }
 
     private async checkAccountValid(userId: string, category: UserCategory) {
