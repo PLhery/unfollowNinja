@@ -90,6 +90,11 @@ if (cluster.isMaster) {
                     .then(() => done())
                     .catch((err) => {
                         logger.error(`An error happened with ${taskName} / @${job.data.username || ''}: ${err.stack}`);
+                        Sentry.withScope(scope => {
+                            scope.setTag('task-name', taskName);
+                            scope.setUser({username: job.data.username});
+                            Sentry.captureException(err);
+                        });
                         done(err);
                     });
             },
@@ -107,6 +112,7 @@ function death() {
     queue.shutdown( 9000, (err: Error) => {
         logger.info('Kue shutdown - %s', cluster.isMaster ? 'master' : 'worker ' + cluster.worker.id);
         if (err) {
+            Sentry.captureException(err);
             logger.error(err.message);
         }
         dao.disconnect();
