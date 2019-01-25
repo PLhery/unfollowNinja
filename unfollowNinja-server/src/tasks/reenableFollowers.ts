@@ -1,8 +1,12 @@
+import * as Sentry from '@sentry/node';
 import {Job} from 'kue';
 
 import {UserCategory} from '../dao/dao';
 import logger from '../utils/logger';
 import Task from './task';
+if (process.env.SENTRY_DSN) {
+    Sentry.init({ dsn: process.env.SENTRY_DSN });
+}
 
 const CATEGORIES_TO_CHECK = [
     UserCategory.suspended,
@@ -15,8 +19,15 @@ export default class extends Task {
     public async run(job: Job) {
         return Promise.all(
             CATEGORIES_TO_CHECK.map(async category => {
-                for (const userId in await this.dao.getUserIdsByCategory(category)) {
-                    await this.checkAccountValid(userId, category);
+                for (const userId of await this.dao.getUserIdsByCategory(category)) {
+                    await this.checkAccountValid(userId, category).catch((err) => {
+                        logger.error(err);
+                        Sentry.withScope(scope => {
+                            scope.setTag('task-name', 'reenableFollowers');
+                            scope.setUser({id: userId});
+                            Sentry.captureException(err);
+                        });
+                    });
                 }
             }),
         ).then(() => null);

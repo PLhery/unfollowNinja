@@ -1,5 +1,4 @@
-import {Redis} from 'ioredis';
-import {DoneCallback, Job, Queue} from 'kue';
+import {Job, Queue} from 'kue';
 import Dao from '../dao/dao';
 
 export default abstract class Task {
