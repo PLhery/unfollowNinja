@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import {Job} from 'kue';
 import {promisify} from 'util';
 import { UserCategory } from '../dao/dao';
@@ -19,7 +20,11 @@ export default class extends Task {
                 ` and ${inactiveCacheFTasks} queued cacheFollowers.` +
                 'Add some more CPUs/Workers! Skipping this check.');
             logger.error(error.message);
-            throw error;
+            Sentry.withScope(scope => {
+                scope.setFingerprint(['tooManyQueuedItems']);
+                Sentry.captureException(error);
+            });
+            return;
         }
         const users: string[] = await this.dao.getUserIdsByCategory(UserCategory.enabled);
 
