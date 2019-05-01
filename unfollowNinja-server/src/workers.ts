@@ -85,7 +85,7 @@ if (cluster.isMaster) {
         queue.process(
             taskName,
             WORKER_RATE_LIMIT,
-            (job, done) => {
+            (job: kue.Job, done: kue.DoneCallback) => {
                 task.run(job)
                     .then(() => done())
                     .catch((err) => {
