@@ -33,7 +33,7 @@ export default class extends Task {
 
             await promisify((cb) =>
                 this.queue
-                .create('checkFollowers', {title: `Check @${username} s followers`, username, userId})
+                .create('checkFollowers', {username, userId})
                 .removeOnComplete(true)
                 .priority('low')
                 .save(cb),
@@ -42,7 +42,7 @@ export default class extends Task {
             if (await this.dao.getUserDao(userId).getHasNotCachedFollowers()) {
                 await promisify((cb) =>
                     this.queue
-                        .create('cacheFollowers', {title: `cache @${username} s followers`, username, userId})
+                        .create('cacheFollowers', {username, userId})
                         .removeOnComplete(true)
                         .priority('low')
                         .save(cb),
