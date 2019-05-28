@@ -10,7 +10,7 @@ if (process.env.SENTRY_DSN) {
 
 const CATEGORIES_TO_CHECK = [
     UserCategory.suspended,
-    UserCategory.revoked,
+    // UserCategory.revoked, shouldnt be useful
     // UserCategory.dmclosed TODO
 ];
 
