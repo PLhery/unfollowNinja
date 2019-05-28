@@ -29,8 +29,8 @@ export default class extends Task {
                 if (remainingRequests === 0) {
                     // this may happen for ex if someone needs a 2nd requests in the 15th check of the 15minutes window
                     await userDao.setNextCheckTime(resetTime);
-                    // noinspection ExceptionCaughtLocallyJS
-                    throw new Error('No twitter requests remaining to pursue the job.');
+                    logger.error('@%s - No twitter requests remaining to pursue the job.', username);
+                    return;
                 }
                 const result: any = await twit.get('followers/ids', {cursor, stringify_ids: true});
                 cursor = result.data.next_cursor_str;
