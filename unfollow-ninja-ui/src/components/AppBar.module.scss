@@ -1,0 +1,18 @@
+.appBar {
+  a {
+    text-decoration: none;
+  }
+
+  transition: margin .2s ease;
+  img {
+    transition: transform .4s ease;
+  }
+
+  &:hover {
+    margin-top: -5px;
+    margin-bottom: 5px;
+    img {
+      transform: rotate(180deg);
+    }
+  }
+}
