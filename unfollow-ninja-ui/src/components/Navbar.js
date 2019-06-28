@@ -8,8 +8,6 @@ export default (props) => (
       <a href='https://twitter.com/unfollowNinja' target='_blank' rel='noopener noreferrer'>
         <Box
             direction='row'
-            align='center'
-            width='xlarge'
             pad={{horizontal: 'medium', vertical: 'small'}}
         >
             <Image title='logo' height={40} margin={{horizontal: 'xsmall'}} src={Images.Logo}/>
