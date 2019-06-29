@@ -1,0 +1,9 @@
+.sloped {
+  padding-top:80px!important;
+  clip-path: polygon(
+                  0 0,
+                  100% 80px,
+                  100% 100%,
+                  0 100%
+  );
+}

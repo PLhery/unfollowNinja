@@ -1,10 +1,10 @@
 import React from 'react';
 import {Box, Heading, Image} from "grommet/es6";
 import * as Images from "../images";
-import Styles from './AppBar.module.scss';
+import Styles from './Navbar.module.scss';
 
 export default (props) => (
-    <header className={Styles.appBar} {...props}>
+    <header className={Styles.navbar} {...props}>
       <a href='https://twitter.com/unfollowNinja' target='_blank' rel='noopener noreferrer'>
         <Box
             direction='row'
