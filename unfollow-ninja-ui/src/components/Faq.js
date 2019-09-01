@@ -1,12 +1,13 @@
 import React from 'react';
 import {Box, Heading, Paragraph} from "grommet/es6";
 import Emojify from 'react-emojione';
+import Styles from './Faq.module.scss';
 
 export default (props) => (
-    <Box alignSelf='center' pad='medium' margin='medium' background='rgba(255, 255, 255, 0.5)' {...props}>
+    <Box alignSelf='center' pad='medium' margin='medium' className={Styles.container} {...props}>
       <Heading level={1} color='dark'>Foire aux questions</Heading>
       <Heading level={3} color='dark'>Que signifient les différents messages et emojis ?</Heading>
-      <Paragraph><Emojify style={{height: 20, width: 20}}><ul>
+      <Emojify style={{height: 20, width: 20}}><ul>
         <li>Les messages suivants parlent d'eux-meme :<ul>
           <li><b>@username</b> vous a unfollow :wave:</li>
           <li><b>@username</b> a été suspendu :see_no_evil:</li>
@@ -20,21 +21,15 @@ export default (props) => (
         <li>"Ce compte vous suivait avant votre inscription à <b>@unfollowninja</b> !" : nous n'arrivons pas toujours à retrouver la date de follow exacte de chaque unfollower. Si on ne la trouve pas, nous vous donnons la première fois que nous l'avons vu sur votre compte. Mais s'il était déjà sur votre compte lors de votre inscription, nous ne pouvons vous donner de date.</li>
 
 
-      </ul></Emojify></Paragraph>
+      </ul></Emojify>
 
       <Heading level={3} color='dark'>Un ami m'a unfollow mais je n'ai pas été prévenu</Heading>
-      <Paragraph>Pas grand chose</Paragraph>
+      <Paragraph>Pour éviter de vous déranger trop souvent, plusieurs filtres s'appliquent sur les notifications envoyées. Pour être vraiment sur d'avoir la notification, la personne doit vous avoir suivie 24h et unfollow 20 minutes.</Paragraph>
 
-      <Heading level={3} color='dark'>Je ne recois pas de notification à la deuxième étape</Heading>
-      <Paragraph>Pas grand chose</Paragraph>
-
-
-      <Heading level={3} color='dark'>Pourquoi, à la deuxième étape, dois-je donner l'accès aux messages privés et aux tweets ?</Heading>
-      <Paragraph>Pas grand chose</Paragraph>
       <Heading level={3} color='dark'>Publierez-vous des tweets sans mon accord ?</Heading>
-      <Paragraph>Jamais</Paragraph>
+      <Paragraph>Absolument pas : lorsque vous vous connectez, vous ne nous donnez pas les droits pour publier sur votre compte ou lire vos messages privés.</Paragraph>
 
-      <Heading level={3} color='dark'>Pourquoi dois-je me connecter deux fois ?</Heading>
-      <Paragraph>Pas grand chose</Paragraph>
+      <Heading level={3} color='dark'>Pourquoi le service est-il gratuit ?</Heading>
+      <Paragraph>Ce projet est maintenu sur mon temps libre, et me permet d'avoir un projet sur lequel je peux librement experimenter, en parallèle de mon travail. L'association Hivane Network permet au service d'exister à moindre frais grâce au prêt d'un serveur virtuel.</Paragraph>
     </Box>
 );

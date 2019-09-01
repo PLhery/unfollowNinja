@@ -45,7 +45,7 @@ function App() {
           <Navbar/>
         </Section>
         <Section>
-          <Box direction='row' wrap='true' margin={{vertical: 'large'}}>
+          <Box direction='row' wrap={true} margin={{vertical: 'large'}}>
             <Box basis='medium' flex='grow' pad='medium'>
               <Heading level={1} color='dark'>Soyez prévenus rapidement de vos unfollowers Twitter</Heading>
               <Paragraph size='large'>Unfollow Ninja vous envoie un message privé dès qu'un twitto se désabonne de votre compte, en quelques secondes.</Paragraph>
@@ -57,7 +57,7 @@ function App() {
           </Box>
         </Section>
         <Section background='lightPink' sloped={true}>
-          <Box direction='row' wrap='true' align='center'>
+          <Box direction='row' wrap={true} align='center'>
             <Box basis='small' flex='grow' pad='medium'>
               <Image title='dog playing' fit='contain' src={Images.Dog}/>
             </Box>

@@ -12,7 +12,7 @@ export default (props) => (
       />
       <Button
           icon={<ChatOption/>}
-          label='Choisissez le compte qui vous enverra vos DMs'
+          label='Activez les notifications web'
           disabled={true}
       />
       <Button
