@@ -27,7 +27,7 @@ export default (props) => (
       <Paragraph>Pour éviter de vous déranger trop souvent, plusieurs filtres s'appliquent sur les notifications envoyées. Pour être vraiment sur d'avoir la notification, la personne doit vous avoir suivie 24h et unfollow 20 minutes.</Paragraph>
 
       <Heading level={3} color='dark'>Publierez-vous des tweets sans mon accord ?</Heading>
-      <Paragraph>Absolument pas : lorsque vous vous connectez, vous ne nous donnez pas les droits pour publier sur votre compte ou lire vos messages privés.</Paragraph>
+      <Paragraph>Cela ne peut pas arriver : lorsque vous vous connectez, vous ne nous donnez pas les droits pour publier sur votre compte ou lire vos messages privés.</Paragraph>
 
       <Heading level={3} color='dark'>Pourquoi le service est-il gratuit ?</Heading>
       <Paragraph>Ce projet est maintenu sur mon temps libre, et me permet d'avoir un projet sur lequel je peux librement experimenter, en parallèle de mon travail. L'association Hivane Network permet au service d'exister à moindre frais grâce au prêt d'un serveur virtuel.</Paragraph>
