@@ -4,8 +4,7 @@ https://unfollow.ninja
 
 Legacy version: https://github.com/PLhery/unfollowNinja/tree/legacy
 
-![Screenshot](http://i.imgur.com/QkMjAQS.png)
-(new landing page - WIP)
+![Screenshot](https://unfollow.ninja/preview.png)
 
 ## Install
 

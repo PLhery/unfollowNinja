@@ -48,7 +48,7 @@ function App() {
           <Box direction='row' wrap={true} margin={{vertical: 'large'}}>
             <Box basis='medium' flex='grow' pad='medium'>
               <Heading level={1} color='dark'>Soyez prévenus rapidement de vos unfollowers Twitter</Heading>
-              <Paragraph size='large'>Unfollow Ninja vous envoie un message privé dès qu'un twitto se désabonne de votre compte, en quelques secondes.</Paragraph>
+              <Paragraph size='large'>Unfollow Ninja vous envoie une notification dès qu'un twitto se désabonne de votre compte, en quelques secondes.</Paragraph>
               <MiniApp/>
             </Box>
             <Box basis='medium' flex='grow' pad='medium'>
