@@ -1,10 +1,12 @@
 .container {
   background-color: rgba(255, 255, 255, 0.5);
-  text-align: justify;
+  p, ul {
+    text-align: justify;
+  }
   h3 {
     margin-bottom: 0;
   }
   ul {
-    max-width: 800px;
+    max-width: 760px;
   }
 }

@@ -6,6 +6,13 @@ import Styles from './Faq.module.scss';
 export default (props) => (
     <Box alignSelf='center' pad='medium' margin='medium' className={Styles.container} {...props}>
       <Heading level={1} color='dark'>Foire aux questions</Heading>
+
+      <Heading level={3} color='dark'>Un ami m'a unfollow mais je n'ai pas été prévenu</Heading>
+      <Paragraph>Pour éviter de vous déranger trop souvent, plusieurs filtres s'appliquent sur les notifications envoyées. Pour être certain d'avoir la notification, la personne doit vous avoir suivie 24h et unfollow 20 minutes.</Paragraph>
+
+      <Heading level={3} color='dark'>Publierez-vous des tweets sans mon accord ?</Heading>
+      <Paragraph>Cela ne peut pas arriver : lorsque vous vous connectez, vous ne nous donnez pas les droits pour publier sur votre compte ou lire vos messages privés.</Paragraph>
+
       <Heading level={3} color='dark'>Que signifient les différents messages et emojis ?</Heading>
       <Emojify style={{height: 20, width: 20}}><ul>
         <li>Les messages suivants parlent d'eux-meme :<ul>
@@ -22,12 +29,6 @@ export default (props) => (
 
 
       </ul></Emojify>
-
-      <Heading level={3} color='dark'>Un ami m'a unfollow mais je n'ai pas été prévenu</Heading>
-      <Paragraph>Pour éviter de vous déranger trop souvent, plusieurs filtres s'appliquent sur les notifications envoyées. Pour être vraiment sur d'avoir la notification, la personne doit vous avoir suivie 24h et unfollow 20 minutes.</Paragraph>
-
-      <Heading level={3} color='dark'>Publierez-vous des tweets sans mon accord ?</Heading>
-      <Paragraph>Cela ne peut pas arriver : lorsque vous vous connectez, vous ne nous donnez pas les droits pour publier sur votre compte ou lire vos messages privés.</Paragraph>
 
       <Heading level={3} color='dark'>Pourquoi le service est-il gratuit ?</Heading>
       <Paragraph>Ce projet est maintenu sur mon temps libre, et me permet d'avoir un projet sur lequel je peux librement experimenter, en parallèle de mon travail. L'association Hivane Network permet au service d'exister à moindre frais grâce au prêt d'un serveur virtuel.</Paragraph>
