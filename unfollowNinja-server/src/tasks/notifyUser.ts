@@ -20,8 +20,8 @@ moment.tz.setDefault('Europe/Paris');
 // const BETA_USERS = split(process.env.BETA_USERS, ',').concat('testUsername');
 
 // friendships/show can be called 180 times/15min
-// with this limit it will be called < 120 times/15min
-const MAX_UNFOLLOWERS = 15;
+// with this limit it can be called max 200 times/15min (if checked 8 times)
+const MAX_UNFOLLOWERS = 25;
 
 export default class extends Task {
     public async run(job: Job) {
