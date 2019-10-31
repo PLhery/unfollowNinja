@@ -18,6 +18,10 @@ export default class UserDao {
         return this.redis.disconnect();
     }
 
+    public async getCategory(): Promise<UserCategory> {
+        return Number(await this.redis.zscore('users', this.userId));
+    }
+
     public async setCategory(category: UserCategory): Promise<void> {
         await this.redis.zadd('users', category.toString(), this.userId);
     }
@@ -152,5 +156,47 @@ export default class UserDao {
 
     public async getCachedFollowers(): Promise<string[]> {
         return this.redis.hkeys(`followers:snowflake-ids:${this.userId}`);
+    }
+
+    public async getAllUserData() {
+        const [ username, category, nextCheckTime, userParams, followers, followTimes, uncachables, snowflakeIds] =
+            await Promise.all([
+                this.redis.hget('cachedTwittos', `${this.userId}:username`),
+                this.getCategory(),
+                this.getNextCheckTime(),
+                this.getUserParams(),
+                this.getFollowers(),
+                this.redis.hgetall(`followers:follow-time:${this.userId}`),
+                this.redis.smembers(`followers:uncachable:${this.userId}`),
+                this.redis.hgetall(`followers:snowflake-ids:${this.userId}`),
+        ]);
+
+        return {
+            username,
+            category,
+            nextCheckTime,
+            userParams,
+            followers,
+            followTimes,
+            uncachables,
+            snowflakeIds,
+        };
+    }
+
+    // Not safe (some tasks for that user may still exist)
+    // But can be used for disabled account
+    public async deleteUser(): Promise<void> {
+        await Promise.all([
+            this.redis.zrem(`users`, this.userId),
+            this.redis.del(
+                `nextCheckTime:${this.userId}`,
+                `user:${this.userId}`,
+                `followers:${this.userId}`,
+                `followers:count:${this.userId}`,
+                `followers:follow-time:${this.userId}`,
+                `followers:uncachable:${this.userId}`,
+                `followers:snowflake-ids:${this.userId}`,
+            ),
+        ]);
     }
 }
