@@ -24,14 +24,19 @@ jobs:
           key: node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
       - name: npm ci
         if: steps.cache.outputs.cache-hit != 'true'
-        working-directory: ./unfollowNinja-server
+        working-directory: unfollowNinja-server
         run: npm ci
       - name: lint
-        working-directory: ./unfollowNinja-server
+        working-directory: unfollowNinja-server
         run: npm run lint
       - name: build
-        working-directory: ./unfollowNinja-server
+        working-directory: unfollowNinja-server
         run: npm run build
       - name: test
-        working-directory: ./unfollowNinja-server
+        working-directory: unfollowNinja-server
         run: npm run specs
+      - name: Archive test results
+        uses: actions/upload-artifact@v1
+        with:
+          name: test-results
+          path: unfollowNinja-server/test-results
