@@ -1,16 +1,15 @@
-# Unfollow Ninja
+# Unfollow Ninja [![Server CI status](https://github.com/PLhery/unfollowNinja/workflows/Server%20CI/badge.svg)](https://github.com/PLhery/unfollowNinja/actions?query=workflow%3A%22Server+CI%22)
+
 https://unfollow.ninja
 : Receive a notification when someone unfollows you on Twitter
 
-Legacy version: https://github.com/PLhery/unfollowNinja/tree/legacy
-
-![Screenshot](https://unfollow.ninja/preview.png)
+![Screenshot](https://raw.githubusercontent.com/PLhery/unfollowNinja/master/unfollow-ninja-ui/public/preview.png)
 
 ## Install
 
 - clone the repo `git clone git@github.com:PLhery/unfollowNinja.git`
 - `cd unfollowNinja/unfollowNinja-server`
-- install the dependencies `npm install`
+- install the dependencies and build the project `npm install && npm build`
 - create a .env file (see [.env file](#.env-file))
 - launch the workers `node ./dist/api/workers`
 - launch the api server `node ./dist/api`
@@ -44,26 +43,6 @@ SENTRY_DSN= # sentry DSN, if sentry is enabled
 
 You can also set these parameters as environment variables.
 
-## Motivation behind improving the legacy version
-
-TL;DR: Less bugs and faster notifications
-
-The legacy version couldn't scale and manage thousands of users, while still checking every 2 minutes the followers.
-Now, the program checks 30 000 users's followers every 2 minutes.
-
-- Based on a job queue for:
-    - Monitoring: I can see how much job/sec is happening, their errors, and rate limit them.
-    - Scalability: Everything was happening in one thread in one server. If a queue is full I can add a vcore and a worker thread.
-    - Atomicity: When the server restart, wait for every atomic job to finish instead of interupting them. (causing messages not sent or sent twice)
-    - Reliability: If a job fails, prepare better retry strategies.
-    - Uptime: Possibility to scale on two servers. If one server is down, the second one is still working.
-- Use Typescript to make code more bug-proof and clearer for contributors
-- Split the webserver from the worker: When the worker was busy, the webserver was slow because all was happening in the same thread.
-- Use redis for improved db performance
-- I18n
-- Use twitter's SnowFlake IDs to get the exact follow time
-- New UI
-  
 ## Contribute
 
 Open an issue with your suggestions or assign yourself to an existing issue
@@ -76,4 +55,24 @@ Open an issue with your suggestions or assign yourself to an existing issue
 - change line 3 of unfollowNinja-server/src/utils/types.ts and add your language code
 - commit and submit a pull request
 
-[License](./LICENSE.md) (ISC)
+
+## Motivation behind improving the legacy version
+
+Legacy version: https://github.com/PLhery/unfollowNinja/tree/legacy
+
+The legacy version couldn't scale and manage thousands of users, while still checking every 2 minutes the followers.
+Now, the program checks 50 000 users's followers every 3 minutes.
+
+- Based on a job queue for:
+    - Monitoring: I can see how much job/sec is happening, their errors, and rate limit them.
+    - Scalability: Everything was happening in one thread. Now the work is shared between 8 workers/vCPUs.
+    - Atomicity: When the server restart, wait for every atomic job to finish instead of interrupting them. (causing messages not sent or sent twice)
+    - Reliability: If a job fails, prepare better retry strategies.
+- Use Typescript to make code more bug-proof and clearer for contributors
+- Split the webserver from the worker: When the worker was busy, the webserver was slow because everything was happening in the same thread.
+- Use redis for improved db performance
+- I18n
+- Use twitter's SnowFlake IDs to get the exact follow time
+- New UI
+
+[License](./license.md) (Apache V2)
