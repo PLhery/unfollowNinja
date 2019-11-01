@@ -1,0 +1,30 @@
+name: Server CI
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x, 13.x]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - name: Use node ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: npm ci
+        working-directory: ./unfollowNinja-server
+        run: npm ci
+      - name: lint
+        working-directory: ./unfollowNinja-server
+        run: npm run lint
+      - name: compile
+        working-directory: ./unfollowNinja-server
+        run: npm run buil
+      - name: test specs
+        working-directory: ./unfollowNinja-server
+        run: npm run specs

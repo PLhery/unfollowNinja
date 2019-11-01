@@ -9,7 +9,7 @@
     "specs": "jest",
     "lint": "tslint -p tsconfig.json",
     "watch": "gulp",
-    "postinstall": "gulp compile",
+    "build": "gulp compile",
     "kue-ui": "kue-dashboard -p 3000",
     "importDbFromLegacy": "node ./dist/jobs/importDbFromLegacy",
     "cleanKue": "node ./dist/jobs/cleanKue"
