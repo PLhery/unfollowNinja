@@ -69,7 +69,8 @@ export default class extends Task {
         // know who you're blocking or blocked you
         await Promise.all(unfollowersInfo.map(async unfollower => { // know if we're blocked / if we blocked them
             let errorCode = null;
-            const friendship = await twit.get('friendships/show', {target_id: unfollower.id} as Params)
+            // in @types/twit 2.2.23 target_id must be a number, however it's safer to send a string TODO PR @types/twit
+            const friendship = await twit.get('friendships/show', {target_id: unfollower.id} as any as Params)
                 .catch(async (err) => {
                     await this.manageTwitterErrors(err, username, userId);
                     errorCode = get(err, 'twitterReply.errors[0].code', null);

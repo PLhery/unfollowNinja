@@ -61,7 +61,7 @@
     "@types/node-emoji": "^1.8.1",
     "@types/passport": "^1.0.1",
     "@types/passport-twitter": "^1.0.34",
-    "@types/twit": "^2.2.22",
+    "@types/twit": "^2.2.23",
     "big-integer": "^1.6.48",
     "connect-redis": "^3.4.2",
     "dotenv": "^8.2.0",
