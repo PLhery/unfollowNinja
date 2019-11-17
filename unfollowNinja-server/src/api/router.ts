@@ -3,6 +3,7 @@ import * as kue from 'kue';
 import * as passport from 'passport';
 import { promisify } from 'util';
 import Dao, {UserCategory} from '../dao/dao';
+import {IUserEgg} from '../utils/types';
 
 const router = Router();
 export default router;
@@ -27,7 +28,7 @@ router.get('/auth',  passport.authenticate('twitter'), (req, res) => {
 });
 
 router.get('/infos', shouldBeLoggedIn, (req, res) => {
-    const { username, id, photo, dmId, dmPhoto } = req.user;
+    const { username, id, photo, dmId, dmPhoto } = req.user as IUserEgg;
     if (dmId) {
         dao.getCachedUsername(dmId).then((dmUsername) => {
             res.json( { username, id, photo, dmId, dmUsername, dmPhoto });
@@ -38,7 +39,7 @@ router.get('/infos', shouldBeLoggedIn, (req, res) => {
 });
 
 router.get('/auth-dm-app', shouldBeLoggedIn, passport.authenticate('twitter-dm', { session: false }), (req, res) => {
-    const { username, id, photo, token, tokenSecret } = req.user;
+    const { username, id, photo, token, tokenSecret } = req.user as IUserEgg;
     Promise.all([
         dao.getUserDao(req.session.passport.user.id).setUserParams({
             dmId: id,

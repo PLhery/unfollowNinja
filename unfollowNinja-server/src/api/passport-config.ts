@@ -10,11 +10,7 @@ if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET) {
     logger.error('Make sure you added them in a .env file in you cwd or that you defined them.');
     process.exit();
 }
-if (!process.env.DM_CONSUMER_KEY || !process.env.DM_CONSUMER_SECRET) {
-    logger.error('Some required environment variables are missing (DM_CONSUMER_KEY / DM_CONSUMER_SECRET).');
-    logger.error('Make sure you added them in a .env file in you cwd or that you defined them.');
-    process.exit();
-}
+
 const { CONSUMER_KEY, CONSUMER_SECRET, DM_CONSUMER_KEY, DM_CONSUMER_SECRET } = process.env;
 const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:2000/`;
 
