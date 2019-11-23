@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Test userDao should get a stable getAllUserData 1`] = `
+Object {
+  "category": 2,
+  "followTimes": Object {
+    "1": "123",
+    "4": "456",
+  },
+  "followers": Array [
+    "1",
+    "4",
+  ],
+  "nextCheckTime": 123,
+  "snowflakeIds": Object {
+    "4": "1654482657084000",
+  },
+  "uncachables": Array [
+    "1",
+  ],
+  "userParams": Object {
+    "added_at": "1234",
+    "dmId": "",
+    "dmPhoto": "",
+    "dmToken": "",
+    "dmTokenSecret": "",
+    "lang": "fr",
+    "photo": "http://twitter.com/photo.jpg",
+    "token": "t0k3n",
+    "tokenSecret": "s3cr3t",
+  },
+  "username": "user 1",
+}
+`;
