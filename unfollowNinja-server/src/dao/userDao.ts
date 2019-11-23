@@ -51,6 +51,9 @@ export default class UserDao {
     // get twitter instance with refreshed user's credentials
     public async getTwit(): Promise<Twit> {
         const [ token, tokenSecret ] = await this.redis.hmget(`user:${this.userId}`, 'token', 'tokenSecret');
+        if (!token || !tokenSecret) {
+            throw new Error('Tried to create a new Twit client but the user didn\'t have any credentials stored');
+        }
         return new Twit({
             access_token:         token,
             access_token_secret:  tokenSecret,
@@ -62,6 +65,10 @@ export default class UserDao {
     // get DM twitter instance with refreshed user's credentials
     public async getDmTwit(): Promise<Twit> {
         const [ dmToken, dmTokenSecret ] = await this.redis.hmget(`user:${this.userId}`, 'dmToken', 'dmTokenSecret');
+        if (!dmToken || !dmTokenSecret) {
+            // TODO investigate - happens ~4 times a day on sendWelcomeMessage
+            throw new Error('Tried to create a new Twit DM client but the user didn\'t have any DM credentials stored');
+        }
         return new Twit({
             access_token: dmToken,
             access_token_secret: dmTokenSecret,
@@ -147,11 +154,6 @@ export default class UserDao {
         const nbUncachable = Number(await this.redis.scard(`followers:uncachable:${this.userId}`));
         const nbFollowers = Number(await this.redis.get(`followers:count:${this.userId}`));
         return nbCached + nbUncachable < nbFollowers;
-    }
-
-    public async addFollowTimes(notCachedFollowers: Array<{followTime: string, id: string}>): Promise<void> {
-        const notCachedDict = fromPairs(notCachedFollowers.map(f => [f.id, f.followTime]));
-        await this.redis.hmset(`followers:follow-time:${this.userId}`, notCachedDict);
     }
 
     public async getCachedFollowers(): Promise<string[]> {

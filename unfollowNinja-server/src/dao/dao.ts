@@ -56,11 +56,6 @@ export default class Dao {
         return this.redis.zrangebyscore('users', category, category);
     }
 
-    public async getCachedTwitto(userId: string): Promise<ITwittoInfo> {
-        const username = await this.redis.hget('cachedTwittos', `${userId}:username`);
-        return username !== null ? {id: userId, username} : null;
-    }
-
     public async getCachedUsername(userId: string): Promise<string> {
         return this.redis.hget('cachedTwittos', `${userId}:username`);
     }
@@ -71,10 +66,5 @@ export default class Dao {
             this.redis.zadd('cachedTwittosIds', time.toString(), id),
             this.redis.hset(`cachedTwittos`, `${id}:username`, username),
         ]);
-    }
-
-    // set the total numbers of unique unfollowers detected in the previous unfollowninja backend
-    public async setTotalUnfollowersLegacy(nbUnfollowers: number): Promise<void> {
-        await this.redis.set('total-unfollowers-legacy', nbUnfollowers.toString());
     }
 }
