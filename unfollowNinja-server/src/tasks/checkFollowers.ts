@@ -69,10 +69,7 @@ export default class extends Task {
                 }
                 throw err;
             } else {
-                const unexpected = await this.manageTwitterErrors(err.twitterReply, username, userId);
-                if (unexpected) {
-                    throw err;
-                }
+                await this.manageTwitterErrors(err.twitterReply, username, userId);
             }
         }
     }
@@ -127,21 +124,18 @@ export default class extends Task {
         }
     }
 
-    // return true if the error is really unexpected / the job will be kept in the "failed" section
+    // Manage or rethrow twitter errors
     private async manageTwitterErrors(
-        twitterReply: Twit.Twitter.Errors, username: string, userId: string): Promise<boolean> {
+        twitterReply: Twit.Twitter.Errors, username: string, userId: string): Promise<void> {
         const userDao = this.dao.getUserDao(userId);
 
-        for (const { code, message } of twitterReply.errors) {
+        for (const { code, message } of (twitterReply.errors)) {
             switch (code) {
                 // app-related
                 case 32:
-                    logger.error('Authentication problem with @%s. ' +
-                        'Please check that your consumer key & secret are correct.', username);
-                    return true;
+                    throw new Error(`[checkFollowers] Authentication problems. Please check that your consumer key.`);
                 case 416:
-                    logger.error('Oops, it looks like the application has been suspended :/...');
-                    return true;
+                    throw new Error(`[checkFollowers] Oops, it looks like the application has been suspended :/...`);
                 // user-related
                 case 89:
                     logger.warn('@%s revoked the token. removing him from the list...', username);
@@ -154,17 +148,12 @@ export default class extends Task {
                 // twitter errors
                 case 130: // over capacity
                 case 131: // internal error
-                    logger.warn('Twitter has problems at the moment, skipping this check');
-                    return true;
+                    throw new Error(`[checkFollowers] internal Twitter error`);
                 case 88: // rate limit
-                    logger.warn('@%s reached its rate-limit.', username);
-                    return true;
+                    throw new Error(`[checkFollowers] the user reached its rate-limit.`);
                 default:
-                    logger.error('An unexpected twitter error occured with @%s: %d %s',
-                        username, code, message);
-                    return true;
+                    throw new Error(`[checkFollowers] An unexpected twitter error occured: ${code} ${message}`);
             }
         }
-        return false;
     }
 }
