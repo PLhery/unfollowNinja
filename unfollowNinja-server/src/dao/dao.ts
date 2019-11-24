@@ -8,6 +8,7 @@ export enum UserCategory {
     revoked,
     disabled,
     dmclosed,
+    accountClosed,
 }
 
 export default class Dao {

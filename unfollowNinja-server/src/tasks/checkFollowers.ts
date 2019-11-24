@@ -138,12 +138,16 @@ export default class extends Task {
                     throw new Error(`[checkFollowers] Oops, it looks like the application has been suspended :/...`);
                 // user-related
                 case 89:
-                    logger.warn('@%s revoked the token. removing him from the list...', username);
+                    logger.warn('@%s revoked the token. Removing him from the list...', username);
                     await userDao.setCategory(UserCategory.revoked);
                     break;
                 case 326:
-                    logger.warn('@%s is suspended. removing him from the list...', username);
+                    logger.warn('@%s is suspended. Removing him from the list...', username);
                     await userDao.setCategory(UserCategory.suspended);
+                    break;
+                case 34: // 404 - the user closed his account?
+                    logger.warn('@%s this account doesn\'t exist. Removing him from the list...', username);
+                    await userDao.setCategory(UserCategory.accountClosed);
                     break;
                 // twitter errors
                 case 130: // over capacity
