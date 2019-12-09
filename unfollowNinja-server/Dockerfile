@@ -6,10 +6,10 @@ WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Bundle app source
 COPY . .
-RUN npm build
+RUN npm run build
 
 CMD [ "npm", "start" ]

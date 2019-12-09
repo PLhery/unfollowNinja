@@ -4,7 +4,8 @@
   "description": "Receive a direct message in a few seconds when someone unfollows you on Twitter",
   "main": "./dist/workers.js",
   "scripts": {
-    "start": "node .",
+    "start": "node ./dist/workers.js",
+    "start-api": "node ./dist/api.js",
     "test": "npm run lint && gulp compile && npm run specs",
     "specs": "jest",
     "jest": "jest",
@@ -51,7 +52,7 @@
   },
   "dependencies": {
     "@sentry/node": "^5.9.0",
-    "@types/connect-redis": "0.0.10",
+    "@types/connect-redis": "0.0.13",
     "@types/express": "^4.17.2",
     "@types/express-session": "^1.15.15",
     "@types/i18n": "^0.8.6",
@@ -65,7 +66,7 @@
     "@types/passport-twitter": "^1.0.34",
     "@types/twit": "^2.2.23",
     "big-integer": "^1.6.48",
-    "connect-redis": "^3.4.2",
+    "connect-redis": "^4.0.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.0",

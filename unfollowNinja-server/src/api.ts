@@ -5,6 +5,7 @@ import * as bodyParser from 'body-parser';
 import * as connectRedis from 'connect-redis';
 import * as express from 'express';
 import * as session from 'express-session';
+import * as Redis from 'ioredis';
 import * as passport from 'passport';
 
 import passportConfig from './api/passport-config';
@@ -28,7 +29,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 const RedisStore = connectRedis(session);
 app.use(session({
-    store: new RedisStore({}),
+    store: new RedisStore({client: new Redis(process.env.REDIS_URI)}),
     secret: API_SESSION_SECRET,
     resave: false,
     saveUninitialized: true,

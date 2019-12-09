@@ -19,7 +19,7 @@ const shouldBeLoggedIn: RequestHandler = (req, res, next) => {
 };
 
 const dao = new Dao();
-const queue = kue.createQueue();
+const queue = kue.createQueue({redis: process.env.REDIS_KUE_URI});
 
 router.get('/', (req, res) => res.json({message: 'Unfollow ninja API is up!'}));
 
