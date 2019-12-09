@@ -35,7 +35,7 @@ if (!process.env.DM_CONSUMER_KEY || !process.env.DM_CONSUMER_SECRET) {
     process.exit();
 }
 
-const queue = kue.createQueue();
+const queue = kue.createQueue({redis: process.env.REDIS_KUE_URI});
 queue.setMaxListeners(200);
 
 queue.on( 'error',  ( err: Error ) => {
@@ -55,7 +55,7 @@ if (cluster.isMaster) {
 
     queue.client.once('connect', () => {
         queue.removeListener('error', initFailed);
-        logger.info('Connected to the redis server');
+        logger.info('Connected to the kue redis server');
     });
 
     logger.info('Cleaning the previously created delayed jobs');

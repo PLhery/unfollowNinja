@@ -14,7 +14,7 @@ export enum UserCategory {
 export default class Dao {
     private readonly redis: Redis.Redis;
 
-    constructor(redis = new Redis()) {
+    constructor(redis = new Redis(process.env.REDIS_URI)) {
         this.redis = redis;
     }
 

@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  tests:
+    build: ..
+    command: "npm run specs"
+    volumes:
+      - ..:/usr/app/
+      - /usr/app/node_modules
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      REDIS_TEST_URI: redis://redis
+  postgres:
+    image: postgres:12
+  redis:
+    image: redis:5

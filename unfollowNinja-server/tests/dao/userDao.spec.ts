@@ -1,10 +1,10 @@
-import { Redis } from 'ioredis';
+import * as Redis from 'ioredis';
 // @ts-ignore
 import * as RedisMock from 'ioredis-mock'; // @types/ioredis-mock doesn't exist yet
 import Dao, {UserCategory} from '../../src/dao/dao';
 import {IUserEgg, IUserParams} from '../../src/utils/types';
 
-const redis: Redis = new RedisMock(); // todo replace with a real redis running in docker
+const redis = process.env.REDIS_TEST_URI ? new Redis(process.env.REDIS_TEST_URI) : new RedisMock();
 const dao = new Dao(redis);
 
 const uDao1 = dao.getUserDao('1');

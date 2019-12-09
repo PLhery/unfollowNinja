@@ -9,7 +9,7 @@ export default class UserDao {
     private readonly redis: Redis.Redis;
     private readonly userId: string;
 
-    constructor(userId: string, redis = new Redis()) {
+    constructor(userId: string, redis = new Redis(process.env.REDIS_URI)) {
         this.redis = redis;
         this.userId = userId;
     }
