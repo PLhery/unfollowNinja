@@ -3,6 +3,7 @@ import {Job} from 'kue';
 import {promisify} from 'util';
 import { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
+import metrics from '../utils/metrics';
 import Task from './task';
 
 // Every three minutes, create checkFollowers tasks
@@ -27,6 +28,7 @@ export default class extends Task {
             return;
         }
         const users: string[] = await this.dao.getUserIdsByCategory(UserCategory.enabled);
+        metrics.gauge('uninja.users.enabled', users.length);
 
         for (const userId of users) {
             const username: string = await this.dao.getCachedUsername(userId);
