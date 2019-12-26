@@ -4,6 +4,7 @@ import * as Twit from 'twit';
 import {promisify} from 'util';
 import { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
+import metrics from '../utils/metrics';
 import {IUnfollowerInfo} from '../utils/types';
 import Task from './task';
 
@@ -12,6 +13,11 @@ export default class extends Task {
         const { username, userId } = job.data;
         const userDao = this.dao.getUserDao(userId);
         const startedAt = Number(job.started_at);
+
+        if (job.data.metric) {
+            const { name, from } = job.data.metric;
+            metrics.gauge(name, startedAt - Number(from));
+        }
 
         if (startedAt < await userDao.getNextCheckTime()) {
             return;
