@@ -39,20 +39,16 @@ export default class extends Task {
                     throw new Error('No twitter requests remaining to pursue the job.');
                 }
                 const result: any = await twit.get('followers/ids', {cursor, stringify_ids: true});
+                if (!result.data && result.resp.statusCode === 503) {
+                    // noinspection ExceptionCaughtLocallyJS
+                    throw new Error('[checkFollowers] Twitter services overloaded / unavailable (503)');
+                }
                 cursor = result.data.next_cursor_str;
                 requests++;
 
                 remainingRequests = Number(result.resp.headers['x-rate-limit-remaining']);
                 resetTime = Number(result.resp.headers['x-rate-limit-reset']) * 1000;
-                // goal: understand "TypeError: Cannot read property 'Symbol(Symbol.iterator)' of followers.push"
-                // TODO remove this try-catch
-                try {
-                    followers.push(...result.data.ids);
-                } catch (err) {
-                    logger.error('unexpected exception on followers.push');
-                    logger.error(JSON.stringify(result));
-                    throw err;
-                }
+                followers.push(...result.data.ids);
             }
             // Compute next time we can do the X requests
             const remainingChecks = Math.floor(remainingRequests / requests);
@@ -114,8 +110,6 @@ export default class extends Task {
                 promisify((cb) =>
                     this.queue
                         .create('notifyUser', {
-                            title: `Notify @${username} that he's been unfollowed by ` +
-                                unfollowersInfo.map((u) => u.id).toString(),
                             userId,
                             username,
                             unfollowersInfo,
