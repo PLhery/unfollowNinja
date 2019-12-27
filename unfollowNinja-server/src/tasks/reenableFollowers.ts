@@ -32,7 +32,7 @@ export default class extends Task {
                 }
             }),
         ).then(() => {
-            metrics.gauge('uninja.reenableFollowers.reenabled', Date.now() - Number(job.started_at));
+            metrics.gauge('uninja.reenableFollowers.duration', Date.now() - Number(job.started_at));
         });
     }
 
