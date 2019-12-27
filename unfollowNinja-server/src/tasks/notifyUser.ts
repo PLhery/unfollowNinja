@@ -238,13 +238,13 @@ export default class extends Task {
                     logger.warn('@%s is suspended. removing him from the list...', username);
                     await userDao.setCategory(UserCategory.suspended);
                     return true;
-                case 150:
+                case 150: // dm closed to non-followers
+                case 349: // user blocked?
                     logger.warn('@%s does not accept DMs. removing him from the list...', username);
                     await userDao.setCategory(UserCategory.dmclosed);
                     return true;
                 case 292:
-                    logger.warn('@%s notify request blocked because "it seems automated".', username);
-                    break;
+                    throw new Error('Notification blocked because "it seems automated".');
                 // twitter errors
                 case 130: // over capacity
                 case 131: // internal error`
