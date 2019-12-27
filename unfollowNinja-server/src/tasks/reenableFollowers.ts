@@ -3,6 +3,7 @@ import {Job} from 'kue';
 
 import {UserCategory} from '../dao/dao';
 import logger from '../utils/logger';
+import metrics from '../utils/metrics';
 import Task from './task';
 if (process.env.SENTRY_DSN) {
     Sentry.init({ dsn: process.env.SENTRY_DSN });
@@ -30,7 +31,9 @@ export default class extends Task {
                     });
                 }
             }),
-        ).then(() => null);
+        ).then(() => {
+            metrics.gauge('uninja.reenableFollowers.reenabled', Date.now() - Number(job.started_at));
+        });
     }
 
     private async checkAccountValid(userId: string, category: UserCategory) {

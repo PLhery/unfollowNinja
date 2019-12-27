@@ -33,8 +33,8 @@ export default class Scheduler {
         await this.createTwitterTasks();
 
         // twice a day, reenable suspended followers
-        this.dailyIntervalId = setInterval(() => this.createDailyTasks(), 12 * 60 * 60 * 1000);
-        await this.createDailyTasks();
+        this.dailyIntervalId = setInterval(() => this.createTriHourlyTasks(), 3 * 60 * 60 * 1000);
+        await this.createTriHourlyTasks();
     }
 
     public stop() {
@@ -58,7 +58,7 @@ export default class Scheduler {
             .save(cb))();
     }
 
-    private async createDailyTasks(): Promise<void> {
+    private async createTriHourlyTasks(): Promise<void> {
         if (await this.dao.getSchedulerId() !== this.schedulerId) {
             logger.warn('A new scheduler has been launched, cancelling this one...');
             this.stop();
