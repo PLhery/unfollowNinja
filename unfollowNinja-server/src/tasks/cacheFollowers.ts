@@ -41,6 +41,10 @@ export default class extends Task {
             const result: any = await twit.get('followers/list', {
                 cursor, count, skip_status: true, include_user_entities: false,
             });
+            if (!result.data && result.resp.statusCode === 503) {
+                // noinspection ExceptionCaughtLocallyJS
+                throw new Error('[checkFollowers] Twitter services overloaded / unavailable (503)');
+            }
 
             const users: Twitter.User[] = result.data.users;
             const next_cursor_str: string = result.data.next_cursor_str;
