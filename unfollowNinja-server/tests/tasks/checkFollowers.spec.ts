@@ -14,8 +14,8 @@ job.started_at = Date.now();
 const task = new CheckFollowers(dao, queue);
 
 // reset time in sec (and not ms)
-function mockTwitterReply(ids: string[], nextCursorStr = '0', remaining = '15', resetTime = '0') {
-    userDao.twit.get.mockResolvedValueOnce({
+function mockTwitterReply(ids: string[], nextCursorStr = '0', remaining = '15', resetTime = '0', twit = userDao.twit) {
+    twit.get.mockResolvedValueOnce({
         data: {
             ids,
             next_cursor_str: nextCursorStr,
@@ -137,10 +137,21 @@ describe('checkFollowers task', () => {
         expect(userDao.setNextCheckTime.mock.calls[0][0]).toBeLessThan(Number(job.started_at) + 60 * 1000);
     });
 
-    test('If there is no requests remaining, nextCheckTime is next reset time', async () => {
+    test('If there is no requests remaining (75 000+ followers), use DM tokens', async () => {
         const resetTime = Math.floor(Number(job.started_at) / 1000 + 15 * 60);
-        mockTwitterReply(['123', '234'], '0', '0', resetTime.toString());
+        mockTwitterReply(['123', '234'], '100', '0', resetTime.toString());
+        mockTwitterReply(['345', '456'], '0', '0', resetTime.toString(), userDao.dmTwit);
         await task.run(job);
-        expect(userDao.setNextCheckTime).toBeCalledWith(resetTime * 1000);
+        expect(userDao.twit.get).toBeCalled();
+        expect(userDao.dmTwit.get).toBeCalled();
+    });
+
+    test('If there is no requests remaining on any token, nextCheckTime is max(next reset times)', async () => {
+        const resetTime1 = Math.floor(Number(job.started_at) / 1000 + 14 * 60);
+        const resetTime2 = Math.floor(Number(job.started_at) / 1000 + 13 * 60);
+        mockTwitterReply(['123', '234'], '100', '0', resetTime1.toString());
+        mockTwitterReply(['345', '456'], '50', '0', resetTime2.toString(), userDao.dmTwit);
+        await expect(task.run(job)).rejects.toThrowError('No twitter requests remaining to pursue the job.');
+        expect(userDao.setNextCheckTime).toBeCalledWith(resetTime1 * 1000); // max(rt1,rt2)
     });
 });

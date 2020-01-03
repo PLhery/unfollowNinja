@@ -23,7 +23,9 @@ export default class extends Task {
             return;
         } // don't check every minute if the user has more than 5000 followers : we can only get 5000 followers/minute
 
-        const twit = await userDao.getTwit();
+        let twit = await userDao.getTwit();
+        let useDmTwit = false;
+        let twitResetTime = 0;
 
         let requests = 0;
         let cursor = '-1';
@@ -33,12 +35,19 @@ export default class extends Task {
             let resetTime: number;
             while (cursor !== '0') {
                 if (remainingRequests === 0) {
-                    // this may happen for ex if someone needs a 2nd requests in the 15th check of the 15minutes window
-                    await userDao.setNextCheckTime(resetTime);
-                    // noinspection ExceptionCaughtLocallyJS
-                    throw new Error('No twitter requests remaining to pursue the job.');
+                    if (useDmTwit) {
+                        // this may happen for 150 000+ followers
+                        await userDao.setNextCheckTime(Math.max(resetTime, twitResetTime));
+                        // noinspection ExceptionCaughtLocallyJS
+                        throw new Error('No twitter requests remaining to pursue the job.');
+                    } else {
+                        // this may happen for 75 000+ followers
+                        useDmTwit = true;
+                        twitResetTime = resetTime;
+                        twit = await userDao.getDmTwit();
+                    }
                 }
-                const result: any = await twit.get('followers/ids', {cursor, stringify_ids: true});
+                const result: any = await twit.get('followers/ids', {cursor, stringify_ids: true, user_id: userId});
                 if (!result.data && result.resp.statusCode === 503) {
                     // noinspection ExceptionCaughtLocallyJS
                     throw new Error('[checkFollowers] Twitter services overloaded / unavailable (503)');
