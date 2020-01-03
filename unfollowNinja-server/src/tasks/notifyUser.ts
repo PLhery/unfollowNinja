@@ -133,6 +133,8 @@ export default class extends Task {
                             isSecondTry: true,
                         })
                         .delay(15 * 60 * 1000)
+                        .attempts(5)
+                        .backoff( {delay: 60000, type: 'exponential'})
                         .removeOnComplete(true)
                         .save(cb),
                 )();

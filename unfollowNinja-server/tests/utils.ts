@@ -43,6 +43,8 @@ export function queueMock() {
         create: jest.fn().mockReturnThis(),
         removeOnComplete: jest.fn().mockReturnThis(),
         delay: jest.fn().mockReturnThis(),
+        attempts: jest.fn().mockReturnThis(),
+        backoff: jest.fn().mockReturnThis(),
         save: jest.fn().mockImplementation((cb) => cb()),
         priority: jest.fn().mockReturnThis(),
 

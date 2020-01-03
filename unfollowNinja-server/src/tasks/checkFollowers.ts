@@ -124,6 +124,8 @@ export default class extends Task {
                             unfollowersInfo,
                         })
                         .removeOnComplete(true)
+                        .attempts(5)
+                        .backoff( {delay: 60000, type: 'exponential'})
                         .save(cb),
                 )(),
                 userDao.updateFollowers(followers, newFollowers, unfollowers, newUser ? 0 : Number(job.started_at)),

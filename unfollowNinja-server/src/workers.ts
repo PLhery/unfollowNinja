@@ -95,7 +95,7 @@ if (cluster.isMaster) {
                             scope.setUser({username: job.data.username});
                             Sentry.captureException(err);
                         });
-                        done();
+                        done(err);
                     });
             },
         );
