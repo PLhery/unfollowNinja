@@ -9,7 +9,11 @@ COPY package*.json ./
 RUN npm ci
 
 # Bundle app source
-COPY . .
+COPY src src
+COPY *.json ./
+COPY *.js ./
 RUN npm run build
+
+COPY .env .env
 
 CMD [ "npm", "start" ]
