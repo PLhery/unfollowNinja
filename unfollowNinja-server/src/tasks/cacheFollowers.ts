@@ -43,7 +43,7 @@ export default class extends Task {
             });
             if (!result.data && result.resp.statusCode === 503) {
                 // noinspection ExceptionCaughtLocallyJS
-                throw new Error('[checkFollowers] Twitter services overloaded / unavailable (503)');
+                throw new Error('[cacheFollowers] Twitter services overloaded / unavailable (503)');
             }
 
             const users: Twitter.User[] = result.data.users;
