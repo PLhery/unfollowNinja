@@ -54,7 +54,7 @@ router.get('/auth-dm-app', shouldBeLoggedIn, passport.authenticate('twitter-dm',
             queue
                 .create('sendWelcomeMessage', {
                     title: `send welcome message to @${username}`,
-                    userId: id,
+                    userId: req.session.passport.user.id,
                     username,
                 })
                 .removeOnComplete(true)

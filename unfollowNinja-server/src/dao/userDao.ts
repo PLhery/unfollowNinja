@@ -66,7 +66,6 @@ export default class UserDao {
     public async getDmTwit(): Promise<Twit> {
         const [ dmToken, dmTokenSecret ] = await this.redis.hmget(`user:${this.userId}`, 'dmToken', 'dmTokenSecret');
         if (!dmToken || !dmTokenSecret) {
-            // TODO investigate - happens ~4 times a day on sendWelcomeMessage
             throw new Error('Tried to create a new Twit DM client but the user didn\'t have any DM credentials stored');
         }
         return new Twit({
