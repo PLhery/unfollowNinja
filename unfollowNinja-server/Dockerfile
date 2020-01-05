@@ -14,6 +14,8 @@ COPY *.json ./
 COPY *.js ./
 RUN npm run build
 
+COPY tests tests
+COPY locales locales
 COPY .env .env
 
 CMD [ "npm", "start" ]
