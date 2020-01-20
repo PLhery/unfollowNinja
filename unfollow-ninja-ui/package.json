@@ -5,7 +5,7 @@
   "dependencies": {
     "grommet": "^2.7.7",
     "grommet-icons": "^4.3.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.1",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-emojione": "^5.0.1",
