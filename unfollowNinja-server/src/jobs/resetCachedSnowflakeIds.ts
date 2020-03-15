@@ -1,4 +1,4 @@
-import * as Redis from 'ioredis';
+import Redis from 'ioredis';
 import Dao from '../dao/dao';
 
 // ran once (while it was in beta) to fix an inconsistency in the DB

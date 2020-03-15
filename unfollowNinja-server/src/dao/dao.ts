@@ -1,4 +1,4 @@
-import * as Redis from 'ioredis';
+import Redis from 'ioredis';
 import { ITwittoInfo, IUserEgg, IUserParams } from '../utils/types';
 import UserDao from './userDao';
 

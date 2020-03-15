@@ -1,12 +1,12 @@
 import 'dotenv/config';
 
-import * as Sentry from '@sentry/node';
-import * as bodyParser from 'body-parser';
-import * as connectRedis from 'connect-redis';
-import * as express from 'express';
-import * as session from 'express-session';
-import * as Redis from 'ioredis';
-import * as passport from 'passport';
+import Sentry from '@sentry/node';
+import bodyParser from 'body-parser';
+import connectRedis from 'connect-redis';
+import express from 'express';
+import session from 'express-session';
+import Redis from 'ioredis';
+import passport from 'passport';
 
 import passportConfig from './api/passport-config';
 import router from './api/router';

@@ -1,4 +1,4 @@
-import * as SDC from 'statsd-client';
+import SDC from 'statsd-client';
 
 const STATSD_HOST = process.env.STATSD_HOST || undefined;
 

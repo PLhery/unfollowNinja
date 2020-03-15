@@ -1,6 +1,6 @@
-import * as Redis from 'ioredis';
+import Redis from 'ioredis';
 import { fromPairs } from 'lodash';
-import * as Twit from 'twit';
+import Twit from 'twit';
 import {IUnfollowerInfo, IUser, IUserParams, Lang} from '../utils/types';
 import { twitterCursorToTime } from '../utils/utils';
 import { UserCategory } from './dao';

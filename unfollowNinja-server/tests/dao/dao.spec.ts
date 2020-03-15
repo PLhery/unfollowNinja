@@ -1,6 +1,6 @@
-import * as Redis from 'ioredis';
+import Redis from 'ioredis';
 // @ts-ignore
-import * as RedisMock from 'ioredis-mock'; // @types/ioredis-mock doesn't exist yet
+import RedisMock from 'ioredis-mock'; // @types/ioredis-mock doesn't exist yet
 import Dao, {UserCategory} from '../../src/dao/dao';
 import { IUserEgg } from '../../src/utils/types';
 

@@ -1,8 +1,8 @@
-import * as i18n from 'i18n';
+import i18n from 'i18n';
 import { Job } from 'kue';
 import { defaults, difference, get, keyBy, split } from 'lodash';
-import * as moment from 'moment-timezone';
-import * as emojis from 'node-emoji';
+import moment from 'moment-timezone';
+import emojis from 'node-emoji';
 import { Params, Twitter } from 'twit';
 import { promisify } from 'util';
 import { UserCategory } from '../dao/dao';

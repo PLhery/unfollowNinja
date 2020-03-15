@@ -4,9 +4,10 @@
     "tests/**/*.ts"
   ],
   "compilerOptions": {
-    "noImplicitAny": true,
-    "lib": ["es2017"],
     "module": "commonjs",
-    "target": "es2017"
+    "esModuleInterop": true,
+    "target": "es2019",
+    "outDir": "dist",
+    "incremental": true
   }
 }
