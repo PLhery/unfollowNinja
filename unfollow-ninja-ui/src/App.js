@@ -1,4 +1,8 @@
 import React from 'react';
+import { BrowserRouter as Router } from "react-router-dom";
+import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
+import nanoid  from 'nanoid';
+
 import './style.scss';
 import 'react-github-cards/dist/default.css';
 
@@ -38,6 +42,16 @@ const theme = {
   },
 };
 
+localStorage['uid'] = localStorage['uid'] || nanoid();
+
+const client = new ApolloClient({
+  cache: new InMemoryCache(),
+  uri: 'https://api2.unfollow.ninja',
+  headers: {
+    uid: localStorage['uid'],
+  }
+});
+
 function App() {
   return (
       <Grommet theme={theme}>
@@ -49,7 +63,11 @@ function App() {
             <Box basis='medium' flex={true} pad='medium'>
               <Heading level={1} color='dark'>Soyez prévenus rapidement de vos unfollowers Twitter</Heading>
               <Paragraph size='large'>Unfollow Ninja vous envoie une notification dès qu'un twitto se désabonne de votre compte, en quelques secondes.</Paragraph>
-              <MiniApp/>
+              <ApolloProvider client={client}>
+                <Router>
+                  <MiniApp/>
+                </Router>
+              </ApolloProvider>
             </Box>
             <Box basis='medium' flex={true} pad='medium'>
               <Image title='smartphone' src={Images.Smartphone}/>
