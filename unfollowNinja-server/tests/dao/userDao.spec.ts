@@ -78,8 +78,8 @@ describe('Test userDao', () => {
     });
 
     test('should be able to fetch and edit user params', async () => {
-        const uParamsStr1 = {...USER_PARAMS_1, added_at: '1234', dmId: '', dmPhoto: '', dmToken: '', dmTokenSecret: ''};
-        const uParamsStr2 = {...USER_PARAMS_2, added_at: '2345'};
+        const uParamsStr1 = {...USER_PARAMS_1, added_at: 1234, dmId: '', dmPhoto: '', dmToken: '', dmTokenSecret: ''};
+        const uParamsStr2 = {...USER_PARAMS_2, added_at: 2345};
         expect(await uDao1.getUserParams()).toStrictEqual(uParamsStr1);
         expect(await uDao2.getUserParams()).toStrictEqual(uParamsStr2);
 

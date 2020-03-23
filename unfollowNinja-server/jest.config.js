@@ -24,12 +24,6 @@ module.exports = {
     reporters: [
         'default',
         [
-            'jest-junit',
-            {
-                outputName: './test-results/junit/results.xml',
-            },
-        ],
-        [
             'jest-html-reporter',
             {
                 outputPath: './test-results/tests/test-report.html',

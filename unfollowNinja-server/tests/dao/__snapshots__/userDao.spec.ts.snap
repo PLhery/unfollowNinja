@@ -19,7 +19,7 @@ Object {
     "1",
   ],
   "userParams": Object {
-    "added_at": "1234",
+    "added_at": 1234,
     "dmId": "",
     "dmPhoto": "",
     "dmToken": "",

@@ -43,6 +43,6 @@ export interface IUserEgg extends ITwittoInfo, IUserParams {
 }
 
 export interface IUser extends IUserEgg {
-    followers: Array<IFollowerInfo & ITwittoInfo>;
-    lastUnfollows: Array<IUnfollowerInfo & ITwittoInfo>;
+    followers: (IFollowerInfo & ITwittoInfo)[];
+    lastUnfollows: (IUnfollowerInfo & ITwittoInfo)[];
 }

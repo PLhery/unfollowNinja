@@ -1,7 +1,7 @@
 import Redis from 'ioredis';
 import { fromPairs } from 'lodash';
 import Twit from 'twit';
-import {IUnfollowerInfo, IUser, IUserParams, Lang} from '../utils/types';
+import {IUnfollowerInfo, IUserParams, Lang} from '../utils/types';
 import { twitterCursorToTime } from '../utils/utils';
 import { UserCategory } from './dao';
 
@@ -41,7 +41,12 @@ export default class UserDao {
     }
 
     public async getUserParams(): Promise<IUserParams> {
-        return await this.redis.hgetall(`user:${this.userId}`);
+        const stringUserParams = await this.redis.hgetall(`user:${this.userId}`) as Record<keyof IUserParams, string>;
+        return {
+            ...stringUserParams,
+            added_at: parseInt(stringUserParams.added_at, 10),
+            lang: stringUserParams.lang as Lang,
+        };
     }
 
     public async setUserParams(userParams: Partial<IUserParams>): Promise<void> {
