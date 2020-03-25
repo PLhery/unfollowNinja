@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {Box, Button, Paragraph} from "grommet/es6";
-import {Twitter, ChatOption, UserExpert} from "grommet-icons";
+import {Alert, Twitter, ChatOption, UserExpert} from "grommet-icons";
 import { useHistory, useLocation } from "react-router-dom";
 
 import { useQuery, useMutation, gql } from '@apollo/client';
@@ -38,13 +38,13 @@ export default (props) => {
     }
   }
 
-  let { loading, error, data } = loggingIn ? loggingInAnswer : useQuery(GET_INFO);
+  let { error, data } = loggingIn ? loggingInAnswer : useQuery(GET_INFO);
   data = data?.login || data;
   const step1 = !data?.twitterStep2AuthUrl;
 
   return (
       <Box gap='small' margin={{horizontal: 'small', vertical: 'medium'}} {...props}>
-        {error ? <Paragraph>Impossible de joindre le serveur, réessayez plus tard...</Paragraph> : null}
+        {error ? <Paragraph textAlign='center'><Alert/><br/>Impossible de joindre le serveur, réessayez plus tard...</Paragraph> : null}
         <Button
             icon={<Twitter color={step1 ? 'white' : null}/>}
             label='Connectez-vous à votre compte'
