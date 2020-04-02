@@ -1,6 +1,6 @@
 import {RequestHandler, Router} from 'express';
-import * as kue from 'kue';
-import * as passport from 'passport';
+import kue from 'kue';
+import passport from 'passport';
 import { promisify } from 'util';
 import Dao, {UserCategory} from '../dao/dao';
 import {IUserEgg} from '../utils/types';

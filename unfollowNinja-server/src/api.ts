@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import Sentry from '@sentry/node';
+import * as Sentry from '@sentry/node';
 import bodyParser from 'body-parser';
 import connectRedis from 'connect-redis';
 import express from 'express';

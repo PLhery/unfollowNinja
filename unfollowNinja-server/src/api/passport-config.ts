@@ -1,4 +1,4 @@
-import * as passport from 'passport';
+import passport from 'passport';
 import {Strategy as TwitterStrategy} from 'passport-twitter';
 import { URL } from 'url';
 import Dao, {UserCategory} from '../dao/dao';
