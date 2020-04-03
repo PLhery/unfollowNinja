@@ -162,23 +162,31 @@ export default class extends Task {
     private generateMessage(unfollowersInfo: IUnfollowerInfo[], lang: Lang, nbLeftovers: number): string {
         i18n.setLocale(lang);
         const messages: string[] = unfollowersInfo.map((unfollower) => {
-            const username = unfollower.username ? '@' + unfollower.username : i18n.__('one of you followers');
+            let username = unfollower.username ? '@' + unfollower.username : i18n.__('one of you followers');
 
+            let customEmoji = '';
+            if (unfollower.username === 'louanben') { // https://twitter.com/louanben/status/1246045006529531910
+                customEmoji = '\n👁👄👁';
+                username += ' 👦🏽'
+            }
             let action;
             if (unfollower.suspended) {
-                const emoji = emojis.get('see_no_evil');
+                const emoji = emojis.get('see_no_evil') + customEmoji;
                 action = i18n.__('{{username}} has been suspended {{emoji}}.', { username, emoji });
             } else if (unfollower.deleted) {
-                const emoji = emojis.get('see_no_evil');
+                const emoji = emojis.get('see_no_evil') + customEmoji;
                 action = i18n.__('{{username}} has left Twitter {{emoji}}.', { username, emoji });
             } else if (unfollower.blocked_by) {
-                const emoji = emojis.get('no_entry');
+                const emoji = emojis.get('no_entry') + customEmoji;
                 action = i18n.__('{{username}} blocked you {{emoji}}.', { username, emoji });
             } else if (unfollower.blocking) {
-                const emoji = emojis.get('poop').repeat(3);
+                const emoji = emojis.get('poop').repeat(3) + customEmoji;
                 action = i18n.__('You blocked {{username}} {{emoji}}.', { username, emoji });
+            } else if (unfollower.following) {
+                const emoji = customEmoji || emojis.get('broken_heart');
+                action = i18n.__('{{username}} unfollowed you {{emoji}}.', { username, emoji });
             } else {
-                const emoji = emojis.get(unfollower.following ? 'broken_heart' : 'wave');
+                const emoji = customEmoji || emojis.get('wave');
                 action = i18n.__('{{username}} unfollowed you {{emoji}}.', { username, emoji });
             }
 

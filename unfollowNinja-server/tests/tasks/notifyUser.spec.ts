@@ -160,4 +160,18 @@ describe('notifyUser task', () => {
             .toBe('@twitto123 vous a unfollow 👋.\n' +
                 'Ce compte vous a suivi pendant 33 minutes (01/01/1970).');
     });
+
+    test('louan', async () => {
+        const louanBenId = '941331337759346688';
+        unfollowersInfo.push({id: louanBenId, followTime: 100, followDetectedTime: 100, unfollowTime: 2000000, username: 'louanben'});
+        mockUsersLookupReply([louanBenId], ['louanben']);
+        mockFriendshipShowReply();
+        await task.run(job);
+        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
+        expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
+            .toBe('@louanben 👦🏽 unfollowed you \n👁👄👁.\n' +
+                'This account followed you for 33 minutes (01/01/1970).');
+    });
 });
