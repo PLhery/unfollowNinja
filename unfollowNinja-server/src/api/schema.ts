@@ -2,25 +2,29 @@ import { gql } from 'apollo-server';
 
 export const typeDefs = gql`
     type User {
-        token: String!
-        secret: String!
         id: ID!
         username: String!
+        dmAccountUsername: String
     }
 
-    type LoginResult {
-        me: User!
-        twitterStep1AuthUrl: String!
-        twitterStep2AuthUrl: String!
+    type CurrentState {
+        id: ID!
+        user: User
+        twitterStep1AuthUrl: String
+        twitterStep2AuthUrl: String
     }
 
     type Query {
+        info: CurrentState
         me: User
         twitterStep1AuthUrl: String
         twitterStep2AuthUrl: String
     }
 
     type Mutation {
-        login(token: String!, verifier: String!): LoginResult
+        login(token: String!, verifier: String!): CurrentState
+        addDmAccount(token: String!, verifier: String!): User
+        removeDmAccount: User
+        logout: CurrentState
     }
 `;

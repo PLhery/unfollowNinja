@@ -23,7 +23,7 @@ const Query = {
         return uidToUser[context.uid] || null;
     },
 
-    twitterStep1AuthUrl(_, args, context) {
+    twitterStep1AuthUrl(_, _args, context) {
         if (uidToUser[context.uid]) {
             return null;
         }
@@ -33,13 +33,13 @@ const Query = {
                     reject(error);
                 } else {
                     tokenToSecret[oauthToken] = oauthTokenSecret;
-                    resolve('https://twitter.com/oauth/authorize?oauth_token=' + oauthToken);
+                    resolve('https://twitter.com/oauth/authenticate?oauth_token=' + oauthToken);
                 }
             });
         });
     },
 
-    twitterStep2AuthUrl(_, args, context) {
+    twitterStep2AuthUrl(_, _args, context) {
         if (!uidToUser[context.uid]) {
             return null;
         }
@@ -49,49 +49,88 @@ const Query = {
                     reject(error);
                 } else {
                     tokenToSecret[oauthToken] = oauthTokenSecret;
-                    resolve('https://twitter.com/oauth/authorize?oauth_token=' + oauthToken);
+                    resolve('https://twitter.com/oauth/authenticate?oauth_token=' + oauthToken);
                 }
             });
         });
+    },
+
+    async info(_, _args, context) {
+        const [ user, twitterStep1AuthUrl, twitterStep2AuthUrl ] = await Promise.all([
+            Query.me(null, null, context), Query.twitterStep1AuthUrl(null, null, context), Query.twitterStep2AuthUrl(null, null, context)
+        ]);
+        return { id: 0, user, twitterStep1AuthUrl, twitterStep2AuthUrl }
     },
 };
 
 const Mutation = {
     async login(_, { token, verifier }, context) {
-        if (!uidToUser[context.uid]) {
-            const secret = tokenToSecret[token];
-            if (!secret) {
-                throw new ApolloError('Session lost, please try again');
-            }
-            await new Promise((resolve, reject) => {
-                step1Twit.getOAuthAccessToken(token, secret, verifier,
-                    (error, oauthAccessToken, oauthAccessTokenSecret) => {
-                        if (error) {
-                            reject(error);
-                            return;
-                        }
-                        step1Twit.get('https://api.twitter.com/1.1/account/verify_credentials.json', oauthAccessToken,
-                            oauthAccessTokenSecret, (error2, data) => {
-                                if (error2) {
-                                    reject(error2);
-                                } else {
-                                    const jsonData = JSON.parse(data.toString());
-                                    uidToUser[context.uid] = {
-                                        token: oauthAccessToken,
-                                        secret: oauthAccessTokenSecret,
-                                        username: jsonData.screen_name,
-                                        id: jsonData.id_str,
-                                    };
-                                    resolve();
-                                }
-                            });
-                    });
-            });
+        const secret = tokenToSecret[token];
+        if (!secret) {
+            throw new ApolloError('Session lost, please try again');
         }
-        const [twitterStep2AuthUrl, me] = await Promise.all(
-            [Query.twitterStep2AuthUrl(null, null, context), Query.me(null, null, context)],
-        );
-        return { twitterStep2AuthUrl, me };
+        await new Promise((resolve, reject) => {
+            step1Twit.getOAuthAccessToken(token, secret, verifier,
+                (error, oauthAccessToken, oauthAccessTokenSecret) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+                    step1Twit.get('https://api.twitter.com/1.1/account/verify_credentials.json', oauthAccessToken,
+                        oauthAccessTokenSecret, (error2, data) => {
+                            if (error2) {
+                                reject(error2);
+                            } else {
+                                const jsonData = JSON.parse(data.toString());
+                                uidToUser[context.uid] = {
+                                    token: oauthAccessToken,
+                                    secret: oauthAccessTokenSecret,
+                                    username: jsonData.screen_name,
+                                    id: jsonData.id_str,
+                                };
+                                resolve();
+                            }
+                        });
+                });
+        });
+        return await Query.info(null, null, context);
+    },
+    async addDmAccount(_, { token, verifier }, context) {
+        const secret = tokenToSecret[token];
+        if (!secret) {
+            throw new ApolloError('Session lost, please try again');
+        }
+        await new Promise((resolve, reject) => {
+            step1Twit.getOAuthAccessToken(token, secret, verifier,
+                (error, oauthAccessToken, oauthAccessTokenSecret) => {
+                    if (error) {
+                        reject(error);
+                        return;
+                    }
+                    step2Twit.get('https://api.twitter.com/1.1/account/verify_credentials.json', oauthAccessToken,
+                        oauthAccessTokenSecret, (error2, data) => {
+                            if (error2) {
+                                reject(error2);
+                            } else {
+                                const jsonData = JSON.parse(data.toString());
+                                uidToUser[context.uid] = {
+                                    ...uidToUser[context.uid],
+                                    dmAccountUsername: jsonData.screen_name,
+                                };
+                                resolve();
+                            }
+                        });
+                });
+        });
+        return uidToUser[context.uid];
+    },
+    async removeDmAccount(_, _args, context) {
+        delete uidToUser[context.uid].dmAccountUsername;
+        return uidToUser[context.uid]
+    },
+    async logout(_, _args, context) {
+        delete uidToUser[context.uid];
+        return await Query.info(null, null, context);
     },
 };
 
