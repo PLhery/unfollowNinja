@@ -68,4 +68,13 @@ export default class Dao {
             this.redis.hset(`cachedTwittos`, `${id}:username`, username),
         ]);
     }
+
+    public async getSession(uid: string) {
+        return JSON.parse(await this.redis.get(`session:${uid}`) || '{}');
+    }
+
+    public async setSession(uid: string, params: Record<string, string>) {
+        await this.redis.set(`session:${uid}`, JSON.stringify(params));
+        await this.redis.expire(`session:${uid}`, 3600); // 1h sessions
+    }
 }

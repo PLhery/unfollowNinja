@@ -46,7 +46,7 @@ localStorage['uid'] = localStorage['uid'] || nanoid();
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  uri: 'https://api2.unfollow.ninja',
+  uri: 'http://localhost:4000',
   headers: {
     uid: localStorage['uid'],
   }

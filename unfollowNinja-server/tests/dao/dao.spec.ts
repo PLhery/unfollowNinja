@@ -56,4 +56,11 @@ describe('Test DAO', () => {
 
         expect(await redis.zcard('cachedTwittosIds')).toBe(2);
     });
+
+    test('should manage sessions', async () => {
+        expect(await dao.getSession('12345')).toEqual({});
+        await dao.setSession('12345', {hello:'world1'});
+        await dao.setSession('23456', {hello:'world2'});
+        expect(await dao.getSession('12345')).toEqual({hello:'world1'});
+    });
 });
