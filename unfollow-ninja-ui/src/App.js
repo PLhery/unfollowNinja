@@ -46,7 +46,7 @@ localStorage['uid'] = localStorage['uid'] || nanoid();
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  uri: 'http://localhost:4000',
+  uri: 'https://api2.unfollow.ninja',
   headers: {
     uid: localStorage['uid'],
   }
@@ -97,7 +97,7 @@ function App() {
           <Box direction='row' align='center' alignSelf='center' gap='small'>
             <Image title='logo' height={30} src={Images.Logo}/>
             <Text size='small' textAlign='center' style={{fontFamily: 'quicksand'}}>
-              © 2019 UnfollowNinja · <Link href='https://uzzy.me/fr/cgu/'>CGU</Link> ·
+              © 2020 UnfollowNinja · <Link href='https://uzzy.me/fr/cgu/'>CGU</Link> ·
               Découvrez aussi <Link href='https://uzzy.me'><Image title='uzzy' src='https://uzzy.me/img/logo.svg' height={18}/></Link> Uzzy et <Link href='https://uzzy.me'><Image title='affinitweet' src='https://static.affinitweet.com/images/affinitweet-page-loader.png' height={18}/></Link> Affinitweet ·
               Proposé par <Link href='https://twitter.com/plhery'>@plhery</Link> · Disponible sur <Link href='https://twitter.com/plhery'>GitHub</Link>
             </Text>

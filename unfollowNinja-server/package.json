@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node ./dist/workers.js",
     "start-api": "node ./dist/api.js",
+    "start-api2": "node ./dist/api2.js",
     "test": "npm run lint && npm run build && npm run specs",
     "specs": "jest",
     "jest": "jest",

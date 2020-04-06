@@ -14,7 +14,7 @@ const GET_INFO = gql`
             id,
             twitterStep1AuthUrl,
             twitterStep2AuthUrl,
-            user {id, username, dmAccountUsername}
+            user {id, username, dmUsername}
         }
     }
 `;
@@ -25,20 +25,20 @@ const LOGIN = gql`
             id,
             twitterStep1AuthUrl,
             twitterStep2AuthUrl,
-            user {id, username, dmAccountUsername}
+            user {id, username, dmUsername}
         }
     }
 `;
 
 const ADD_DMS = gql`
     mutation AddDms($oauthToken: String!, $oauthVerifier: String!) {
-        addDmAccount(token: $oauthToken, verifier: $oauthVerifier) {id, username, dmAccountUsername}
+        addDmAccount(token: $oauthToken, verifier: $oauthVerifier) {id, username, dmUsername}
     }
 `;
 
 const REMOVE_DMS = gql`
     mutation RemoveDms {
-        removeDmAccount {id, username, dmAccountUsername}
+        removeDmAccount {id, username, dmUsername}
     }
 `;
 
@@ -48,7 +48,7 @@ const LOGOUT = gql`
             id,
             twitterStep1AuthUrl,
             twitterStep2AuthUrl,
-            user {id, username, dmAccountUsername}
+            user {id, username, dmUsername}
         }
     }
 `;
@@ -57,11 +57,11 @@ const LoggedInIntro = ({ user, logout, removeDMs }) => {
     if (!user) return null; // not logged in
 
     let message = <Paragraph>Plus qu'une étape pour activer le service :<br/> Choisissez un compte pour vous envoyer les notifications</Paragraph>;
-    if (user.dmAccountUsername) {
+    if (user.dmUsername) {
         message = <Paragraph>Tout est en ordre ! N'oubliez pas de suivre <Link href='https://twitter.com/unfollowninja'>@unfollowNinja</Link></Paragraph>;
     }
-    if (user.dmAccountUsername && user.dmAccountUsername !== user.username) {
-        message = <Paragraph>Tout est en ordre, <b>@{user.dmAccountUsername}</b> vous préviendra par DM !
+    if (user.dmUsername && user.dmUsername !== user.username) {
+        message = <Paragraph>Tout est en ordre, <b>@{user.dmUsername}</b> vous préviendra par DM !
             N'oubliez pas de suivre <Link href='https://twitter.com/unfollowninja'>@unfollowNinja</Link></Paragraph>;
     }
     return <div className={Styles.loggedInDetails}>
@@ -69,7 +69,7 @@ const LoggedInIntro = ({ user, logout, removeDMs }) => {
         {message}
         <Paragraph>
             <Link href='#' onClick={e => {logout();e.preventDefault();}}>Se déconnecter</Link>
-            {user.dmAccountUsername ? <span> — <Link href='#' onClick={e => {removeDMs();e.preventDefault();}}>Désactiver le service</Link>
+            {user.dmUsername ? <span> — <Link href='#' onClick={e => {removeDMs();e.preventDefault();}}>Désactiver le service</Link>
             </span> : null}
         </Paragraph>
     </div>
@@ -84,6 +84,7 @@ export default (props) => {
   const [logout] = useMutation(LOGOUT);
   let { error, data, refetch } = useQuery(GET_INFO);
   data = data?.info;
+  error = error || loginRequest.error || addDmsRequest.error;
 
   if (!loginRequest.called && location.pathname === '/1') {
     const urlParams = new URLSearchParams(location.search);
@@ -102,8 +103,8 @@ export default (props) => {
   }
 
   const step0 = !data?.user && !addDmsRequest.loading && !loginRequest.loading; // not logged in or loading
-  const step1 = data?.user && !data.user.dmAccountUsername; // logged in but no DM account
-  const step2 = !!data?.user?.dmAccountUsername; // logged in and have a DM account
+  const step1 = data?.user && !data.user.dmUsername; // logged in but no DM account
+  const step2 = !!data?.user?.dmUsername; // logged in and have a DM account
 
   return (
       <Box gap='small' margin={{horizontal: 'small', vertical: 'medium'}} {...props}>

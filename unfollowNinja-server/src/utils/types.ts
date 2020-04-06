@@ -31,7 +31,7 @@ export interface IUserParams {
     lang: Lang;
     token: string;
     tokenSecret: string;
-    photo: string;
+    photo?: string;
     dmId?: string;
     dmToken?: string;
     dmTokenSecret?: string;
@@ -42,7 +42,7 @@ export interface IUserEgg extends ITwittoInfo, IUserParams {
     category?: UserCategory;
 }
 
-export interface IUser extends IUserEgg {
-    followers: (IFollowerInfo & ITwittoInfo)[];
-    lastUnfollows: (IUnfollowerInfo & ITwittoInfo)[];
+export interface Session {
+    user?: IUserEgg & { dmUsername?: string };
+    tokenToSecret?: Record<string, string>;
 }

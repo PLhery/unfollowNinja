@@ -1,10 +1,19 @@
 import { gql } from 'apollo-server';
 
 export const typeDefs = gql`
+    enum Lang {
+        fr
+        en
+    }
+
     type User {
         id: ID!
         username: String!
-        dmAccountUsername: String
+        added_at: Int! # in ms
+        lang: Lang!
+        category: Int! # enabled=0, suspended, revoked, disabled, dmclosed, accountClosed=5
+        dmId: String
+        dmUsername: String
     }
 
     type CurrentState {

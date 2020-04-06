@@ -1,6 +1,12 @@
-import { ApolloError } from 'apollo-server';
+import { ApolloError, AuthenticationError } from 'apollo-server';
 import { OAuth } from 'oauth';
+import { promisify } from 'util';
+import type { Queue } from 'kue';
+
 import logger from '../utils/logger';
+import Dao, { UserCategory } from '../dao/dao';
+import { getOauthUrl, getOauthUser } from './oauth-manager';
+import type { Session } from '../utils/types';
 
 if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET ||
     !process.env.DM_CONSUMER_KEY || !process.env.DM_CONSUMER_SECRET || !process.env.WEB_URL) {
@@ -15,9 +21,15 @@ const step1Twit = new OAuth('https://twitter.com/oauth/request_token', 'https://
 const step2Twit = new OAuth('https://twitter.com/oauth/request_token', 'https://twitter.com/oauth/access_token',
     process.env.DM_CONSUMER_KEY, process.env.DM_CONSUMER_SECRET, '1.0A', process.env.WEB_URL + '/2', 'HMAC-SHA1');
 
-const tokenToSecret = {};
+export interface Context {
+    session: Session;
+    setSession: (data: Session) => Promise<void>;
+    dao: Dao;
+    queue?: Queue
+}
+type resolver = Record<string, (_: any, args: any, context: Context) => any>;
 
-const Query = {
+const Query: resolver = {
     me(_, args, { session }) {
         return session.user;
     },
@@ -26,38 +38,14 @@ const Query = {
         if (session.user) {
             return null;
         }
-        return new Promise((resolve, reject) => {
-            step1Twit.getOAuthRequestToken((error, oauthToken, oauthTokenSecret) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    session.tokenToSecret = session.tokenToSecret || {};
-                    session.tokenToSecret[oauthToken] = oauthTokenSecret;
-                    setSession(session)
-                        .then(() => resolve('https://twitter.com/oauth/authenticate?oauth_token=' + oauthToken))
-                        .catch(reject);
-                }
-            });
-        });
+        return getOauthUrl(step1Twit, session, setSession);
     },
 
     twitterStep2AuthUrl(_, _args, { session, setSession }) {
         if (!session.user) {
             return null;
         }
-        return new Promise((resolve, reject) => {
-            step2Twit.getOAuthRequestToken((error, oauthToken, oauthTokenSecret) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    session.tokenToSecret = session.tokenToSecret || {};
-                    session.tokenToSecret[oauthToken] = oauthTokenSecret;
-                    setSession(session)
-                        .then(() => resolve('https://twitter.com/oauth/authenticate?oauth_token=' + oauthToken))
-                        .catch(reject);
-                }
-            });
-        });
+        return getOauthUrl(step2Twit, session, setSession);
     },
 
     async info(_, _args, context) {
@@ -68,79 +56,99 @@ const Query = {
     },
 };
 
-const Mutation = {
-    async login(_, { token, verifier }, { session, setSession }) {
+const Mutation: resolver = {
+    async login(_, { token, verifier }, { session, setSession, dao }) {
         const secret = session.tokenToSecret?.[token];
-        delete session.tokenToSecret?.[token];
         if (!secret) {
             throw new ApolloError('Session lost, please try again');
         }
-        const user: Record<string, string> = await new Promise((resolve, reject) => {
-            step1Twit.getOAuthAccessToken(token, secret, verifier,
-                (error, oauthAccessToken, oauthAccessTokenSecret) => {
-                    if (error) {
-                        reject(error);
-                        return;
-                    }
-                    step1Twit.get('https://api.twitter.com/1.1/account/verify_credentials.json', oauthAccessToken,
-                        oauthAccessTokenSecret, (error2, data) => {
-                            if (error2) {
-                                reject(error2);
-                            } else {
-                                const jsonData = JSON.parse(data.toString());
-                                resolve({
-                                    token: oauthAccessToken,
-                                    secret: oauthAccessTokenSecret,
-                                    username: jsonData.screen_name,
-                                    id: jsonData.id_str,
-                                });
-                            }
-                        });
-                });
-        });
-        session.user = {...user};
+        delete session.tokenToSecret[token];
+        const user = await getOauthUser(step1Twit, token, secret, verifier);
+        let [params, category] = await Promise.all([
+            dao.getUserDao(user.id).getUserParams(),
+            dao.getUserDao(user.id).getCategory(),
+            dao.addTwittoToCache({id: user.id, username: user.username}),
+        ]);
+        if (!params) {
+            params = {
+                added_at: Date.now(),
+                lang: 'fr',
+                token: user.token,
+                tokenSecret: user.secret,
+            };
+            await dao.addUser({
+                category: UserCategory.disabled,
+                id: user.id,
+                username: user.username,
+                ...params,
+            });
+        }
+        session.user = {...params, id: user.id, username: user.username, category};
+        if (params.dmId) {
+            session.user.dmUsername = await dao.getCachedUsername(params.dmId);
+        }
+
         await setSession(session);
-        return await Query.info(null, null, { session, setSession});
+        return await Query.info(null, null, { session, setSession, dao });
     },
-    async addDmAccount(_, { token, verifier }, { session, setSession }) {
+
+    async addDmAccount(_, { token, verifier }, { session, setSession, dao, queue }) {
+        if (!session.user) {
+            throw new AuthenticationError('you must be logged in to do this action');
+        }
         const secret = session.tokenToSecret?.[token];
-        delete session.tokenToSecret?.[token];
         if (!secret) {
             throw new ApolloError('Session lost, please try again');
         }
-        await new Promise((resolve, reject) => {
-            step1Twit.getOAuthAccessToken(token, secret, verifier,
-                (error, oauthAccessToken, oauthAccessTokenSecret) => {
-                    if (error) {
-                        reject(error);
-                        return;
-                    }
-                    step2Twit.get('https://api.twitter.com/1.1/account/verify_credentials.json', oauthAccessToken,
-                        oauthAccessTokenSecret, (error2, data) => {
-                            if (error2) {
-                                reject(error2);
-                            } else {
-                                const jsonData = JSON.parse(data.toString());
-                                session.user = {
-                                    ...session.user,
-                                    dmAccountUsername: jsonData.screen_name,
-                                };
-                                resolve();
-                            }
-                        });
-                });
-        });
-        await setSession(session);
+        delete session.tokenToSecret[token];
+        const dmUser = await getOauthUser(step2Twit, token, secret, verifier);
+        session.user = {
+            ...session.user,
+            dmId: dmUser.id,
+            dmUsername: dmUser.username,
+            category: UserCategory.enabled,
+        };
+        await Promise.all([
+            dao.getUserDao(session.user.id).setUserParams({
+                dmId: dmUser.id,
+                dmToken: dmUser.token,
+                dmTokenSecret: dmUser.secret,
+            }),
+            dao.getUserDao(session.user.id).setCategory(UserCategory.enabled),
+            dao.addTwittoToCache({id: dmUser.id, username: dmUser.username}),
+            setSession(session),
+        ]);
+        await promisify((cb) =>
+            queue
+                .create('sendWelcomeMessage', {
+                    userId: session.user.id,
+                    username: session.user.username,
+                })
+                .removeOnComplete(true)
+                .save(cb),
+        )();
         return session.user;
     },
-    async removeDmAccount(_, _args, { session, setSession }) {
-        delete session.user.dmAccountUsername;
-        await setSession(session);
+
+    async removeDmAccount(_, _args, { session, setSession, dao }) {
+        delete session.user.dmId;
+        delete session.user.dmUsername;
+        await Promise.all([
+            dao.getUserDao(session.user.id).setCategory(UserCategory.disabled),
+            dao.getUserDao(session.user.id).setUserParams({
+                dmId: null,
+                dmPhoto: null,
+                dmToken: null,
+                dmTokenSecret: null,
+            }),
+            setSession(session),
+        ]);
         return session.user;
     },
-    async logout(_, _args, { setSession }) {
+
+    async logout(_, _args, { setSession, dao }) {
         await setSession({});
-        return await Query.info(null, null, { session: {}, setSession });
+        return await Query.info(null, null, { session: {}, setSession, dao });
     },
 };
 
