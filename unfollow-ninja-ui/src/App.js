@@ -82,7 +82,7 @@ function App() {
             <Box basis='medium' flex={true} pad='medium' >
               <Heading level={2} color='dark'>UnfollowNinja est libre et gratuit</Heading>
               <Paragraph>UnfollowNinja est un projet <Link href='https://github.com/PLhery/unfollowNinja'>open-source</Link>, maintenu par <Link href='https://twitter.com/plhery'>@plhery</Link> et hébergé par <Link href='https://twitter.com/hivanenetwork'>HivaneNetwork</Link>.</Paragraph>
-              <Paragraph>Merci à Hivane d'aider le projet à rester performant, libre, et gratuit, soutenant 35 000 utilisateurs.</Paragraph>
+              <Paragraph>Merci à Hivane d'aider le projet à rester performant, libre, et gratuit, soutenant 60 000+ utilisateurs actifs.</Paragraph>
               <Box gap='small' alignSelf='center' style={{overflow: 'hidden'}}>
                 <RepoCard username="plhery" repo="unfollowninja"/>
                 <TwitterFollowButton screenName="unfollowninja" options={{size: 'large'}} />
@@ -98,7 +98,7 @@ function App() {
             <Image title='logo' height={30} src={Images.Logo}/>
             <Text size='small' textAlign='center' style={{fontFamily: 'quicksand'}}>
               © 2020 UnfollowNinja · <Link href='https://uzzy.me/fr/cgu/'>CGU</Link> ·
-              Découvrez aussi <Link href='https://uzzy.me'><Image title='uzzy' src='https://uzzy.me/img/logo.svg' height={18}/></Link> Uzzy et <Link href='https://uzzy.me'><Image title='affinitweet' src='https://static.affinitweet.com/images/affinitweet-page-loader.png' height={18}/></Link> Affinitweet ·
+              Découvrez aussi <Link href='https://uzzy.me'><Image title='uzzy' src={Images.Uzzy} height={18}/></Link> Uzzy et <Link href='https://uzzy.me'><Image title='affinitweet' src={Images.Affinitweet} height={18}/></Link> Affinitweet ·
               Proposé par <Link href='https://twitter.com/plhery'>@plhery</Link> · Disponible sur <Link href='https://twitter.com/plhery'>GitHub</Link>
             </Text>
           </Box>
