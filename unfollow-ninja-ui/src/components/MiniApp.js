@@ -85,6 +85,9 @@ export default (props) => {
   let { error, data, refetch } = useQuery(GET_INFO);
   data = data?.info;
   error = error || loginRequest.error || addDmsRequest.error;
+  if (navigator.userAgent === 'ReactSnap') {
+      data = null; // ReactSnap should capture a loading state
+  }
 
   if (!loginRequest.called && location.pathname === '/1') {
     const urlParams = new URLSearchParams(location.search);
