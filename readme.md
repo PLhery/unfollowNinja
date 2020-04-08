@@ -77,4 +77,14 @@ Now, the program checks 50 000 users's followers every 3 minutes.
 - Use twitter's SnowFlake IDs to get the exact follow time
 - New UI
 
+# Licensing
+
 [License](./license.md) (Apache V2)
+
+UnfollowNinja uses multiple open-source projects:
+
+#### Twemoji
+
+Copyright 2020 Twitter, Inc and other contributors  
+Code licensed under the MIT License: http://opensource.org/licenses/MIT  
+Graphics licensed under CC-BY 4.0: https://creativecommons.org/licenses/by/4.0/
