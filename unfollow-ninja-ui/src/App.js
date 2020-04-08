@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router } from "react-router-dom";
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
-import nanoid  from 'nanoid';
+import { nanoid } from 'nanoid';
 
 import './style.scss';
 import 'react-github-cards/dist/default.css';
@@ -46,7 +46,7 @@ localStorage['uid'] = localStorage['uid'] || nanoid();
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  uri: 'https://api2.unfollow.ninja',
+  uri: 'https://api.unfollow.ninja',
   headers: {
     uid: localStorage['uid'],
   }

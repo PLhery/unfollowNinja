@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@apollo/client": "^3.0.0-beta.41",
-    "graphql": "^14.6.0",
-    "grommet": "^2.11.2",
+    "@apollo/client": "^3.0.0-beta.43",
+    "graphql": "^15.0.0",
+    "grommet": "^2.12.0",
     "grommet-icons": "^4.4.0",
-    "nanoid": "^2.1.11",
+    "nanoid": "^3.0.2",
     "node-sass": "^4.13.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -18,7 +18,7 @@
     "react-scripts": "^3.4.1",
     "react-snap": "^1.23.0",
     "react-twitter-embed": "^3.0.3",
-    "styled-components": "^5.0.1",
+    "styled-components": "^5.1.0",
     "twemoji": "^12.1.5"
   },
   "scripts": {
