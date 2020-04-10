@@ -82,6 +82,8 @@ const Mutation: resolver = {
                 username: user.username,
                 ...params,
             });
+        } else if (params.tokenSecret !== user.secret) { // after a revoked token
+            await dao.getUserDao(user.id).setUserParams({token: user.token, tokenSecret: user.secret});
         }
         session.user = {...params, id: user.id, username: user.username, category};
         if (params.dmId) {
