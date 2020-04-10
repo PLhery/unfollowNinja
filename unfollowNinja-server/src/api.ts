@@ -1,44 +1,40 @@
 import 'dotenv/config';
 
 import * as Sentry from '@sentry/node';
-import bodyParser from 'body-parser';
-import connectRedis from 'connect-redis';
-import express from 'express';
-import session from 'express-session';
-import Redis from 'ioredis';
-import passport from 'passport';
+import kue from 'kue';
+import { ApolloServer, AuthenticationError } from 'apollo-server';
 
-import passportConfig from './api/passport-config';
-import router from './api/router';
+import resolvers from './api/resolvers';
+import { typeDefs } from './api/schema';
 import logger, { setLoggerPrefix } from './utils/logger';
+import Dao from './dao/dao';
 
 setLoggerPrefix('api');
-passportConfig();
 
-const API_PORT = Number(process.env.API_PORT) || 2000;
-const API_SESSION_SECRET = process.env.API_SESSION_SECRET || 'session_secret';
-const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
 const SENTRY_DSN = process.env.SENTRY_DSN || undefined;
-
 if (SENTRY_DSN) {
     Sentry.init({ dsn: SENTRY_DSN });
 }
 
-const app = express();
-app.use(bodyParser.urlencoded({ extended: false }));
+const dao = new Dao();
+const queue = kue.createQueue({redis: process.env.REDIS_KUE_URI});
 
-const RedisStore = connectRedis(session);
-app.use(session({
-    store: new RedisStore({client: new Redis(process.env.REDIS_URI)}),
-    secret: API_SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false, domain: COOKIE_DOMAIN },
-}));
+const context = async ({req}) => {
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    logger.info(ip + ' - ' + JSON.stringify(req.body.query, null, null));
+    const { uid } = req.headers;
+    if (!uid) {
+        throw new AuthenticationError('uid required');
+    }
+    const session = await dao.getSession(uid);
+    const setSession = (data) => dao.setSession(uid, data);
+    return { uid, session, setSession, dao, queue };
+};
 
-app.use(passport.initialize());
-app.use(passport.session());
+const server = new ApolloServer({
+    typeDefs, resolvers, context, introspection: false, playground: false, debug: false
+});
 
-app.use('/v1', router);
-app.listen(API_PORT);
-logger.info(`Unfollow ninja API is now listening on port ${API_PORT}`);
+server.listen().then(({ url }: { url: string }) => {
+    logger.info(`🚀 Server ready at ${url}`);
+});

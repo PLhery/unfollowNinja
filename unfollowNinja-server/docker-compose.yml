@@ -19,21 +19,7 @@ services:
     build: .
     command: "npm run start-api"
     ports:
-      - "2000:2000"
-    depends_on:
-      - postgres
-      - redis-kue
-      - redis
-    environment:
-      POSTGRES_URI: postgres://postgres@postgres
-      REDIS_URI: redis://redis
-      REDIS_KUE_URI: redis://redis-kue
-  api2:
-    restart: always
-    build: .
-    command: "npm run start-api2"
-    ports:
-      - "4000:4000"
+      - "127.0.0.1:4000:4000"
     depends_on:
       - postgres
       - redis-kue

@@ -14,6 +14,7 @@ https://unfollow.ninja
 - launch the workers `node ./dist/api/workers`
 - launch the api server `node ./dist/api`
 - or launch both in the as a daemon with pm2 `pm2 start pm2.yml`
+- or launch the whole stack with docker-compose `docker-compose up  --build`
 
 If you made some changes to the code, you can launch a new instance before exiting the former one to prevent downtime.
 
