@@ -69,7 +69,7 @@ const Mutation: resolver = {
             dao.getUserDao(user.id).getCategory(),
             dao.addTwittoToCache({id: user.id, username: user.username}),
         ]);
-        if (!params) {
+        if (!params.token) { // params = {}
             params = {
                 added_at: Date.now(),
                 lang: 'fr',
