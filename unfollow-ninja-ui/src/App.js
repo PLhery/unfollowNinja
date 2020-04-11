@@ -70,7 +70,7 @@ function App() {
               </ApolloProvider>
             </Box>
             <Box basis='medium' flex={true} pad='medium'>
-              <Image title='smartphone' src={Images.Smartphone}/>
+              <object title='smartphone' data={Images.Smartphone}/>
             </Box>
           </Box>
         </Section>
