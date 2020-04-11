@@ -1,4 +1,4 @@
-# Unfollow Ninja [![Server CI status](https://github.com/PLhery/unfollowNinja/workflows/Server%20CI/badge.svg)](https://github.com/PLhery/unfollowNinja/actions?query=workflow%3A%22Server+CI%22) [![Netlify Status](https://api.netlify.com/api/v1/badges/e0a3cf17-1a97-4e62-a8d7-8867a0d1ee83/deploy-status)](https://app.netlify.com/sites/unfollowninja/deploys)
+# Unfollow Ninja [![Server CI status](https://github.com/PLhery/unfollowNinja/workflows/Server%20CI/badge.svg)](https://github.com/PLhery/unfollowNinja/actions?query=workflow%3A%22Server+CI%22)
 
 https://unfollow.ninja
 : Receive a notification when someone unfollows you on Twitter
