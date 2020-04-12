@@ -67,3 +67,6 @@ dist/
 
 # test reports
 test-results/
+
+# osX
+.DS_Store

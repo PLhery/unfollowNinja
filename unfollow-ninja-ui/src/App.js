@@ -42,13 +42,20 @@ const theme = {
   },
 };
 
-localStorage['uid'] = localStorage['uid'] || nanoid();
+if (!sessionStorage['uid']) {
+  if (localStorage['uid']) { // for the transition localStorage->sessionStorage TODO remove
+    sessionStorage['uid'] = localStorage['uid'];
+    localStorage.clear();
+  } else {
+    sessionStorage['uid'] = nanoid();
+  }
+}
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   uri: 'https://api.unfollow.ninja',
   headers: {
-    uid: localStorage['uid'],
+    uid: sessionStorage['uid'],
   }
 });
 
