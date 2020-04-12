@@ -58,22 +58,31 @@ const LoggedInIntro = ({ user, logout, removeDMs }) => {
 
     let message = <Paragraph>Plus qu'une étape pour activer le service :<br/> Choisissez un compte pour vous envoyer les notifications</Paragraph>;
     if (user.dmUsername) {
-        message = <Paragraph>Tout est en ordre ! N'oubliez pas de suivre <Link href='https://twitter.com/unfollowninja'>@unfollowNinja</Link></Paragraph>;
+        message = <Paragraph>Tout est en ordre ! N'oubliez pas de suivre <Link href='https://twitter.com/unfollowninja' source='logged-in-intro'>@unfollowNinja</Link></Paragraph>;
     }
     if (user.dmUsername && user.dmUsername !== user.username) {
         message = <Paragraph>Tout est en ordre, <b>@{user.dmUsername}</b> vous préviendra par DM !
-            N'oubliez pas de suivre <Link href='https://twitter.com/unfollowninja'>@unfollowNinja</Link></Paragraph>;
+            N'oubliez pas de suivre <Link href='https://twitter.com/unfollowninja' source='logged-in-intro'>@unfollowNinja</Link></Paragraph>;
     }
     return <div className={Styles.loggedInDetails}>
         <Paragraph><Validate color='neutral-1' className={Styles.centerIcon}/> Bienvenue, <b>@{user.username}</b> !</Paragraph>
         {message}
         <Paragraph>
-            <Link href='#' onClick={e => {logout();e.preventDefault();}}>Se déconnecter</Link>
-            {user.dmUsername ? <span> — <Link href='#' onClick={e => {removeDMs();e.preventDefault();}}>Désactiver le service</Link>
+            <Link href='#' onClick={e => {logout();e.preventDefault();}} source='disconnect'>Se déconnecter</Link>
+            {user.dmUsername ? <span> — <Link href='#' onClick={e => {removeDMs();e.preventDefault();}} source='disable'>Désactiver le service</Link>
             </span> : null}
         </Paragraph>
     </div>
 };
+
+function sendStep3Event() {
+    if (window.gtag) {
+        window.gtag('event', 'click', {
+            'event_category': 'outbound',
+            'event_label': 'step 3',
+        });
+    }
+}
 
 export default (props) => {
   const location = useLocation();
@@ -93,7 +102,10 @@ export default (props) => {
     const urlParams = new URLSearchParams(location.search);
     const [ oauthToken, oauthVerifier ] = [ urlParams.get('oauth_token'), urlParams.get('oauth_verifier') ];
     if (oauthToken && oauthVerifier) { // otherwise, probably denied
-      login({variables: {oauthToken, oauthVerifier}});
+        login({variables: {oauthToken, oauthVerifier}});
+        setTimeout(() => window.gtag && window.gtag('event', 'login'), 1000); // ganalaytics
+    } else {
+        setTimeout(() => window.gtag && window.gtag('event', 'exception', {description: 'login_failed'}), 1000);
     }
     useHistory().push('/');
   } else if (!addDmsRequest.called && location.pathname === '/2') {
@@ -101,6 +113,9 @@ export default (props) => {
       const [ oauthToken, oauthVerifier ] = [ urlParams.get('oauth_token'), urlParams.get('oauth_verifier') ];
       if (oauthToken && oauthVerifier) { // otherwise, probably denied
           addDms({variables: {oauthToken, oauthVerifier}});
+          setTimeout(() => window.gtag && window.gtag('event', 'sign_up'), 1000); // ganalaytics
+      } else {
+          setTimeout(() => window.gtag && window.gtag('event', 'exception', {description: 'add_dms_failed'}), 1000);
       }
       useHistory().push('/');
   }
@@ -136,6 +151,7 @@ export default (props) => {
             primary={step2}
             style={step2 ? {color: 'white'} : {}}
             href='https://twitter.com/unfollowninja'
+            onClick={sendStep3Event}
             target='_blank'
             rel='noopener'
         />
