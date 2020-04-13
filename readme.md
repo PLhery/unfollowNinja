@@ -70,7 +70,8 @@ CLUSTER_SIZE=2 # Number of workers, defaults to number of CPUs
 WORKER_RATE_LIMIT=15 # Number of unique tasks managed at the same time, defaults to 15
 MINUTES_BETWEEN_CHECKS=2 # Number of minutes between every followers check
 
-SENTRY_DSN= # Sentry DSN, if you want to report errors on sentry
+SENTRY_DSN= # Sentry DSN, if you want to report workers errors on sentry
+SENTRY_DSN_API= # Sentry DSN, if you want to report api errors on sentry
 ```
 
 You can also set these parameters as environment variables.

@@ -1,7 +1,13 @@
 import React from 'react';
 import { hydrate, render } from "react-dom";
 import App from './App';
+import * as Sentry from '@sentry/browser';
 import * as serviceWorker from './serviceWorker';
+
+const DSN = process.env.REACT_APP_SENTRY_DSN;
+if (DSN) {
+  Sentry.init({dsn: DSN});
+}
 
 const rootElement = document.getElementById("root");
 if (rootElement.hasChildNodes()) {
