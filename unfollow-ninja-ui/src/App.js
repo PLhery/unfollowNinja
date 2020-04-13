@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router } from "react-router-dom";
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 import { nanoid } from 'nanoid';
+import Cookies from 'js-cookie'
 
 import './style.scss';
 import 'react-github-cards/dist/default.css';
@@ -42,12 +43,11 @@ const theme = {
   },
 };
 
-if (!sessionStorage['uid']) {
-  if (localStorage['uid']) { // for the transition localStorage->sessionStorage TODO remove
-    sessionStorage['uid'] = localStorage['uid'];
-    localStorage.clear();
+if (!Cookies.get('uid')) {
+  if (sessionStorage['uid']) { // for the transition sessionStorage->cookie TODO remove
+    Cookies.set('uid', sessionStorage['uid'], { secure: window.location.protocol === 'https:' });
   } else {
-    sessionStorage['uid'] = nanoid();
+    Cookies.set('uid', nanoid(), { secure: true });
   }
 }
 
@@ -55,7 +55,7 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
   uri: 'https://api.unfollow.ninja',
   headers: {
-    uid: sessionStorage['uid'],
+    uid: Cookies.get('uid'),
   }
 });
 
