@@ -17,7 +17,7 @@ services:
   api:
     restart: always
     build: .
-    command: "npm run start-api"
+    command: ["node", "./dist/api.js"]
     ports:
       - "127.0.0.1:4000:4000"
     depends_on:

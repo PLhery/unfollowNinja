@@ -18,4 +18,4 @@ COPY tests tests
 COPY locales locales
 COPY .env .env
 
-CMD [ "npm", "start" ]
+CMD [ "node", "./dist/workers.js" ]
