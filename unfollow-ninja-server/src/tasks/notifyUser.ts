@@ -9,6 +9,7 @@ import { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
 import { IUnfollowerInfo, Lang } from '../utils/types';
 import Task from './task';
+import metrics from '../utils/metrics';
 
 i18n.configure({
     locales: ['en', 'fr'],
@@ -140,7 +141,9 @@ export default class extends Task {
                 )();
                 realUnfollowersInfo = difference(realUnfollowersInfo, potentialGlitches);
             }
+            metrics.increment('uninja.notifyUser.nbFirstTry');
         }
+        metrics.increment('uninja.notifyUser.count');
 
         if (realUnfollowersInfo.length > 0) {
             userDao.addUnfollowers(realUnfollowersInfo.concat(leftovers));
@@ -156,6 +159,9 @@ export default class extends Task {
                 },
             } as Params)
                 .catch((err) => this.manageTwitterErrors(err, username, userId));
+
+            metrics.increment('uninja.notifyUser.dmsSent');
+            metrics.increment('uninja.notifyUser.nbUnfollowers', realUnfollowersInfo.length + leftovers.length);
         }
     }
 

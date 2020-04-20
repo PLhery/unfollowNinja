@@ -44,6 +44,7 @@ describe('Test DAO', () => {
         expect(await dao.getUserIdsByCategory(UserCategory.disabled)).toStrictEqual(['2']);
         expect(await dao.getUserIdsByCategory(UserCategory.suspended)).toStrictEqual([]);
         expect(await dao.getCachedUsername('2')).toBe('user 1');
+        expect(await dao.getUserCountByCategory()).toStrictEqual( {0: 1, 1: 0, 2: 0, 3: 1, 4: 0, 5: 0});
     });
 
     test('should manage username cache', async () => {

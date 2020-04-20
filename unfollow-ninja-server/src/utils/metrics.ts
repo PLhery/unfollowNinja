@@ -1,20 +1,35 @@
-import SDC from 'statsd-client';
+import { StatsD } from 'hot-shots';
 
 const STATSD_HOST = process.env.STATSD_HOST || undefined;
+const DD_AGENT_HOST = process.env.DD_AGENT_HOST || undefined;
 
 export default class Metrics {
-    public static setStatsdHost(host: string) {
-        this.sdc = new SDC({host: STATSD_HOST});
+    private static statsDClients: StatsD[] = [];
+
+    public static addStatsdHost(host: string, port: number = 8125) {
+        this.statsDClients.push(new StatsD({host, port}))
     }
 
     public static gauge(metric: string, value: number) {
-        if (this.sdc) {
-            this.sdc.gauge(metric, value);
-        }
+        this.statsDClients
+            .forEach(client => client.gauge(metric, value));
     }
 
-    private static sdc: SDC;
+    public static increment(metric: string, value: number = 1) {
+        this.statsDClients
+            .forEach(client => client.increment(metric, value));
+    }
+
+    public static kill() {
+        this.statsDClients.forEach(client => client.close(null))
+    }
 }
 if (STATSD_HOST) {
-    Metrics.setStatsdHost(STATSD_HOST);
+    Metrics.addStatsdHost(STATSD_HOST);
 }
+if (DD_AGENT_HOST) { // datadog
+    Metrics.addStatsdHost(DD_AGENT_HOST, Number(process.env.DD_DOGSTATSD_PORT || 8125));
+}
+
+process.once( 'SIGTERM', Metrics.kill);
+process.once( 'SIGINT', Metrics.kill);

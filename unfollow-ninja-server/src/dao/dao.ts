@@ -57,6 +57,18 @@ export default class Dao {
         return this.redis.zrangebyscore('users', category, category);
     }
 
+    public async getUserCountByCategory(): Promise<Record<UserCategory, number>> {
+        const nbCategory = Object.keys(UserCategory).length / 2; // not super clean but I have no better idea
+        const counts = await Promise.all(
+            new Array(nbCategory)
+                .fill(null)
+                .map((_, category) => this.redis.zcount('users', category, category))
+        );
+        return Object.fromEntries(
+            counts.map((count, category) => [category, count])
+        ) as Record<UserCategory, number>;
+    }
+
     public async getCachedUsername(userId: string): Promise<string> {
         return this.redis.hget('cachedTwittos', `${userId}:username`);
     }

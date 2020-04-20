@@ -27,8 +27,12 @@ export default class extends Task {
             });
             return;
         }
+        // metrics
+        for (const [category, count] of Object.entries(await this.dao.getUserCountByCategory())) {
+            metrics.gauge(`uninja.users.${UserCategory[category]}`, count)
+        }
+
         const users: string[] = await this.dao.getUserIdsByCategory(UserCategory.enabled);
-        metrics.gauge('uninja.users.enabled', users.length);
 
         for (const [index, userId] of users.entries()) {
             const username: string = await this.dao.getCachedUsername(userId);
