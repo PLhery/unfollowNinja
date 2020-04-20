@@ -30,6 +30,3 @@ if (STATSD_HOST) {
 if (DD_AGENT_HOST) { // datadog
     Metrics.addStatsdHost(DD_AGENT_HOST, Number(process.env.DD_DOGSTATSD_PORT || 8125));
 }
-
-process.once( 'SIGTERM', Metrics.kill);
-process.once( 'SIGINT', Metrics.kill);

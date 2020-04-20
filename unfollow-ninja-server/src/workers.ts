@@ -10,6 +10,7 @@ import tasks from './tasks';
 import Task from './tasks/task';
 import logger from './utils/logger';
 import Scheduler from './utils/scheduler';
+import Metrics from './utils/metrics';
 
 // these will be deleted before launching the workers
 const CLEAN_TYPES = ['checkFollowers', 'createTwitterTasks', 'getFollowersInfos', 'cacheFollowers'];
@@ -116,6 +117,7 @@ function death() {
             logger.error(err.message);
         }
         dao.disconnect();
+        Metrics.kill();
         if (cluster.isWorker) {
             process.exit(0);
         }
