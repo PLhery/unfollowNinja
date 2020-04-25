@@ -91,8 +91,6 @@ function App() {
               <Paragraph>Merci à Hivane d'aider le projet à rester performant, libre, et gratuit, soutenant 60 000+ utilisateurs actifs.</Paragraph>
               <Box gap='small' alignSelf='center' style={{overflow: 'hidden'}}>
                 <RepoCard username="plhery" repo="unfollowninja"/>
-                <a href="https://twitter.com/unfollowNinja?ref_src=twsrc%5Etfw" className="twitter-follow-button"
-                   data-size="large" data-dnt="true">Follow @unfollowNinja</a>
               </Box>
             </Box>
           </Box>
