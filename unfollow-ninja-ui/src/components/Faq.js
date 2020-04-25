@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Heading, Paragraph } from "grommet/es6";
-import Emojis from './Emojis';
+import Emojis from '../twemojis/Emojis';
 import Styles from './Faq.module.scss';
 
 export default (props) => {
