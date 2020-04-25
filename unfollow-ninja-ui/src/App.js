@@ -10,7 +10,6 @@ import 'react-github-cards/dist/default.css';
 import {Box, Grommet, Heading, Image, Paragraph, Text} from 'grommet';
 import { RepoCard } from 'react-github-cards';
 import GithubCorner from "react-github-corner";
-import { TwitterFollowButton } from 'react-twitter-embed'
 
 import { Faq, Link, MiniApp, Navbar, Section }  from "./components";
 import * as Images from './images';
@@ -92,7 +91,8 @@ function App() {
               <Paragraph>Merci à Hivane d'aider le projet à rester performant, libre, et gratuit, soutenant 60 000+ utilisateurs actifs.</Paragraph>
               <Box gap='small' alignSelf='center' style={{overflow: 'hidden'}}>
                 <RepoCard username="plhery" repo="unfollowninja"/>
-                <TwitterFollowButton screenName="unfollowninja" options={{size: 'large'}} />
+                <a href="https://twitter.com/unfollowNinja?ref_src=twsrc%5Etfw" className="twitter-follow-button"
+                   data-size="large" data-dnt="true">Follow @unfollowNinja</a>
               </Box>
             </Box>
           </Box>
