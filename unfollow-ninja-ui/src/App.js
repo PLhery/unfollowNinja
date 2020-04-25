@@ -97,7 +97,7 @@ function App() {
             </Box>
           </Box>
         </Section>
-        <Section background={`url(${Images.Alaska})`}>
+        <Section background={`url(${Images.useAlaska()})`}>
           <Faq/>
         </Section>
         <Section>
