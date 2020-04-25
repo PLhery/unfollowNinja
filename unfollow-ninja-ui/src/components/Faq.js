@@ -1,12 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Box, Heading, Paragraph } from "grommet/es6";
-import twemoji from 'twemoji';
+import Emojis from './Emojis';
 import Styles from './Faq.module.scss';
 
 export default (props) => {
-    const emojisRef = useRef(null);
-    useEffect(() => twemoji.parse(emojisRef.current, {folder:'svg', ext: '.svg'}), [])
-
     return <Box alignSelf='center' pad='medium' margin='medium' className={Styles.container} {...props}>
             <Heading level={1} color='dark'>Foire aux questions</Heading>
 
@@ -25,17 +22,17 @@ export default (props) => {
 
 
             <Heading level={3} color='dark'>Que signifient les différents messages et emojis ?</Heading>
-            <ul ref={emojisRef}>
+            <ul>
                 <li>Les messages suivants parlent d'eux-meme :<ul>
-                    <li><b>@username</b> vous a unfollow 👋</li>
-                    <li><b>@username</b> a été suspendu 🙈</li>
-                    <li><b>@username</b> vous a bloqué ⛔</li>
-                    <li>Vous avez bloqué <b>@username</b> 💩</li>
+                    <li><b>@username</b> vous a unfollow <Emojis.WavingHand/></li>
+                    <li><b>@username</b> a été suspendu <Emojis.SeeNoEvil/></li>
+                    <li><b>@username</b> vous a bloqué  <Emojis.NoEntry/></li>
+                    <li>Vous avez bloqué <b>@username</b> <Emojis.Poo/></li>
                 </ul></li>
-                <li><b>@username</b> a quitté Twitter 🙈 peut signifier que la personne a été suspendue quelques minutes, a fermé son compte, ou a été retirée de Twitter par exemple à cause de la limite d'âge.</li>
-                <li>L'emoji est un coeur brisé 💔 si cette personne est un mutual, que vous la suiviez.</li>
+                <li><b>@username</b> a quitté Twitter <Emojis.SeeNoEvil/> peut signifier que la personne a été suspendue quelques minutes, a fermé son compte, ou a été retirée de Twitter par exemple à cause de la limite d'âge.</li>
+                <li>L'emoji est un coeur brisé <Emojis.BrokenHeart/> si cette personne est un mutual, que vous la suiviez.</li>
                 <li>Si plus de 20 twittos vous unfollowent en moins de deux minutes, vous ne serez informé que des 20 premiers, ainsi que du nombre total de followers perdus.</li>
-                <li>"Un twitto a quitté Twitter 🙈" : quand le nom d'utilisateur de la personne qui a fermé son compte n'a pas eu le temps d'être sauvegardé (peut prendre 48h), vous ne recevez pas son pseudo, mais êtes informé de cet abonné en moins.</li>
+                <li>"Un twitto a quitté Twitter <Emojis.SeeNoEvil/>" : quand le nom d'utilisateur de la personne qui a fermé son compte n'a pas eu le temps d'être sauvegardé (peut prendre 48h), vous ne recevez pas son pseudo, mais êtes informé de cet abonné en moins.</li>
                 <li>"Ce compte vous suivait avant votre inscription à <b>@unfollowninja</b> !" : nous n'arrivons pas toujours à retrouver la date de follow exacte de chaque unfollower. Si on ne la trouve pas, nous vous donnons la première fois que nous l'avons vu sur votre compte. Mais s'il était déjà sur votre compte lors de votre inscription, nous ne pouvons vous donner de date.</li>
             </ul>
 
