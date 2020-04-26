@@ -19,6 +19,7 @@ i18n.configure({
 moment.tz.setDefault('Europe/Paris');
 
 // const BETA_USERS = split(process.env.BETA_USERS, ',').concat('testUsername');
+const MINUTES_BETWEEN_CHECKS = Number(process.env.MINUTES_BETWEEN_CHECKS) || 2;
 
 // friendships/show can be called 180 times/15min
 // with this limit it can be called max 200 times/15min (if checked 8 times)
@@ -115,7 +116,7 @@ export default class extends Task {
             const followDuration = unfollowerInfo.unfollowTime - unfollowerInfo.followDetectedTime;
             return unfollowerInfo.followed_by !== true &&
                 !(unfollowerInfo.deleted && followDuration < 24 * 60 * 60 * 1000) &&
-                followDuration > 10 * 60 * 1000;
+                followDuration > Math.max(MINUTES_BETWEEN_CHECKS*2+1, 7) * 60 * 1000;
         });
 
         if (!isSecondTry) {
