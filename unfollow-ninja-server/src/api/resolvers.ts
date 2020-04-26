@@ -86,7 +86,7 @@ const Mutation: resolver = {
             if (params.tokenSecret !== user.secret) { // after a revoked token
                 await dao.getUserDao(user.id).setUserParams({token: user.token, tokenSecret: user.secret});
             }
-            if (category !== UserCategory.enabled) {
+            if (params.dmId && category !== UserCategory.enabled) { // step 2 done but user disabled
                 await dao.getUserDao(user.id).setCategory(UserCategory.enabled)
             }
         }

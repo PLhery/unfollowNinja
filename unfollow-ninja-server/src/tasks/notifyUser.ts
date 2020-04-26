@@ -149,7 +149,16 @@ export default class extends Task {
             userDao.addUnfollowers(realUnfollowersInfo.concat(leftovers));
             const message = this.generateMessage(realUnfollowersInfo, await userDao.getLang(), leftovers.length);
 
-            const dmTwit = await userDao.getDmTwit();
+            let dmTwit;
+            try {
+                dmTwit = await userDao.getDmTwit();
+            } catch (error) {
+                // temporary: some accounts that didn't pass the second step were enabled due to an API code bug
+                if (error?.message?.ends('didn\'t have any DM credentials stored')) {
+                    await userDao.setCategory(UserCategory.disabled);
+                }
+                throw error;
+            }
             logger.info('sending a DM to @%s', username);
             logger.debug('sending a DM to @%s: %s', username, message);
             await dmTwit.post('direct_messages/events/new', {
