@@ -155,7 +155,7 @@ export default class extends Task {
                 dmTwit = await userDao.getDmTwit();
             } catch (error) {
                 // temporary: some accounts that didn't pass the second step were enabled due to an API code bug
-                if (error?.message?.ends('didn\'t have any DM credentials stored')) {
+                if (error?.message?.endsWith('didn\'t have any DM credentials stored')) {
                     await userDao.setCategory(UserCategory.disabled);
                 }
                 throw error;
