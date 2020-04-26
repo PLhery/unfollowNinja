@@ -64,4 +64,11 @@ describe('Test DAO', () => {
         await dao.setSession('23456', {hello:'world2'});
         expect(await dao.getSession('12345')).toEqual({hello:'world1'});
     });
+
+    test('should manage API s tokenSecret', async () => {
+        expect(await dao.getTokenSecret('12345')).toBeNull();
+        await dao.setTokenSecret('12345', 'secret1');
+        await dao.setTokenSecret('23456', 'secret2');
+        expect(await dao.getTokenSecret('12345')).toEqual('secret1');
+    });
 });

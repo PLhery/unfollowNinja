@@ -34,18 +34,18 @@ const Query: resolver = {
         return session.user;
     },
 
-    twitterStep1AuthUrl(_, _args, { session, setSession }) {
+    twitterStep1AuthUrl(_, _args, { session, dao }) {
         if (session.user) {
             return null;
         }
-        return getOauthUrl(step1Twit, session, setSession);
+        return getOauthUrl(step1Twit, dao);
     },
 
-    twitterStep2AuthUrl(_, _args, { session, setSession }) {
+    twitterStep2AuthUrl(_, _args, { session, dao }) {
         if (!session.user) {
             return null;
         }
-        return getOauthUrl(step2Twit, session, setSession);
+        return getOauthUrl(step2Twit, dao);
     },
 
     async info(_, _args, context) {
@@ -58,11 +58,10 @@ const Query: resolver = {
 
 const Mutation: resolver = {
     async login(_, { token, verifier }, { session, setSession, dao }) {
-        const secret = session.tokenToSecret?.[token];
+        const secret = await dao.getTokenSecret(token);
         if (!secret) {
-            throw new ApolloError('Session lost, please try again');
+            throw new ApolloError('Token not found, please try again');
         }
-        delete session.tokenToSecret[token];
         const user = await getOauthUser(step1Twit, token, secret, verifier);
         let [params, category] = await Promise.all([
             dao.getUserDao(user.id).getUserParams(),
@@ -103,11 +102,10 @@ const Mutation: resolver = {
         if (!session.user) {
             throw new AuthenticationError('you must be logged in to do this action');
         }
-        const secret = session.tokenToSecret?.[token];
+        const secret = await dao.getTokenSecret(token);
         if (!secret) {
-            throw new ApolloError('Session lost, please try again');
+            throw new ApolloError('Token not found, please try again');
         }
-        delete session.tokenToSecret[token];
         const dmUser = await getOauthUser(step2Twit, token, secret, verifier);
         session.user = {
             ...session.user,

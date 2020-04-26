@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { ITwittoInfo, IUserEgg, IUserParams } from '../utils/types';
+import {ITwittoInfo, IUserEgg, IUserParams, Session} from '../utils/types';
 import UserDao from './userDao';
 
 export enum UserCategory {
@@ -81,12 +81,21 @@ export default class Dao {
         ]);
     }
 
-    public async getSession(uid: string) {
+    public async getSession(uid: string): Promise<Session> {
         return JSON.parse(await this.redis.get(`session:${uid}`) || '{}');
     }
 
-    public async setSession(uid: string, params: Record<string, string>) {
+    public async setSession(uid: string, params: Record<string, string>): Promise<void> {
         await this.redis.set(`session:${uid}`, JSON.stringify(params));
         await this.redis.expire(`session:${uid}`, 3600); // 1h sessions
+    }
+
+    public async getTokenSecret(token: string): Promise<string> {
+        return await this.redis.get(`tokensecret:${token}`) || null;
+    }
+
+    public async setTokenSecret(token: string, secret: string): Promise<void> {
+        await this.redis.set(`tokensecret:${token}`, secret);
+        await this.redis.expire(`tokensecret:${token}`, 1200); // 20min memory (lasts <10min on twitter side)
     }
 }

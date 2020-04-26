@@ -1,15 +1,13 @@
 import type { OAuth } from 'oauth';
-import type { Session } from '../utils/types';
+import Dao from '../dao/dao';
 
-export function getOauthUrl(client: OAuth, session: Session, setSession: (data: Session) => Promise<void>): Promise<string> {
+export function getOauthUrl(client: OAuth, dao: Dao): Promise<string> {
     return new Promise((resolve, reject) => {
         client.getOAuthRequestToken((error, oauthToken, oauthTokenSecret) => {
             if (error) {
                 reject(error);
             } else {
-                session.tokenToSecret = session.tokenToSecret || {};
-                session.tokenToSecret[oauthToken] = oauthTokenSecret;
-                setSession(session)
+                dao.setTokenSecret(oauthToken, oauthTokenSecret)
                     .then(() => resolve('https://twitter.com/oauth/authenticate?oauth_token=' + oauthToken))
                     .catch(reject);
             }

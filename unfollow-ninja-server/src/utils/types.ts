@@ -44,5 +44,4 @@ export interface IUserEgg extends ITwittoInfo, IUserParams {
 
 export interface Session {
     user?: IUserEgg & { dmUsername?: string };
-    tokenToSecret?: Record<string, string>;
 }
