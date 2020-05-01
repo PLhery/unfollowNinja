@@ -7,6 +7,7 @@ export {default as Logo}from './logo.svg';
 export {default as Smartphone} from './smartphone.svg'
 export {default as Affinitweet} from './affinitweet.png'
 export {default as Uzzy} from './uzzy.svg'
+export {default as UnfollowMonkey} from './unfollowmonkey.svg'
 
 export function useAlaska() { // react hook to get the right alaska image url
     const [supportsWebP, setWebP] = useState(null); // true if supports, otherwise false

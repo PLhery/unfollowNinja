@@ -59,6 +59,7 @@ const client = new ApolloClient({
 });
 
 function App() {
+  const isForeigner = !navigator.language?.startsWith?.('fr') && navigator.userAgent !== 'ReactSnap';
   return (
       <Grommet theme={theme}>
         <Section>
@@ -69,6 +70,9 @@ function App() {
             <Box basis='medium' flex={true} pad='medium'>
               <Heading level={1} color='dark'>Soyez prévenus rapidement de vos unfollowers Twitter</Heading>
               <Paragraph size='large'>Unfollow Ninja vous envoie une notification dès qu'un twitto se désabonne de votre compte, en quelques secondes.</Paragraph>
+              {isForeigner ? <Paragraph margin={{top: 'xsmall'}}>
+                English speaker? An international version is available at <Link href='https://unfollow-monkey.com/?utm_source=unfollowninja'>https://unfollow-monkey.com</Link>
+              </Paragraph> : null}
               <ApolloProvider client={client}>
                 <Router>
                   <MiniApp/>
@@ -103,7 +107,7 @@ function App() {
             <Image title='logo' height={30} src={Images.Logo}/>
             <Text size='small' textAlign='center' style={{fontFamily: 'quicksand'}}>
               © 2020 UnfollowNinja · <Link href='https://uzzy.me/fr/cgu/?utm_source=unfollowninja'>CGU</Link> ·
-              Découvrez aussi <Link href='https://uzzy.me/?utm_source=unfollowninja'><Image title='uzzy' src={Images.Uzzy} height={18}/></Link> Uzzy et <Link href='https://affinitweet.com/?utm_source=unfollowninja'><Image title='affinitweet' src={Images.Affinitweet} height={18}/></Link> Affinitweet ·
+              Découvrez aussi <Link href='https://unfollow-monkey.com/?utm_source=unfollowninja_footer'><Image title='unfollowmonkey' src={Images.UnfollowMonkey} height={18}/></Link> UnfollowMonkey <Link href='https://uzzy.me/?utm_source=unfollowninja'><Image title='uzzy' src={Images.Uzzy} height={18}/></Link> Uzzy et <Link href='https://affinitweet.com/?utm_source=unfollowninja'><Image title='affinitweet' src={Images.Affinitweet} height={18}/></Link> Affinitweet ·
               Proposé par <Link href='https://twitter.com/plhery'>@plhery</Link> · Disponible sur <Link href='https://twitter.com/plhery'>GitHub</Link>
             </Text>
           </Box>
