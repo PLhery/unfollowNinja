@@ -54,7 +54,7 @@
     "@types/node-emoji": "^1.8.1",
     "@types/oauth": "^0.9.1",
     "@types/twit": "^2.2.23",
-    "apollo-server": "^2.12.0",
+    "apollo-server": "^2.14.2",
     "big-integer": "^1.6.48",
     "dotenv": "^8.2.0",
     "graphql": "^15.0.0",
