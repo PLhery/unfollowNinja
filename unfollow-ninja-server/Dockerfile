@@ -1,5 +1,5 @@
 # -- For workers only, this does not launch the API
-FROM node:12
+FROM node:14
 
 # Create app directory
 WORKDIR /usr/src/app
