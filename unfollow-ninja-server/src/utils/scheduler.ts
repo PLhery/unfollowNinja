@@ -1,13 +1,11 @@
 import { Queue } from 'kue';
 import { promisify } from 'util';
-import Dao from '../dao/dao';
-import logger from './logger';
-
-const MINUTES_BETWEEN_CHECKS = Number(process.env.MINUTES_BETWEEN_CHECKS) || 2;
+import * as Sentry from '@sentry/node';
+import Dao, {UserCategory} from '../dao/dao';
+import metrics from './metrics';
 
 // Launch createTwitterTasks every 3 minutes
 export default class Scheduler {
-    private schedulerId: number;
     private dao: Dao;
     private queue: Queue;
     private intervalId: NodeJS.Timer;
@@ -25,16 +23,14 @@ export default class Scheduler {
             return;
         }
         this.started = true;
-        // makes sure that only one scheduler is running (the app could be launched twice)
-        this.schedulerId = await this.dao.incrSchedulerId();
 
-        // every 2 minutes, create the checkFollowers tasks for everyone
-        this.intervalId = setInterval(() => this.createTwitterTasks(), MINUTES_BETWEEN_CHECKS * 60 * 1000);
-        await this.createTwitterTasks();
+        // every minute, update the user count metrics
+        this.intervalId = setInterval(() => this.updateUserCountMetrics(), 60 * 1000);
+        this.updateUserCountMetrics();
 
         // twice a day, reenable suspended followers
         this.dailyIntervalId = setInterval(() => this.createTriHourlyTasks(), 3 * 60 * 60 * 1000);
-        await this.createTriHourlyTasks();
+        this.createTriHourlyTasks();
     }
 
     public stop() {
@@ -46,27 +42,24 @@ export default class Scheduler {
         this.started = false;
     }
 
-    private async createTwitterTasks(): Promise<void> {
-        if (await this.dao.getSchedulerId() !== this.schedulerId) {
-            logger.warn('A new scheduler has been launched, cancelling this one...');
-            this.stop();
-            return;
+    private async updateUserCountMetrics(): Promise<void> {
+        try {
+            for (const [category, count] of Object.entries(await this.dao.getUserCountByCategory())) {
+                metrics.gauge(`uninja.users.${UserCategory[category]}`, count)
+            }
+        } catch (error) {
+            Sentry.captureException(error);
         }
-        await promisify((cb) => this.queue
-            .create('createTwitterTasks', {})
-            .removeOnComplete(true)
-            .save(cb))();
     }
 
     private async createTriHourlyTasks(): Promise<void> {
-        if (await this.dao.getSchedulerId() !== this.schedulerId) {
-            logger.warn('A new scheduler has been launched, cancelling this one...');
-            this.stop();
-            return;
+        try {
+            await promisify((cb) => this.queue
+                .create('reenableFollowers', {})
+                .removeOnComplete(true)
+                .save(cb))();
+        } catch (error) {
+            Sentry.captureException(error);
         }
-        await promisify((cb) => this.queue
-            .create('reenableFollowers', {})
-            .removeOnComplete(true)
-            .save(cb))();
     }
 }

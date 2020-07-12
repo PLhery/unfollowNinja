@@ -6,8 +6,10 @@ import * as kue from 'kue';
 import { cpus } from 'os';
 import { promisify } from 'util';
 import Dao from './dao/dao';
+import { checkAllFollowers } from './workers/checkAllFollowers';
+import { cacheAllFollowers } from './workers/cacheAllFollowers';
 import tasks from './tasks';
-import Task from './tasks/task';
+import type Task from './tasks/task';
 import logger from './utils/logger';
 import Scheduler from './utils/scheduler';
 import Metrics from './utils/metrics';
@@ -69,7 +71,7 @@ if (cluster.isMaster) {
     )))
         .then(() => {
             logger.info('Launching the %s workers...', CLUSTER_SIZE);
-            for (let i = 0; i < CLUSTER_SIZE; i++) {
+            for (let i = 0; i < 2*CLUSTER_SIZE; i++) {
                 cluster.fork();
             }
         });
@@ -81,25 +83,37 @@ if (cluster.isMaster) {
     scheduler = new Scheduler(dao, queue);
     scheduler.start();
 } else {
-    for (const taskName in tasks) {
-        const task: Task = new tasks[taskName](dao, queue);
-        queue.process(
-            taskName,
-            WORKER_RATE_LIMIT,
-            (job: kue.Job, done: kue.DoneCallback) => {
-                task.run(job)
-                    .then(() => done())
-                    .catch((err) => {
-                        logger.error(`An error happened with ${taskName} / @${job.data.username || ''}: ${err.stack}`);
-                        Sentry.withScope(scope => {
-                            scope.setTag('task-name', taskName);
-                            scope.setUser({username: job.data.username});
-                            Sentry.captureException(err);
+    // if CLUSTER_SIZE=3, we'll create 6 workers
+    // workers 1,2,3 will be used to check new unfollowers, workers 4,5,6 to process new kue tasks
+    if (cluster.worker.id <= CLUSTER_SIZE) {
+        // start checking the worker's followers
+        checkAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao, queue)
+            .catch(err => Sentry.captureException(err));
+
+        // Also start caching its follower's username and follow time
+        cacheAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao)
+            .catch(err => Sentry.captureException(err));
+    } else {
+        for (const taskName in tasks) {
+            const task: Task = new tasks[taskName](dao, queue);
+            queue.process(
+                taskName,
+                WORKER_RATE_LIMIT,
+                (job: kue.Job, done: kue.DoneCallback) => {
+                    task.run(job)
+                        .then(() => done())
+                        .catch((err) => {
+                            logger.error(`An error happened with ${taskName} / @${job.data.username || ''}: ${err.stack}`);
+                            Sentry.withScope(scope => {
+                                scope.setTag('task-name', taskName);
+                                scope.setUser({username: job.data.username});
+                                Sentry.captureException(err);
+                            });
+                            done(err);
                         });
-                        done(err);
-                    });
-            },
-        );
+                },
+            );
+        }
     }
 
     logger.info('Worker %d ready', cluster.worker.id);

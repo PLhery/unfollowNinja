@@ -46,8 +46,6 @@ By default, the db files and logs are stored in /data subfolders. Feel free to e
 - launch the api server `node ./dist/api`
 - or launch both in the as a daemon with pm2 `pm2 start pm2.yml`
 
-If you made some changes to the code, you can launch a new instance before exiting the former one to prevent downtime.
-
 ## .env file
 
 To get started, you'll need to create one or two twitter app https://developer.twitter.com/en/apps:  
@@ -68,7 +66,6 @@ WEB_URL=https://unfollow.ninja # Front-end URL (without any ending /)
 # optionally:
 CLUSTER_SIZE=2 # Number of workers, defaults to number of CPUs
 WORKER_RATE_LIMIT=15 # Number of unique tasks managed at the same time, defaults to 15
-MINUTES_BETWEEN_CHECKS=2 # Number of minutes between every followers check
 
 SENTRY_DSN= # Sentry DSN, if you want to report workers errors on sentry
 SENTRY_DSN_API= # Sentry DSN, if you want to report api errors on sentry
@@ -93,7 +90,7 @@ Open an issue with your suggestions or assign yourself to an existing issue
 Legacy version: https://github.com/PLhery/unfollowNinja/tree/legacy
 
 The legacy version couldn't scale and manage thousands of users, while still checking every 2 minutes the followers.
-Now, the program checks 50 000 users's followers every 3 minutes.
+Now, the program checks 100 000 users's followers in about 3 minutes with 12 cpus.
 
 - Based on a job queue for:
     - Monitoring: I can see how many jobs/sec are happening, their errors, and rate limit them.

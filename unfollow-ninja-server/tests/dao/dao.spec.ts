@@ -17,14 +17,6 @@ describe('Test DAO', () => {
         await redis.disconnect();
     });
 
-    test('Should have an incrementable schedulerId', async () => {
-        await dao.incrSchedulerId();
-        await dao.incrSchedulerId();
-        await dao.incrSchedulerId();
-        const schedulerId = await dao.getSchedulerId();
-        expect(schedulerId).toBe(3);
-    });
-
     test('should manage users', async () => {
         const user1: IUserEgg = {
             id: '1000000000000001',

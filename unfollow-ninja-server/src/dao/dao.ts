@@ -26,16 +26,6 @@ export default class Dao {
         return new UserDao(userId, this.redis);
     }
 
-    // used to make sure only one scheduler is working at a time
-    public async getSchedulerId(): Promise<number> {
-        return Number(await this.redis.get('scheduler_id'));
-    }
-
-    // called every time a new scheduler is launched: invalidate former schedulers
-    public async incrSchedulerId(): Promise<number> {
-        return Number(await this.redis.incr('scheduler_id'));
-    }
-
     public async addUser(userEgg: IUserEgg): Promise<void> {
         userEgg = {category: UserCategory.enabled, ...userEgg};
         const { id, category, username,
