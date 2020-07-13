@@ -34,7 +34,7 @@ export default class Dao {
             dmId, dmToken, dmTokenSecret, dmPhoto };
         await Promise.all([
             this.redis.zadd('users', category.toString(), id),
-            this.redis.hmset(`user:${id}`, params),
+            this.redis.hmset(`user:${id}`, params as any), // string literal not accepted as a type
             this.addTwittoToCache({ id, username }, added_at),
         ]);
     }
