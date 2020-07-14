@@ -38,3 +38,18 @@ jobs:
         with:
           name: test-results
           path: unfollow-ninja-server/test-results
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: create an empty env file
+        working-directory: unfollow-ninja-server
+        run: touch .env
+      - name: build
+        working-directory: unfollow-ninja-server/tests
+        run: docker-compose build
+      - name: run tests
+        working-directory: unfollow-ninja-server/tests
+        run: docker-compose up --exit-code-from tests

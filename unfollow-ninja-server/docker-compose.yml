@@ -25,7 +25,7 @@ services:
       - redis-kue
       - redis
     environment:
-      POSTGRES_URI: postgres://postgres:unfollowninja@postgres/postress
+      POSTGRES_URI: postgres://postgres:unfollowninja@postgres/postgres
       REDIS_URI: redis://redis
       REDIS_KUE_URI: redis://redis-kue
   postgres:

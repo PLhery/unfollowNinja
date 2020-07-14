@@ -21,12 +21,11 @@ describe('Test DAO', () => {
 
     beforeEach(async () => {
         await redis.flushdb();
-        await sequelize.query('delete from CachedUsernames');
     });
 
     afterAll(async () => {
         await redis.flushdb();
-        await sequelize.query('delete from CachedUsernames');
+        await sequelize.dropAllSchemas({});
         await dao.disconnect();
     });
 

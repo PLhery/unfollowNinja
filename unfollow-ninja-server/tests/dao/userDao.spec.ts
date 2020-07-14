@@ -5,7 +5,7 @@ import RedisMock from 'ioredis-mock';
 import Dao, {UserCategory} from '../../src/dao/dao';
 import {IUserEgg, IUserParams} from '../../src/utils/types';
 
-const redis = process.env.REDIS_TEST_URI ?
+const redis: Redis.Redis = process.env.REDIS_TEST_URI ?
     new Redis(process.env.REDIS_TEST_URI, { lazyConnect: true }) :
     new RedisMock({ lazyConnect: true });
 
@@ -15,7 +15,7 @@ const sequelize = process.env.POSTGRES_TEST_URI ?
 
 const dao = new Dao(redis, sequelize);
 
-const uDao1 = dao.getUserDao('1');
+const uDao1 = dao.getUserDao( '1');
 const uDao2 = dao.getUserDao('2');
 
 const USER_PARAMS_1: IUserParams = {
@@ -40,12 +40,14 @@ const USER_PARAMS_2: IUserParams = {
 describe('Test userDao', () => {
     afterAll(async () => {
         await redis.flushdb();
+        await sequelize.dropAllSchemas({});
         await dao.disconnect();
     });
 
     beforeAll(async () => {
         await dao.load();
         await redis.flushdb();
+
         const user1: IUserEgg = {
             ...USER_PARAMS_1,
             id: '1',
@@ -192,6 +194,8 @@ describe('Test userDao', () => {
         expect(await redis.dbsize()).toBe(13);
         await uDao1.deleteUser();
         await uDao2.deleteUser();
-        expect(await redis.dbsize()).toBe(4); // users, cachedTwittosIds, cachedTwittos, total-unfollowers
+        expect(await redis.zcard('users')).toBe(0);
+        redis.del('users'); // empty users appears as a key on ioredis-mock but not on redis 6
+        expect((await redis.keys('*')).sort()).toEqual(['cachedTwittos', 'cachedTwittosIds', 'total-unfollowers']);
     });
 });
