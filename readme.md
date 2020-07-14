@@ -1,9 +1,13 @@
 # Unfollow Ninja [![Server CI status](https://github.com/PLhery/unfollowNinja/workflows/Server%20CI/badge.svg)](https://github.com/PLhery/unfollowNinja/actions?query=workflow%3A%22Server+CI%22)
 
-https://unfollow.ninja
-: Receive a notification when someone unfollows you on Twitter
+Get notified when your Twitter account loses a follower
 
-![Screenshot](https://raw.githubusercontent.com/PLhery/unfollowNinja/master/unfollow-ninja-ui/public/preview.png)
+Used by ~150 000 Twitter users (07/2020)
+
+🇬🇧 https://unfollow.monkey (branch unfollow-monkey)  
+🇫🇷 https://unfollow.ninja  
+
+![Screenshot](https://raw.githubusercontent.com/PLhery/unfollowNinja/unfollow-monkey/unfollow-ninja-ui/public/preview.png)
 
 ---
 Feel free to reuse the UI on a personal server, but please don't reuse the name/logo on a public instance.
