@@ -77,6 +77,10 @@ const server = new ApolloServer({
     typeDefs, resolvers, context, plugins: [apolloServerSentryPlugin], introspection: false, playground: false, debug: false
 });
 
-server.listen().then(({ url }: { url: string }) => {
-    logger.info(`🚀 Server ready at ${url}`);
-});
+
+dao.load()
+    .then(() => server.listen())
+    .then(({ url }: { url: string }) => {
+        logger.info(`🚀 Server ready at ${url}`);
+    })
+    .catch(error => Sentry.captureException(error));

@@ -7,6 +7,7 @@ export function userDaoMock() {
         getTwit: jest.fn().mockResolvedValue(twit),
         getDmTwit: jest.fn().mockResolvedValue(dmTwit),
         getLang: jest.fn(),
+        getUsername: jest.fn(),
 
         setNextCheckTime: jest.fn(),
         updateFollowers: jest.fn(),

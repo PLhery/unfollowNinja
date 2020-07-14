@@ -69,12 +69,14 @@ if (cluster.isMaster) {
                 )),
         ),
     )))
+        .then(() => dao.load())
         .then(() => {
             logger.info('Launching the %s workers...', CLUSTER_SIZE);
             for (let i = 0; i < 2*CLUSTER_SIZE; i++) {
                 cluster.fork();
             }
-        });
+        })
+        .catch(error => Sentry.captureException(error));
 
     // watchdog - recommended by Kue
     queue.watchStuckJobs(1000);
@@ -124,13 +126,13 @@ function death() {
     if (cluster.isMaster) {
         scheduler.stop();
     }
-    queue.shutdown( 9000, (err: Error) => {
+    queue.shutdown( 15000, (err: Error) => {
         logger.info('Kue shutdown - %s', cluster.isMaster ? 'master' : 'worker ' + cluster.worker.id);
         if (err) {
             Sentry.captureException(err);
             logger.error(err.message);
         }
-        dao.disconnect();
+        dao.disconnect().catch(error => Sentry.captureException(error));
         Metrics.kill();
         if (cluster.isWorker) {
             process.exit(0);

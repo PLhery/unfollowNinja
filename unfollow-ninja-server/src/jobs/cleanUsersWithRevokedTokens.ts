@@ -4,7 +4,7 @@ import logger from '../utils/logger';
 
 // Backup and delete for Redis users that revoked their tokens
 async function runJob() {
-    const dao = new Dao();
+    const dao = await new Dao().load();
     const userIds = await dao.getUserIdsByCategory(UserCategory.revoked);
     logger.info(`${userIds.length}`);
     const userDatas = [];

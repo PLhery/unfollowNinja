@@ -1,4 +1,6 @@
 import Redis from 'ioredis';
+import {DataTypes, Model, ModelCtor, Sequelize} from 'sequelize';
+
 import {ITwittoInfo, IUserEgg, IUserParams, Session} from '../utils/types';
 import UserDao from './userDao';
 
@@ -11,19 +13,46 @@ export enum UserCategory {
     accountClosed,
 }
 
+interface ICachedUsername extends Model {twitterId: string, username: string}
+
 export default class Dao {
     private readonly redis: Redis.Redis;
+    private readonly sequelize: Sequelize;
 
-    constructor(redis = new Redis(process.env.REDIS_URI)) {
+    private readonly CachedUsername: ModelCtor<ICachedUsername>;
+
+    constructor(
+        redis = new Redis(process.env.REDIS_URI, { lazyConnect: true }),
+        sequelize = new Sequelize(process.env.POSTGRES_URI, { logging: false })
+    ) {
         this.redis = redis;
+        this.sequelize = sequelize;
+
+        this.CachedUsername = this.sequelize.define('CachedUsername', {
+            twitterId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
+            username: { type: DataTypes.STRING(15), allowNull: false }
+        });
     }
 
-    public disconnect() {
-        return this.redis.disconnect();
+    /**
+     * Wait for the databases to be connected, and create the tables if necessary
+     */
+    public async load(): Promise<Dao> {
+        await this.sequelize.authenticate(); // check that postgresql is connected
+        await this.CachedUsername.sync(); // create the missing postgresql tables
+        await this.redis.connect(); // wait for redis to load its data
+        return this;
+    }
+
+    public async disconnect() {
+        await Promise.all([
+            this.sequelize.close(),
+            this.redis.quit(),
+        ]);
     }
 
     public getUserDao(userId: string) {
-        return new UserDao(userId, this.redis);
+        return new UserDao(userId, this.redis, this);
     }
 
     public async addUser(userEgg: IUserEgg): Promise<void> {
@@ -60,6 +89,7 @@ export default class Dao {
     }
 
     public async getCachedUsername(userId: string): Promise<string> {
+        // return (await this.CachedUsername.findByPk(userId))?.username;
         return this.redis.hget('cachedTwittos', `${userId}:username`);
     }
 
@@ -68,6 +98,7 @@ export default class Dao {
         await Promise.all([
             this.redis.zadd('cachedTwittosIds', time.toString(), id),
             this.redis.hset(`cachedTwittos`, `${id}:username`, username),
+            this.CachedUsername.upsert({twitterId: id, username}),
         ]);
     }
 

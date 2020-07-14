@@ -27,9 +27,11 @@ const MAX_UNFOLLOWERS = 25;
 
 export default class extends Task {
     public async run(job: Job) {
-        const {username, userId, isSecondTry} = job.data;
-        logger.debug('notifying @%s...', username);
+        const {userId, isSecondTry} = job.data;
         const userDao = this.dao.getUserDao(userId);
+        const username = await userDao.getUsername();
+        logger.debug('notifying @%s...', username);
+
         const twit = await userDao.getTwit();
         const unfollowersInfo: IUnfollowerInfo[] = job.data.unfollowersInfo;
         let stopThere = false;

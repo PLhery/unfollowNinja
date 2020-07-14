@@ -12,7 +12,10 @@ services:
       - redis
     environment:
       REDIS_TEST_URI: redis://redis
+      POSTGRES_TEST_URI: postgres://postgres:unfollowninja@postgres/postress
   postgres:
-    image: postgres:12
+    image: postgres:13
+    environment:
+      POSTGRES_PASSWORD: "unfollowninja"
   redis:
-    image: redis:5
+    image: redis:6

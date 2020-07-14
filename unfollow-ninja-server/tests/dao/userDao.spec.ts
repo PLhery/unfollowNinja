@@ -1,11 +1,19 @@
 import Redis from 'ioredis';
-// @ts-ignore
-import RedisMock from 'ioredis-mock'; // @types/ioredis-mock doesn't exist yet
+import {Sequelize} from 'sequelize';
+import RedisMock from 'ioredis-mock';
+
 import Dao, {UserCategory} from '../../src/dao/dao';
 import {IUserEgg, IUserParams} from '../../src/utils/types';
 
-const redis = process.env.REDIS_TEST_URI ? new Redis(process.env.REDIS_TEST_URI) : new RedisMock();
-const dao = new Dao(redis);
+const redis = process.env.REDIS_TEST_URI ?
+    new Redis(process.env.REDIS_TEST_URI, { lazyConnect: true }) :
+    new RedisMock({ lazyConnect: true });
+
+const sequelize = process.env.POSTGRES_TEST_URI ?
+    new Sequelize(process.env.POSTGRES_TEST_URI, { logging: false }) :
+    new Sequelize( { dialect: 'sqlite', storage: ':memory:', logging: false });
+
+const dao = new Dao(redis, sequelize);
 
 const uDao1 = dao.getUserDao('1');
 const uDao2 = dao.getUserDao('2');
@@ -32,10 +40,11 @@ const USER_PARAMS_2: IUserParams = {
 describe('Test userDao', () => {
     afterAll(async () => {
         await redis.flushdb();
-        await redis.disconnect();
+        await dao.disconnect();
     });
 
     beforeAll(async () => {
+        await dao.load();
         await redis.flushdb();
         const user1: IUserEgg = {
             ...USER_PARAMS_1,
@@ -50,6 +59,11 @@ describe('Test userDao', () => {
         };
         await dao.addUser(user1);
         await dao.addUser(user2);
+    });
+
+    test('should get the usernames', async () => {
+        expect(await uDao1.getUsername()).toBe('user 1');
+        expect(await uDao2.getUsername()).toBe('user 2');
     });
 
     test('should be able to read and edit the category', async () => {

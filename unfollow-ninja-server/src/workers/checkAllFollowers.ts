@@ -27,10 +27,10 @@ export async function checkAllFollowers(workerId: number, nbWorkers: number, dao
     const promises = (await dao.getUserIdsByCategory(UserCategory.enabled))
         .filter(userId => hashCode(userId) % nbWorkers === workerId - 1) // we process 1/x users
         .map((userId) => limit(async () => {
-            const username: string = (await dao.getCachedUsername(userId)) || userId;
             try {
-                await checkFollowers(username, userId, dao, queue);
+                await checkFollowers(userId, dao, queue);
             } catch (error) {
+                const username: string = (await dao.getCachedUsername(userId)) || userId;
                 logger.error(`An error happened with checkFollowers / @${username}: ${error.stack}`);
                 Sentry.withScope(scope => {
                     scope.setTag('task-name', 'checkFollowers');
@@ -60,7 +60,7 @@ function hashCode(s: string) {
     return Math.abs(h);
 }
 
-async function checkFollowers(username: string, userId: string, dao: Dao, queue: Queue) {
+async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
     const userDao = dao.getUserDao(userId);
 
     if (Date.now() < await userDao.getNextCheckTime()) {
@@ -114,22 +114,22 @@ async function checkFollowers(username: string, userId: string, dao: Dao, queue:
             await userDao.setNextCheckTime(resetTime);
         }
 
-        await detectUnfollows(username, userId, followers, dao, queue);
+        await detectUnfollows(userId, followers, dao, queue);
     } catch (err) {
         if (!err.twitterReply) {
             // network error
             if (err.code === 'EAI_AGAIN' || err.code === 'ETIMEDOUT') {
-                logger.warn('@%s - check skipped because of a network error.', username);
+                logger.warn('check skipped because of a network error.');
                 return;
             }
             throw err;
         } else {
-            await manageTwitterErrors(err.twitterReply, username, userDao);
+            await manageTwitterErrors(err.twitterReply, userDao);
         }
     }
 }
 
-async function detectUnfollows(username: string, userId: string, followers: string[], dao: Dao, queue: Queue) {
+async function detectUnfollows(userId: string, followers: string[], dao: Dao, queue: Queue) {
     const userDao = dao.getUserDao(userId);
 
     let newUser = false;
@@ -143,7 +143,7 @@ async function detectUnfollows(username: string, userId: string, followers: stri
 
     if (newFollowers.length > 0 || unfollowers.length > 0) {
         logger.debug('%s had %d followers and now has %d followers (+%d -%d)',
-            username, formerFollowers.length, followers.length, newFollowers.length, unfollowers.length);
+            await userDao.getUsername(), formerFollowers.length, followers.length, newFollowers.length, unfollowers.length);
     }
 
     if (unfollowers.length > 0) { // remove unfollowers
@@ -163,7 +163,6 @@ async function detectUnfollows(username: string, userId: string, followers: stri
                 queue
                     .create('notifyUser', {
                         userId,
-                        username,
                         unfollowersInfo,
                     })
                     .removeOnComplete(true)
@@ -179,7 +178,7 @@ async function detectUnfollows(username: string, userId: string, followers: stri
 }
 
 // Manage or rethrow twitter errors
-async function manageTwitterErrors(twitterReply: Twit.Twitter.Errors, username: string, userDao: UserDao): Promise<void> {
+async function manageTwitterErrors(twitterReply: Twit.Twitter.Errors, userDao: UserDao): Promise<void> {
     for (const { code, message } of (twitterReply.errors)) {
         switch (code) {
             // app-related
@@ -189,15 +188,15 @@ async function manageTwitterErrors(twitterReply: Twit.Twitter.Errors, username: 
                 throw new Error(`[checkFollowers] Oops, it looks like the application has been suspended :/...`);
             // user-related
             case 89:
-                logger.warn('@%s revoked the token. Removing him from the list...', username);
+                logger.warn('@%s revoked the token. Removing him from the list...', await userDao.getUsername());
                 await userDao.setCategory(UserCategory.revoked);
                 break;
             case 326:
-                logger.warn('@%s is suspended. Removing him from the list...', username);
+                logger.warn('@%s is suspended. Removing him from the list...', await userDao.getUsername());
                 await userDao.setCategory(UserCategory.suspended);
                 break;
             case 34: // 404 - the user closed his account?
-                logger.warn('@%s this account doesn\'t exist. Removing him from the list...', username);
+                logger.warn('@%s this account doesn\'t exist. Removing him from the list...', await userDao.getUsername());
                 await userDao.setCategory(UserCategory.accountClosed);
                 break;
             // twitter errors

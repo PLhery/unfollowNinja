@@ -1,21 +1,27 @@
 import Redis from 'ioredis';
 import { fromPairs } from 'lodash';
 import Twit from 'twit';
+import type { default as Dao, UserCategory } from './dao';
 import {IUnfollowerInfo, IUserParams, Lang} from '../utils/types';
 import { twitterCursorToTime } from '../utils/utils';
-import { UserCategory } from './dao';
 
 export default class UserDao {
     private readonly redis: Redis.Redis;
+    private readonly dao: Dao;
     private readonly userId: string;
 
-    constructor(userId: string, redis = new Redis(process.env.REDIS_URI)) {
+    constructor(userId: string, redis = new Redis(process.env.REDIS_URI), dao: Dao) {
         this.redis = redis;
         this.userId = userId;
+        this.dao = dao;
     }
 
     public disconnect() {
         return this.redis.disconnect();
+    }
+
+    public getUsername(): Promise<string> {
+        return this.dao.getCachedUsername(this.userId)
     }
 
     public async getCategory(): Promise<UserCategory> {

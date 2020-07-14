@@ -1,20 +1,33 @@
 import Redis from 'ioredis';
+import { Sequelize } from 'sequelize';
 // @ts-ignore
 import RedisMock from 'ioredis-mock'; // @types/ioredis-mock doesn't exist yet
 import Dao, {UserCategory} from '../../src/dao/dao';
 import { IUserEgg } from '../../src/utils/types';
 
-const redis = process.env.REDIS_TEST_URI ? new Redis(process.env.REDIS_TEST_URI) : new RedisMock();
-const dao = new Dao(redis);
+const redis = process.env.REDIS_TEST_URI ?
+    new Redis(process.env.REDIS_TEST_URI, { lazyConnect: true }) :
+    new RedisMock({ lazyConnect: true });
+
+const sequelize = process.env.POSTGRES_TEST_URI ?
+    new Sequelize(process.env.POSTGRES_TEST_URI, { logging: false }) :
+    new Sequelize( { dialect: 'sqlite', storage: ':memory:', logging: false});
+
+const dao = new Dao(redis, sequelize);
 
 describe('Test DAO', () => {
+
+    beforeAll(() => dao.load());
+
     beforeEach(async () => {
         await redis.flushdb();
+        await sequelize.query('delete from CachedUsernames');
     });
 
     afterAll(async () => {
         await redis.flushdb();
-        await redis.disconnect();
+        await sequelize.query('delete from CachedUsernames');
+        await dao.disconnect();
     });
 
     test('should manage users', async () => {
