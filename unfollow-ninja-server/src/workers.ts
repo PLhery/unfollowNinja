@@ -60,19 +60,22 @@ if (cluster.isMaster) {
     logger.info('Connecting to the databases..');
     dao.load()
         .then(() => {
+            // every 3 minutes, create the checkFollowers tasks for everyone
+            scheduler = new Scheduler(dao, queue);
+            scheduler.start();
+
             logger.info('Launching the %s workers...', CLUSTER_SIZE);
             for (let i = 0; i < 2*CLUSTER_SIZE; i++) {
                 cluster.fork();
             }
         })
-        .catch(error => Sentry.captureException(error));
+        .catch(error => {
+            logger.error(error.stack);
+            Sentry.captureException(error)
+        });
 
     // watchdog - recommended by Kue
     queue.watchStuckJobs(1000);
-
-    // every 3 minutes, create the checkFollowers tasks for everyone
-    scheduler = new Scheduler(dao, queue);
-    scheduler.start();
 } else {
     // if CLUSTER_SIZE=3, we'll create 6 workers
     // workers 1,2,3 will be used to check new unfollowers, workers 4,5,6 to process new kue tasks
