@@ -158,8 +158,7 @@ async function detectUnfollows(userId: string, followers: string[], dao: Dao, qu
             }),
         );
 
-        await Promise.all([
-            promisify((cb) =>
+        await promisify((cb) =>
                 queue
                     .create('notifyUser', {
                         userId,
@@ -170,8 +169,7 @@ async function detectUnfollows(userId: string, followers: string[], dao: Dao, qu
                     .backoff( {delay: 60000, type: 'exponential'})
                     .save(cb),
             )(),
-            userDao.updateFollowers(followers, newFollowers, unfollowers, newUser ? 0 : Date.now())
-        ]);
+        await userDao.updateFollowers(followers, newFollowers, unfollowers, newUser ? 0 : Date.now())
     } else if (newFollowers.length > 0) {
         await userDao.updateFollowers(followers, newFollowers, unfollowers, newUser ? 0 : Date.now());
     }
