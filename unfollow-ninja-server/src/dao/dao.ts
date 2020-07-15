@@ -96,7 +96,6 @@ export default class Dao {
     public async addTwittoToCache(twittoInfo: ITwittoInfo, time = Date.now()): Promise<void> {
         const { id, username } = twittoInfo;
         await Promise.all([
-            this.redis.zadd('cachedTwittosIds', time.toString(), id),
             this.redis.hset(`cachedTwittos`, `${id}:username`, username),
             this.CachedUsername.upsert({twitterId: id, username}),
         ]);
