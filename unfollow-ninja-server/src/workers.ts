@@ -96,11 +96,12 @@ if (cluster.isMaster) {
                 (job: kue.Job, done: kue.DoneCallback) => {
                     task.run(job)
                         .then(() => done())
-                        .catch((err) => {
-                            logger.error(`An error happened with ${taskName} / @${job.data.username || ''}: ${err.stack}`);
+                        .catch(async (err) => {
+                            const username = job.data.userId ? await dao.getCachedUsername(job.data.userId) : null;
+                            logger.error(`An error happened with ${taskName} / @${username || ''}: ${err.stack}`);
                             Sentry.withScope(scope => {
                                 scope.setTag('task-name', taskName);
-                                scope.setUser({username: job.data.username});
+                                scope.setUser({ username });
                                 Sentry.captureException(err);
                             });
                             done(err);
