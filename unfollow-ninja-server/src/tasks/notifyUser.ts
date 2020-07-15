@@ -258,17 +258,17 @@ export default class extends Task {
                     throw new Error('Oops, it looks like the application has been suspended :/...');
                 // user-related
                 case 89:
-                    logger.warn('@%s revoked the token. removing him from the list...', username);
+                    logger.warn('@%s revoked the token. removing them from the list...', username);
                     await userDao.setCategory(UserCategory.revoked);
                     return true;
                 case 326:
                 case 64:
-                    logger.warn('@%s is suspended. removing him from the list...', username);
+                    logger.warn('@%s is suspended. removing them them the list...', username);
                     await userDao.setCategory(UserCategory.suspended);
                     return true;
                 case 150: // dm closed to non-followers
                 case 349: // user blocked?
-                    logger.warn('@%s does not accept DMs. removing him from the list...', username);
+                    logger.warn('@%s does not accept DMs. removing them from the list...', username);
                     await userDao.setCategory(UserCategory.dmclosed);
                     return true;
                 case 292:

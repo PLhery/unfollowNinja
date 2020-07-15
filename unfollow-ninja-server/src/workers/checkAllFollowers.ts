@@ -186,15 +186,15 @@ async function manageTwitterErrors(twitterReply: Twit.Twitter.Errors, userDao: U
                 throw new Error(`[checkFollowers] Oops, it looks like the application has been suspended :/...`);
             // user-related
             case 89:
-                logger.warn('@%s revoked the token. Removing him from the list...', await userDao.getUsername());
+                logger.warn('@%s revoked the token. Removing them from the list...', await userDao.getUsername());
                 await userDao.setCategory(UserCategory.revoked);
                 break;
             case 326:
-                logger.warn('@%s is suspended. Removing him from the list...', await userDao.getUsername());
+                logger.warn('@%s is suspended. Removing them from the list...', await userDao.getUsername());
                 await userDao.setCategory(UserCategory.suspended);
                 break;
             case 34: // 404 - the user closed his account?
-                logger.warn('@%s this account doesn\'t exist. Removing him from the list...', await userDao.getUsername());
+                logger.warn('@%s this account doesn\'t exist. Removing them from the list...', await userDao.getUsername());
                 await userDao.setCategory(UserCategory.accountClosed);
                 break;
             // twitter errors

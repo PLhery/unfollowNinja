@@ -51,12 +51,12 @@ export default class extends Task {
                     throw new Error('Oops, it looks like the application has been suspended :/...');
                 // user-related
                 case 89:
-                    logger.warn('@%s revoked the token. removing him from the list...', username);
+                    logger.warn('@%s revoked the token. removing them from the list...', username);
                     await userDao.setCategory(UserCategory.revoked);
                     break;
                 case 326:
                 case 64:
-                    logger.warn('@%s is suspended. removing him from the list...', username);
+                    logger.warn('@%s is suspended. removing them from the list...', username);
                     await userDao.setCategory(UserCategory.suspended);
                     break;
                 // twitter errors
