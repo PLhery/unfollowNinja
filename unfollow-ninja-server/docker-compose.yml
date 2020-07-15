@@ -11,7 +11,7 @@ services:
     volumes:
       - /data/workers-logs:/usr/src/app/logs
     environment:
-      POSTGRES_URI: postgres://postgres@postgres
+      POSTGRES_URI: postgres://postgres:unfollowninja@postgres/postgres
       REDIS_URI: redis://redis
       REDIS_KUE_URI: redis://redis-kue
   api:
