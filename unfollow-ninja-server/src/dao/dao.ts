@@ -89,16 +89,12 @@ export default class Dao {
     }
 
     public async getCachedUsername(userId: string): Promise<string> {
-        // return (await this.CachedUsername.findByPk(userId))?.username;
-        return this.redis.hget('cachedTwittos', `${userId}:username`);
+        return (await this.CachedUsername.findByPk(userId))?.username || null;
     }
 
     public async addTwittoToCache(twittoInfo: ITwittoInfo, time = Date.now()): Promise<void> {
         const { id, username } = twittoInfo;
-        await Promise.all([
-            this.redis.hset(`cachedTwittos`, `${id}:username`, username),
-            this.CachedUsername.upsert({twitterId: id, username}),
-        ]);
+        await this.CachedUsername.upsert({twitterId: id, username});
     }
 
     public async getSession(uid: string): Promise<Session> {

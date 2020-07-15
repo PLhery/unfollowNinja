@@ -16,8 +16,10 @@ const sequelize = process.env.POSTGRES_TEST_URI ?
 const dao = new Dao(redis, sequelize);
 
 describe('Test DAO', () => {
-
-    beforeAll(() => dao.load());
+    beforeAll(async () => {
+        await sequelize.drop();
+        await dao.load();
+    });
 
     beforeEach(async () => {
         await redis.flushdb();
@@ -25,7 +27,7 @@ describe('Test DAO', () => {
 
     afterAll(async () => {
         await redis.flushdb();
-        await sequelize.dropAllSchemas({});
+        await sequelize.drop();
         await dao.disconnect();
     });
 
@@ -58,8 +60,6 @@ describe('Test DAO', () => {
         expect(await dao.getCachedUsername('3')).toBe('boule');
         expect(await dao.getCachedUsername('4')).toBe('bill');
         expect(await dao.getCachedUsername('5')).toBeNull();
-
-        expect(await redis.zcard('cachedTwittosIds')).toBe(2);
     });
 
     test('should manage sessions', async () => {

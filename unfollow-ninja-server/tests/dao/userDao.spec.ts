@@ -40,11 +40,12 @@ const USER_PARAMS_2: IUserParams = {
 describe('Test userDao', () => {
     afterAll(async () => {
         await redis.flushdb();
-        await sequelize.dropAllSchemas({});
+        await sequelize.drop();
         await dao.disconnect();
     });
 
     beforeAll(async () => {
+        await sequelize.drop();
         await dao.load();
         await redis.flushdb();
 
@@ -191,11 +192,11 @@ describe('Test userDao', () => {
     });
 
     test('should completely delete data about the user', async () => {
-        expect(await redis.dbsize()).toBe(13);
+        expect(await redis.dbsize()).toBe(11);
         await uDao1.deleteUser();
         await uDao2.deleteUser();
         expect(await redis.zcard('users')).toBe(0);
-        redis.del('users'); // empty users appears as a key on ioredis-mock but not on redis 6
-        expect((await redis.keys('*')).sort()).toEqual(['cachedTwittos', 'cachedTwittosIds', 'total-unfollowers']);
+        redis.del('users'); // empty users appears as a key on ioredis-mock but not on actual redis 6
+        expect((await redis.keys('*')).sort()).toEqual(['total-unfollowers']);
     });
 });

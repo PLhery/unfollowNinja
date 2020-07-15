@@ -173,7 +173,7 @@ export default class UserDao {
     public async getAllUserData() {
         const [ username, category, nextCheckTime, userParams, followers, followTimes, uncachables, snowflakeIds] =
             await Promise.all([
-                this.redis.hget('cachedTwittos', `${this.userId}:username`),
+                this.getUsername(),
                 this.getCategory(),
                 this.getNextCheckTime(),
                 this.getUserParams(),
