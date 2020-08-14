@@ -4,9 +4,8 @@ import * as Sentry from '@sentry/node';
 import * as cluster from 'cluster';
 import * as kue from 'kue';
 import { cpus } from 'os';
-import { promisify } from 'util';
 import Dao from './dao/dao';
-import { checkAllFollowers } from './workers/checkAllFollowers';
+import { checkAllFollowers, checkAllVipFollowers } from './workers/checkAllFollowers';
 import { cacheAllFollowers } from './workers/cacheAllFollowers';
 import tasks from './tasks';
 import type Task from './tasks/task';
@@ -83,7 +82,8 @@ if (cluster.isMaster) {
         // start checking the worker's followers
         checkAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao, queue)
             .catch(err => Sentry.captureException(err));
-
+        checkAllVipFollowers(cluster.worker.id, CLUSTER_SIZE, dao, queue)
+            .catch(err => Sentry.captureException(err));
         // Also start caching its follower's username and follow time
         cacheAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao)
             .catch(err => Sentry.captureException(err));

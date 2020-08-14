@@ -11,6 +11,7 @@ export enum UserCategory {
     disabled,
     dmclosed,
     accountClosed,
+    vip
 }
 
 interface ICachedUsername extends Model {twitterId: string, username: string}

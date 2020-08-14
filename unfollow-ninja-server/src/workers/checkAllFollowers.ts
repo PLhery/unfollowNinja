@@ -51,6 +51,36 @@ export async function checkAllFollowers(workerId: number, nbWorkers: number, dao
     );
 }
 
+export async function checkAllVipFollowers(workerId: number, nbWorkers: number, dao: Dao, queue: Queue) {
+    const startedAt = Date.now();
+
+    const userIds = (await dao.getUserIdsByCategory(UserCategory.vip))
+        .filter(userId => hashCode(userId) % nbWorkers === workerId - 1) // we process 1/x users
+
+    for (const userId of userIds) {
+        try {
+            await checkFollowers(userId, dao, queue);
+        } catch (error) {
+            const username: string = (await dao.getCachedUsername(userId)) || userId;
+            logger.error(`An error happened with checkFollowers / @${username}: ${error.stack}`);
+            Sentry.withScope(scope => {
+                scope.setTag('task-name', 'checkFollowers');
+                scope.setUser({username});
+                Sentry.captureException(error);
+            });
+        }
+    }
+
+    const checkDuration =  Date.now() - startedAt;
+    metrics.gauge(`uninja.check-vip-duration.worker.${workerId}`, checkDuration);
+
+    // check every minute minimum (Twitter's limit for the followers/ids API requests)
+    setTimeout(
+        () => checkAllVipFollowers(workerId, nbWorkers, dao, queue),
+        Math.max(0, 60*1000 - checkDuration)
+    );
+}
+
 // inspired from https://gist.github.com/hyamamoto/fd435505d29ebfa3d9716fd2be8d42f0 / abs(java's string.hashcode)
 function hashCode(s: string) {
     let h = 0;
