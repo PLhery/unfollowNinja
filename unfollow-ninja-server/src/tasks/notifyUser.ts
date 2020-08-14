@@ -263,7 +263,7 @@ export default class extends Task {
                     return true;
                 case 326:
                 case 64:
-                    logger.warn('@%s is suspended. removing them them the list...', username);
+                    logger.warn('@%s is suspended. removing them from the list...', username);
                     await userDao.setCategory(UserCategory.suspended);
                     return true;
                 case 150: // dm closed to non-followers
