@@ -14,7 +14,7 @@ const GET_INFO = gql`
             id,
             twitterStep1AuthUrl,
             twitterStep2AuthUrl,
-            user {id, username, dmUsername}
+            user {id, username, dmUsername, category}
         }
     }
 `;
@@ -25,7 +25,7 @@ const LOGIN = gql`
             id,
             twitterStep1AuthUrl,
             twitterStep2AuthUrl,
-            user {id, username, dmUsername}
+            user {id, username, dmUsername, category}
         }
     }
 `;
@@ -38,7 +38,7 @@ const ADD_DMS = gql`
 
 const REMOVE_DMS = gql`
     mutation RemoveDms {
-        removeDmAccount {id, username, dmUsername}
+        removeDmAccount {id, username, dmUsername, category}
     }
 `;
 
@@ -48,7 +48,7 @@ const LOGOUT = gql`
             id,
             twitterStep1AuthUrl,
             twitterStep2AuthUrl,
-            user {id, username, dmUsername}
+            user {id, username, dmUsername, category}
         }
     }
 `;
@@ -57,6 +57,9 @@ const LoggedInIntro = ({ user, logout, removeDMs }) => {
     if (!user) return null; // not logged in
 
     let message = <Paragraph>Plus qu'une étape pour activer le service :<br/> Choisissez un compte pour vous envoyer les notifications</Paragraph>;
+    if (user.category === 2) { // revoked tokens
+        message = <Paragraph>Il semble que votre compte Twitter a été désactivé :<br/> Reconnectez vous à l'étape deux pour réactiver le service</Paragraph>;
+    }
     if (user.dmUsername) {
         message = <Paragraph>Tout est en ordre ! N'oubliez pas de suivre <Link href='https://twitter.com/unfollowninja' source='logged-in-intro'>@unfollowNinja</Link></Paragraph>;
     }
