@@ -85,8 +85,9 @@ const Mutation: resolver = {
             if (params.tokenSecret !== user.secret) { // after a revoked token
                 await dao.getUserDao(user.id).setUserParams({token: user.token, tokenSecret: user.secret});
             }
-            if (params.dmId && category !== UserCategory.enabled) { // step 2 done but user disabled
-                await dao.getUserDao(user.id).setCategory(UserCategory.enabled)
+            // step 2 done but user disabled
+            if (params.dmId && category !== UserCategory.enabled && category !== UserCategory.vip) {
+                delete params.dmId; // we ask the user to log in again to reenable it (probably a revoked token)
             }
         }
         session.user = {...params, id: user.id, username: user.username, category};
@@ -142,7 +143,6 @@ const Mutation: resolver = {
             dao.getUserDao(session.user.id).setCategory(UserCategory.disabled),
             dao.getUserDao(session.user.id).setUserParams({
                 dmId: null,
-                dmPhoto: null,
                 dmToken: null,
                 dmTokenSecret: null,
             }),

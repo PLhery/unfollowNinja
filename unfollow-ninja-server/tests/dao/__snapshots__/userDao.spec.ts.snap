@@ -21,11 +21,9 @@ Object {
   "userParams": Object {
     "added_at": 1234,
     "dmId": "",
-    "dmPhoto": "",
     "dmToken": "",
     "dmTokenSecret": "",
     "lang": "fr",
-    "photo": "http://twitter.com/photo.jpg",
     "token": "t0k3n",
     "tokenSecret": "s3cr3t",
   },

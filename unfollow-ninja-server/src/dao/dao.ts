@@ -58,10 +58,8 @@ export default class Dao {
 
     public async addUser(userEgg: IUserEgg): Promise<void> {
         userEgg = {category: UserCategory.enabled, ...userEgg};
-        const { id, category, username,
-            added_at, lang, token, tokenSecret, photo, dmId, dmToken, dmTokenSecret, dmPhoto } = userEgg;
-        const params: IUserParams = { added_at, lang, token, tokenSecret, photo,
-            dmId, dmToken, dmTokenSecret, dmPhoto };
+        const { id, category, username, added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret } = userEgg;
+        const params: IUserParams = { added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret };
         await Promise.all([
             this.redis.zadd('users', category.toString(), id),
             this.redis.hmset(`user:${id}`, params as any), // string literal not accepted as a type

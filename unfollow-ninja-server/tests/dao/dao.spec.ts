@@ -39,7 +39,6 @@ describe('Test DAO', () => {
             lang: 'fr',
             token: 't0k3n',
             tokenSecret: 's3cr3t',
-            photo: 'http://twitter.com/photo.jpg',
         };
         const user2: IUserEgg = {...user1, id: '2', category: UserCategory.disabled};
         await dao.addUser(user1);

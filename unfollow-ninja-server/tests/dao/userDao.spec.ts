@@ -23,18 +23,15 @@ const USER_PARAMS_1: IUserParams = {
     lang: 'fr',
     token: 't0k3n',
     tokenSecret: 's3cr3t',
-    photo: 'http://twitter.com/photo.jpg',
 };
 const USER_PARAMS_2: IUserParams = {
     added_at: 2345,
     lang: 'en',
     token: 't0k4n',
     tokenSecret: 's2cr2t',
-    photo: 'http://twitter.com/image.jpg',
     dmId: '3',
     dmToken: 'token',
     dmTokenSecret: 'secret',
-    dmPhoto: 'http://twitter.com/dm.jpg',
 };
 
 describe('Test userDao', () => {
@@ -95,13 +92,13 @@ describe('Test userDao', () => {
     });
 
     test('should be able to fetch and edit user params', async () => {
-        const uParamsStr1 = {...USER_PARAMS_1, added_at: 1234, dmId: '', dmPhoto: '', dmToken: '', dmTokenSecret: ''};
+        const uParamsStr1 = {...USER_PARAMS_1, added_at: 1234, dmId: '', dmToken: '', dmTokenSecret: ''};
         const uParamsStr2 = {...USER_PARAMS_2, added_at: 2345};
         expect(await uDao1.getUserParams()).toStrictEqual(uParamsStr1);
         expect(await uDao2.getUserParams()).toStrictEqual(uParamsStr2);
 
-        const newParams = {dmId: '3030', dmPhoto: '--', dmToken: 'token2', dmTokenSecret: 'secret2',
-            photo: 'http://twitter.com/profil.jpg', token: 't0k4n2', tokenSecret: 's2cr2t2'};
+        const newParams = {dmId: '3030', dmToken: 'token2', dmTokenSecret: 'secret2',
+            token: 't0k4n2', tokenSecret: 's2cr2t2'};
         await uDao2.setUserParams(newParams);
         expect(await uDao2.getUserParams()).toStrictEqual({...uParamsStr2, ...newParams});
         await uDao2.setUserParams(USER_PARAMS_2);
