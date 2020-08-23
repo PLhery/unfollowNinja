@@ -31,7 +31,7 @@ export default class Dao {
 
         this.CachedUsername = this.sequelize.define('CachedUsername', {
             twitterId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
-            username: { type: DataTypes.STRING(15), allowNull: false }
+            username: { type: DataTypes.STRING(20), allowNull: false }
         });
     }
 
@@ -40,7 +40,7 @@ export default class Dao {
      */
     public async load(): Promise<Dao> {
         await this.sequelize.authenticate(); // check that postgresql is connected
-        await this.CachedUsername.sync(); // create the missing postgresql tables
+        await this.CachedUsername.sync({ alter: true }); // create the missing postgresql tables
         await this.redis.connect(); // wait for redis to load its data
         return this;
     }
