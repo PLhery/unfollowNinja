@@ -19,32 +19,36 @@ export async function cacheAllFollowers(workerId: number, nbWorkers: number, dao
     const limit = pLimit(WORKER_RATE_LIMIT);
     const startedAt = Date.now();
 
-    const promises = (await dao.getUserIdsByCategory(UserCategory.enabled))
-        .filter(userId => hashCode(userId) % nbWorkers === workerId - 1) // we process 1/x users
-        .map((userId) => limit(async () => {
-            const username: string = (await dao.getCachedUsername(userId)) || userId;
-            try {
-                if (await dao.getUserDao(userId).getHasNotCachedFollowers()) {
-                    await cacheFollowers(userId, dao);
+    try {
+        const promises = (await dao.getUserIdsByCategory(UserCategory.enabled))
+            .filter(userId => hashCode(userId) % nbWorkers === workerId - 1) // we process 1/x users
+            .map((userId) => limit(async () => {
+                const username: string = (await dao.getCachedUsername(userId)) || userId;
+                try {
+                    if (await dao.getUserDao(userId).getHasNotCachedFollowers()) {
+                        await cacheFollowers(userId, dao);
+                    }
+                } catch (error) {
+                    logger.error(`An error happened with checkFollowers / @${username}: ${error.stack}`);
+                    Sentry.withScope(scope => {
+                        scope.setTag('task-name', 'cacheFollowers');
+                        scope.setUser({username});
+                        Sentry.captureException(error);
+                    });
                 }
-            } catch (error) {
-                logger.error(`An error happened with checkFollowers / @${username}: ${error.stack}`);
-                Sentry.withScope(scope => {
-                    scope.setTag('task-name', 'cacheFollowers');
-                    scope.setUser({username});
-                    Sentry.captureException(error);
-                });
-            }
-        }));
+            }));
 
-    await Promise.all(promises);
-    const cacheDuration =  Date.now() - startedAt;
-    metrics.gauge(`uninja.cache-duration.worker.${workerId}`, cacheDuration);
+        await Promise.all(promises);
+        metrics.gauge(`uninja.cache-duration.worker.${workerId}`, Date.now() - startedAt);
+    } catch (error) {
+        Sentry.captureException(error);
+        logger.error(error);
+    }
 
     // check every minute minimum (Twitter's limit for the followers/list API requests)
     setTimeout(
         () => cacheAllFollowers(workerId, nbWorkers, dao),
-        Math.max(0, 60*1000 - cacheDuration)
+        Math.max(0, 60*1000 + startedAt - Date.now())
     );
 }
 
