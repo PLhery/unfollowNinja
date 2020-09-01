@@ -92,7 +92,7 @@ function App() {
             <Box basis='medium' flex={true} pad='medium' >
               <Heading level={2} color='dark'>UnfollowNinja est libre et gratuit</Heading>
               <Paragraph>UnfollowNinja est un projet <Link href='https://github.com/PLhery/unfollowNinja'>open-source</Link>, maintenu par <Link href='https://twitter.com/plhery'>@plhery</Link> et hébergé par <Link href='https://twitter.com/hivanenetwork'>HivaneNetwork</Link>.</Paragraph>
-              <Paragraph>Merci à Hivane d'aider le projet à rester performant, libre, et gratuit, soutenant 60 000+ utilisateurs actifs.</Paragraph>
+              <Paragraph>Merci à Hivane d'aider le projet à rester performant, libre, et gratuit, soutenant 100 000+ utilisateurs actifs.</Paragraph>
               <Box gap='small' alignSelf='center' style={{overflow: 'hidden'}}>
                 <RepoCard username="plhery" repo="unfollowninja"/>
               </Box>
