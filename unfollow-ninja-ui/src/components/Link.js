@@ -10,8 +10,9 @@ function handleClick(e, props) {
     }
 }
 
-export default (props) => (
+const Link = (props) => (
     <a target='_blank' rel='noopener noreferrer' style={{color: 'inherit', fontWeight: 600}} onClick={(e) => handleClick(e, props)} {...props} >
       {props.children}
     </a>
 );
+export default Link;

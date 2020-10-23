@@ -87,10 +87,12 @@ function sendStep3Event() {
     }
 }
 
-export default (props) => {
+function MiniApp(props) {
   const location = useLocation();
+  const history = useHistory();
 
-  const [login, loginRequest] = useMutation(LOGIN);
+
+    const [login, loginRequest] = useMutation(LOGIN);
   const [addDms, addDmsRequest] = useMutation(ADD_DMS);
   const [removeDMs] = useMutation(REMOVE_DMS);
   const [logout] = useMutation(LOGOUT);
@@ -110,7 +112,7 @@ export default (props) => {
     } else {
         setTimeout(() => window.gtag && window.gtag('event', 'exception', {description: 'login_failed'}), 1000);
     }
-    useHistory().push('/');
+    history.push('/');
   } else if (!addDmsRequest.called && location.pathname === '/2') {
       const urlParams = new URLSearchParams(location.search);
       const [ oauthToken, oauthVerifier ] = [ urlParams.get('oauth_token'), urlParams.get('oauth_verifier') ];
@@ -120,7 +122,7 @@ export default (props) => {
       } else {
           setTimeout(() => window.gtag && window.gtag('event', 'exception', {description: 'add_dms_failed'}), 1000);
       }
-      useHistory().push('/');
+      history.push('/');
   }
 
   const step0 = !data?.user && !addDmsRequest.loading && !loginRequest.loading; // not logged in or loading
@@ -161,3 +163,4 @@ export default (props) => {
       </Box>
   );
 }
+export default MiniApp;

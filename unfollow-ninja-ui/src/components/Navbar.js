@@ -4,7 +4,7 @@ import * as Images from "../images";
 import Styles from './Navbar.module.scss';
 import Link from "./Link";
 
-export default (props) => (
+const Navbar = (props) => (
     <header className={Styles.navbar} {...props}>
       <Link href='https://twitter.com/unfollowNinja' source='navbar'>
         <Box
@@ -17,3 +17,4 @@ export default (props) => (
       </Link>
     </header>
 );
+export default Navbar;
