@@ -4,7 +4,7 @@ Get notified when your Twitter account loses a follower
 
 Used by ~150 000 Twitter users (07/2020)
 
-🇬🇧 https://unfollow.monkey (branch unfollow-monkey)  
+🇬🇧 https://unfollow-monkey.com/ (branch unfollow-monkey)  
 🇫🇷 https://unfollow.ninja  
 
 ![Screenshot](https://raw.githubusercontent.com/PLhery/unfollowNinja/unfollow-monkey/unfollow-ninja-ui/public/preview.png)
