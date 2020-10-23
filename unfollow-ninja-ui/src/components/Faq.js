@@ -3,7 +3,7 @@ import { Box, Heading, Paragraph } from "grommet/es6";
 import Emojis from '../twemojis/Emojis';
 import Styles from './Faq.module.scss';
 
-export default (props) => {
+function Faq(props) {
     return <Box alignSelf='center' pad='medium' margin='medium' className={Styles.container} {...props}>
             <Heading level={1} color='dark'>Foire aux questions</Heading>
 
@@ -40,3 +40,4 @@ export default (props) => {
             <Paragraph>Ce projet est maintenu sur mon temps libre, et me permet d'avoir un projet sur lequel je peux librement experimenter, en parallèle de mon travail. L'association Hivane Network permet au service d'exister à moindres frais grâce au prêt d'un serveur virtuel.</Paragraph>
         </Box>;
 }
+export default Faq;

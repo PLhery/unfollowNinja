@@ -14,4 +14,5 @@ export const NoEntry = () => <EmoImg alt="⛔" src={ImgNoEntry}/>;
 export const Poo = () => <EmoImg alt="💩" src={ImgPoo}/>;
 export const BrokenHeart = () => <EmoImg alt="💔" src={ImgBrokenHeart}/>;
 
-export default {WavingHand, SeeNoEvil, NoEntry, Poo, BrokenHeart}
+const Emojis = { WavingHand, SeeNoEvil, NoEntry, Poo, BrokenHeart };
+export default Emojis;
