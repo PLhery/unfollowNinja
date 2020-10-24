@@ -2,7 +2,6 @@ import i18n from 'i18n';
 import { Job } from 'kue';
 import { defaults, difference, get, keyBy, split } from 'lodash';
 import moment from 'moment-timezone';
-import emojis from 'node-emoji';
 import { Params, Twitter } from 'twit';
 import { promisify } from 'util';
 import { UserCategory } from '../dao/dao';
@@ -63,6 +62,7 @@ export default class extends Task {
 
         await Promise.all(usersLookup.data.map(user => {
             unfollowersMap[user.id_str].suspended = false;
+            unfollowersMap[user.id_str].locked = (user.friends_count === 0);
             unfollowersMap[user.id_str].username = user.screen_name;
             return this.dao.addTwittoToCache({
                 id: user.id_str,
@@ -189,22 +189,25 @@ export default class extends Task {
             }
             let action;
             if (unfollower.suspended) {
-                const emoji = emojis.get('see_no_evil') + customEmoji;
+                const emoji = '🙈' + customEmoji;
                 action = i18n.__('{{username}} has been suspended {{emoji}}.', { username, emoji });
             } else if (unfollower.deleted) {
-                const emoji = emojis.get('see_no_evil') + customEmoji;
+                const emoji = '🙈' + customEmoji;
                 action = i18n.__('{{username}} has left Twitter {{emoji}}.', { username, emoji });
             } else if (unfollower.blocked_by) {
-                const emoji = emojis.get('no_entry') + customEmoji;
+                const emoji = '⛔️' + customEmoji;
                 action = i18n.__('{{username}} blocked you {{emoji}}.', { username, emoji });
             } else if (unfollower.blocking) {
-                const emoji = emojis.get('poop').repeat(3) + customEmoji;
+                const emoji = '💩💩💩' + customEmoji;
                 action = i18n.__('You blocked {{username}} {{emoji}}.', { username, emoji });
+            } else if (unfollower.locked) {
+                const emoji = '🔒' + (unfollower.following ? customEmoji || '💔' : customEmoji);
+                action = i18n.__('{{username}}\'s account has been locked {{emoji}}.', { username, emoji });
             } else if (unfollower.following) {
-                const emoji = customEmoji || emojis.get('broken_heart');
+                const emoji = customEmoji || '💔';
                 action = i18n.__('{{username}} unfollowed you {{emoji}}.', { username, emoji });
             } else {
-                const emoji = customEmoji || emojis.get('wave');
+                const emoji = customEmoji || '👋';
                 action = i18n.__('{{username}} unfollowed you {{emoji}}.', { username, emoji });
             }
 

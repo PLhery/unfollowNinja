@@ -66,7 +66,6 @@
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.31",
-    "node-emoji": "^1.10.0",
     "oauth": "^0.9.15",
     "p-limit": "^3.0.2",
     "pg": "^8.4.1",
