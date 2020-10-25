@@ -9,5 +9,6 @@
 	"This account followed you for {{duration}} ({{{time}}}).": "Esta cuenta te siguió por {{duration}} ({{{time}}}).",
 	"This account followed you before you signed up to @unfollowninja!": "Esta cuenta te seguía antes de que te registrases en @unfollowninja!",
 	"and {{nbLeftovers}} more.": "y {{nbLeftovers}} más.",
-	"All set, welcome to @unfollowNinja {{emoji}}!\nYou will soon know all about your unfollowers here!": "Todo listo, bienvenido a @unfollowNinja {{emoji}}!\nPronto conocerás todo sobre tus unfollowers!"
+	"All set, welcome to @unfollowNinja {{emoji}}!\nYou will soon know all about your unfollowers here!": "Todo listo, bienvenido a @unfollowNinja {{emoji}}!\nPronto conocerás todo sobre tus unfollowers!",
+	"{{username}}'s account has been locked {{emoji}}.": "La cuenta de {{username}} ha sido limitada {{emoji}}."
 }

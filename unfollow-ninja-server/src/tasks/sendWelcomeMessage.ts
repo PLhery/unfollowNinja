@@ -1,6 +1,5 @@
 import * as i18n from 'i18n';
 import { Job } from 'kue';
-import * as emojis from 'node-emoji';
 import {Params, Twitter} from 'twit';
 import { promisify } from 'util';
 import {UserCategory} from '../dao/dao';
@@ -19,9 +18,8 @@ export default class extends Task {
         const dmTwit = await userDao.getDmTwit();
         i18n.setLocale(await userDao.getLang());
 
-        const emoji = emojis.get('open_hands');
         const message = i18n.__('All set, welcome to @unfollowNinja {{emoji}}!\n' +
-            'You will soon know all about your unfollowers here!', { emoji });
+            'You will soon know all about your unfollowers here!', { emoji: '🙌' });
 
         await dmTwit.post('direct_messages/events/new', {
             event: {

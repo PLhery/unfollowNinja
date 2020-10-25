@@ -15,9 +15,13 @@ job.started_at = Date.now();
 // @ts-ignore
 const task = new NotifyUser(dao, queue);
 
-function mockUsersLookupReply(ids: string[], screenNames: string[]) {
+function mockUsersLookupReply(ids: string[], screenNames: string[], friendsCounts?: number[]) {
     userDao.twit.post.mockResolvedValueOnce({
-        data: screenNames.map((screenName, i) => ({ id_str: ids[i], screen_name: screenName })),
+        data: screenNames.map((screenName, i) => ({
+            id_str: ids[i],
+            screen_name: screenName,
+            friends_count: friendsCounts ? friendsCounts[i] : 100,
+        })),
     });
 }
 
@@ -148,6 +152,24 @@ describe('notifyUser task', () => {
                 'This account followed you for 33 minutes (01/01/1970).\n' +
                 '  • @twitto234 has been suspended 🙈.\n' +
                 'This account followed you for 33 minutes (01/01/1970).');
+    });
+
+    test('one unfollower, one locked account', async () => {
+        unfollowersInfo.push({id: '123', followTime: 100, followDetectedTime: 100, unfollowTime: 2000000});
+        unfollowersInfo.push({id: '234', followTime: 200, followDetectedTime: 200, unfollowTime: 2000000});
+        mockUsersLookupReply(['123', '234'], ['twitto123', 'twitto234'], [100, 0]);
+        mockFriendshipShowReply();
+        mockFriendshipShowReply();
+        await task.run(job);
+        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
+        expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
+          .toBe('2 twitter users unfollowed you:\n' +
+            '  • @twitto123 unfollowed you 👋.\n' +
+            'This account followed you for 33 minutes (01/01/1970).\n' +
+            '  • @twitto234\'s account has been locked 🔒.\n' +
+            'This account followed you for 33 minutes (01/01/1970).');
     });
 
     test('i18n', async () => {
