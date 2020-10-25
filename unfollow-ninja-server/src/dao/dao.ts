@@ -48,7 +48,7 @@ export default class Dao {
     public async disconnect() {
         await Promise.all([
             this.sequelize.close(),
-            this.redis.quit(),
+            this.redis.disconnect(),
         ]);
     }
 
