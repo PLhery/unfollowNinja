@@ -58,7 +58,7 @@
     "apollo-server": "^2.18.2",
     "big-integer": "^1.6.48",
     "dotenv": "^8.2.0",
-    "graphql": "^15.3.0",
+    "graphql": "^15.4.0",
     "hot-shots": "^8.2.0",
     "i18n": "^0.13.2",
     "ioredis": "^4.19.0",
