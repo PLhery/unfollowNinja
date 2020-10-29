@@ -49,7 +49,7 @@
     "@types/i18n": "^0.8.7",
     "@types/ioredis": "^4.17.6",
     "@types/kue": "^0.11.13",
-    "@types/lodash": "^4.14.162",
+    "@types/lodash": "^4.14.163",
     "@types/moment": "^2.13.0",
     "@types/node-emoji": "^1.8.1",
     "@types/oauth": "^0.9.1",
