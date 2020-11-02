@@ -106,7 +106,7 @@ function App() {
           <Box direction='row' align='center' alignSelf='center' gap='small'>
             <Image title='logo' height={30} src={Images.Logo}/>
             <Text size='small' textAlign='center' style={{fontFamily: 'quicksand'}}>
-              © 2020 UnfollowNinja · <Link href='https://uzzy.me/fr/cgu/?utm_source=unfollowninja'>CGU</Link> ·
+              © 2020 UnfollowNinja · <Link href='/cgu.pdf'>CGU</Link> ·
               Découvrez aussi <Link href='https://unfollow-monkey.com/?utm_source=unfollowninja_footer'><Image title='unfollowmonkey' src={Images.UnfollowMonkey} height={18}/></Link> UnfollowMonkey <Link href='https://uzzy.me/?utm_source=unfollowninja'><Image title='uzzy' src={Images.Uzzy} height={18}/></Link> Uzzy et <Link href='https://affinitweet.com/?utm_source=unfollowninja'><Image title='affinitweet' src={Images.Affinitweet} height={18}/></Link> Affinitweet ·
               Proposé par <Link href='https://twitter.com/plhery'>@plhery</Link> · Disponible sur <Link href='https://twitter.com/plhery'>GitHub</Link>
             </Text>

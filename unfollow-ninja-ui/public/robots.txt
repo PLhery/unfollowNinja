@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /cgu.pdf
+Sitemap: https://unfollow.ninja/sitemap.xml
