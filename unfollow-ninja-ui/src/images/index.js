@@ -4,7 +4,7 @@ import AlaskaWebp from './alaska.webp';
 
 export {default as Dog} from './dog.svg'
 export {default as Logo}from './logo.svg';
-export {default as Smartphone} from './smartphone.svg'
+export {default as DmScreenshot} from './dmscreenshot.png'
 export {default as Affinitweet} from './affinitweet.png'
 export {default as Uzzy} from './uzzy.svg'
 export {default as UnfollowMonkey} from './unfollowmonkey.svg'

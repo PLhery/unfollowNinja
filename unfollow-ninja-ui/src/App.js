@@ -80,7 +80,7 @@ function App() {
               </ApolloProvider>
             </Box>
             <Box basis='medium' flex={true} pad='medium'>
-              <object title='smartphone' data={Images.Smartphone}/>
+              <Image width='100%' title='Exemple de notification' src={Images.DmScreenshot}/>
             </Box>
           </Box>
         </Section>
