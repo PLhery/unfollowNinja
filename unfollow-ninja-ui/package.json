@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@apollo/client": "^3.2.5",
+    "@apollo/client": "^3.2.7",
     "@sentry/browser": "^5.27.6",
     "graphql": "^15.4.0",
     "grommet": "^2.15.2",
