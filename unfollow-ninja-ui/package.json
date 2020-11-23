@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@apollo/client": "^3.2.5",
-    "@sentry/browser": "^5.27.4",
+    "@sentry/browser": "^5.27.6",
     "graphql": "^15.4.0",
     "grommet": "^2.15.2",
     "grommet-icons": "^4.5.0",
