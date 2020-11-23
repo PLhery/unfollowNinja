@@ -20,7 +20,7 @@
     "react-scripts": "^4.0.1",
     "react-snap": "^1.23.0",
     "styled-components": "^5.2.1",
-    "web-vitals": "^0.2.4"
+    "web-vitals": "^1.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
