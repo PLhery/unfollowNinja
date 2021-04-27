@@ -8,6 +8,7 @@ export const setLoggerPrefix = (prefix: string) => workerInfo = prefix + ' '.rep
 const customFormat = format.combine(
     format.timestamp(),
     format.splat(),
+    format.errors({ stack: true }),
     format.printf((info) => `${info.timestamp} ${workerInfo} ${info.level}: ${info.message}`),
 );
 

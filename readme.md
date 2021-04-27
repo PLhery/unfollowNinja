@@ -60,19 +60,29 @@ To get started, you'll need to create one or two twitter app https://developer.t
 Then you can create a .env in unfollow-ninja-server to set some parameters:
 
 ```
-CONSUMER_KEY=xxx # your first step app API key
-CONSUMER_SECRET=xxx # your first step app API secret key
-DM_CONSUMER_KEY=xxx # your second step app API key
+# your first step app API key and secret
+CONSUMER_KEY=xxx 
+CONSUMER_SECRET=xxx
+# your second step app API key
+DM_CONSUMER_KEY=xxx
 DM_CONSUMER_SECRET=xxx # your second step app API secret key
 
-WEB_URL=https://unfollow.ninja # Front-end URL (without any ending /)
+# Front-end URL (without any ending /)
+WEB_URL=https://unfollow.ninja
+
+# a secret key to sign cookies (ex. generate yours on https://password.new)
+COOKIE_SIGNING_KEY=Kg8hfQoGj9GHjdKjsYqPtk6ShJqaoP
 
 # optionally:
-CLUSTER_SIZE=2 # Number of workers, defaults to number of CPUs
-WORKER_RATE_LIMIT=15 # Number of unique tasks managed at the same time, defaults to 15
 
-SENTRY_DSN= # Sentry DSN, if you want to report workers errors on sentry
-SENTRY_DSN_API= # Sentry DSN, if you want to report api errors on sentry
+# -- Number of workers, defaults to number of CPUs
+CLUSTER_SIZE=2
+# -- Number of unique tasks managed at the same time, defaults to 15
+WORKER_RATE_LIMIT=15
+
+# Sentry (API) DSN, if you want to report workers (or API) errors on sentry
+SENTRY_DSN=
+SENTRY_DSN_API=
 ```
 
 You can also set these parameters as environment variables.

@@ -97,12 +97,19 @@ export default class Dao {
     }
 
     public async getSession(uid: string): Promise<Session> {
+        console.log('getsession', uid)
         return JSON.parse(await this.redis.get(`session:${uid}`) || '{}');
     }
 
     public async setSession(uid: string, params: Record<string, string>): Promise<void> {
+        console.log('setsession', uid, params)
         await this.redis.set(`session:${uid}`, JSON.stringify(params));
         await this.redis.expire(`session:${uid}`, 3600); // 1h sessions
+    }
+
+    public async deleteSession(uid: string): Promise<void> {
+        console.log('deletesession', uid)
+        await this.redis.del(`session:${uid}`);
     }
 
     public async getTokenSecret(token: string): Promise<string> {

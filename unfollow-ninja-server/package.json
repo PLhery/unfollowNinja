@@ -48,6 +48,8 @@
     "@types/graphql": "^14.5.0",
     "@types/i18n": "^0.13.0",
     "@types/ioredis": "^4.26.0",
+    "@types/koa-router": "^7.4.1",
+    "@types/koa-session": "^5.10.3",
     "@types/kue": "^0.11.13",
     "@types/lodash": "^4.14.168",
     "@types/moment": "^2.13.0",
@@ -62,6 +64,9 @@
     "hot-shots": "^8.3.1",
     "i18n": "^0.13.2",
     "ioredis": "^4.27.1",
+    "koa": "^2.13.1",
+    "koa-router": "^10.0.0",
+    "koa-session": "^6.2.0",
     "kue": "https://github.com/SeppPenner/kue/tarball/737c1222",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
@@ -72,6 +77,7 @@
     "pg-hstore": "^2.3.3",
     "sequelize": "^6.6.2",
     "twit": "^2.2.11",
+    "twitter-api-v2": "^1.4.0",
     "winston": "^3.3.3"
   }
 }
