@@ -1,8 +1,8 @@
 import 'dotenv/config';
 
-import * as Sentry from '@sentry/node';
-import * as cluster from 'cluster';
-import * as kue from 'kue';
+import Sentry from '@sentry/node';
+import cluster from 'cluster';
+import kue from 'kue';
 import { cpus } from 'os';
 import Dao from './dao/dao';
 import { checkAllFollowers, checkAllVipFollowers } from './workers/checkAllFollowers';

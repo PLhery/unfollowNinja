@@ -106,7 +106,6 @@ export default class Dao {
     }
 
     public async deleteSession(uid: string): Promise<void> {
-        console.log('deletesession', uid)
         await this.redis.del(`session:${uid}`);
     }
 
