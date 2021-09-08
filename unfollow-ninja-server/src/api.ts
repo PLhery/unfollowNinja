@@ -1,86 +1,118 @@
 import 'dotenv/config';
 
 import * as Sentry from '@sentry/node';
+import Koa from 'koa';
+import Router from 'koa-router';
+import koaSession from 'koa-session';
+import Dao, {UserCategory} from './dao/dao';
 import kue from 'kue';
-import { ApolloServer, AuthenticationError } from 'apollo-server';
+import logger, {setLoggerPrefix} from './utils/logger';
+import { createAuthRouter } from './api/auth';
 
-import resolvers from './api/resolvers';
-import { typeDefs } from './api/schema';
-import logger, { setLoggerPrefix } from './utils/logger';
-import Dao from './dao/dao';
+function assertEnvVariable(name: string) {
+  if (typeof process.env[name] === 'undefined') {
+    logger.error(`Some required environment variables are missing (${name}).`);
+    logger.error('Make sure you added them in a .env file in you cwd or that you defined them.');
+    process.exit();
+  }
+}
+assertEnvVariable('WEB_URL');
+assertEnvVariable('COOKIE_SIGNING_KEY');
 
 setLoggerPrefix('api');
 
 const SENTRY_DSN = process.env.SENTRY_DSN_API || undefined;
 if (SENTRY_DSN) {
-    Sentry.init({ dsn: SENTRY_DSN });
+  Sentry.init({ dsn: SENTRY_DSN });
 }
 
+assertEnvVariable('REDIS_URI');
+assertEnvVariable('POSTGRES_URI');
 const dao = new Dao();
 const queue = kue.createQueue({redis: process.env.REDIS_KUE_URI});
+const authRouter = createAuthRouter(dao, queue);
 
-const context = async ({req}) => {
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    logger.info(ip + ' - ' + JSON.stringify(req.body.query, null, null));
-    const { uid } = req.headers;
-    if (!uid) {
-        throw new AuthenticationError('uid required');
+export interface NinjaSession {
+  twitterTokenSecret?: Record<string, string>;
+  userId?: string;
+  username?: string;
+}
+
+const router = new Router()
+  .get('/', ctx => {
+    ctx.body = {status: 'ᕕ( ᐛ )ᕗ Hello, fellow human'};
+  })
+  .use('/auth', authRouter.routes(), authRouter.allowedMethods())
+  .use(async (ctx, next) => {
+    ctx.set('Access-Control-Allow-Origin', process.env.WEB_URL);
+    ctx.set('Access-Control-Allow-Credentials', 'true');
+    ctx.set('Vary', 'origin');
+    await next();
+  })
+  .get('/get-status', async ctx => {
+    const session = ctx.session as NinjaSession;
+    if (!session.userId) {
+      ctx.body = {
+        username: null,
+        dmUsername: null,
+        category: null,
+      };
+    } else {
+      const [params, category] = await Promise.all([
+        dao.getUserDao(session.userId).getUserParams(),
+        dao.getUserDao(session.userId).getCategory(),
+      ])
+      ctx.body = {
+        username: session.username,
+        dmUsername: params.dmId ? await dao.getCachedUsername(params.dmId) : null,
+        category,
+      };
     }
-    const session = await dao.getSession(uid);
-    const setSession = (data) => dao.setSession(uid, data);
-    return { uid, session, setSession, dao, queue, req };
-};
+  })
+  .post('/disable', async ctx => {
+    const session = ctx.session as NinjaSession;
+    await dao.getUserDao(session.userId).setCategory(UserCategory.disabled);
+    await dao.getUserDao(session.userId).setUserParams({
+      dmId: null,
+      dmToken: null,
+      dmTokenSecret: null,
+    });
+    ctx.status = 200;
+  })
+  .post('/logout', async ctx => {
+    const session = ctx.session as NinjaSession;
+    session.userId = null;
+    session.username = null;
+    ctx.status = 200;
+  });
 
-// sentry integration
-// from https://gist.github.com/nodkz/d14b236d67251d2df5674cb446843732
-const apolloServerSentryPlugin = SENTRY_DSN ? {
-    requestDidStart() {
-        return {
-            didEncounterErrors(rc) {
-                Sentry.withScope((scope) => {
-                    scope.addEventProcessor((event) =>
-                        Sentry.Handlers.parseRequest(event, (rc.context as any).req)
-                    );
-
-                    // username
-                    const username = (rc.context as any).session?.user?.username;
-                    if (username) {
-                        scope.setUser({
-                            ip_address: (rc.context as any).req?.ip,
-                            username,
-                        });
-                    }
-
-                    scope.setTags({
-                        graphql: rc.operation?.operation || 'parse_err',
-                        graphqlName: (rc.operationName as any) || (rc.request.operationName as any),
-                    });
-
-                    rc.errors.forEach((error) => {
-                        if (error.path || error.name !== 'GraphQLError') {
-                            scope.setExtras({
-                                path: error.path,
-                            });
-                            Sentry.captureException(error);
-                        } else {
-                            scope.setExtras({});
-                            Sentry.captureMessage(`GraphQLWrongQuery: ${error.message}`);
-                        }
-                    });
-                });
-            },
-        };
+// Create the server app with its router/log/session and error management
+const app = new Koa();
+app.keys = [ process.env.COOKIE_SIGNING_KEY ]; // random key used to sign cookies
+app
+  .use(async (ctx, next) => {
+    const start = Date.now();
+    await next();
+    logger.info(`${ctx.method} ${ctx.url} - ${Date.now() - start}ms`);
+  })
+  .use(koaSession({
+    store: {
+      get: key => dao.getSession(key),
+      set: (key, sess) => dao.setSession(key, sess),
+      destroy: key => dao.deleteSession(key)
     },
-} : {};
+    maxAge: 3600000 // 1h
+  }, app))
+  .use(router.routes())
+  .use(router.allowedMethods())
+  .on('error', err => {
+    logger.error(err.stack);
+    Sentry.captureException(err);
+  });
 
-const server = new ApolloServer({
-    typeDefs, resolvers, context, plugins: [apolloServerSentryPlugin], introspection: false, playground: false, debug: false
-});
-
-
+logger.info('Connecting to the databases...')
 dao.load()
-    .then(() => server.listen())
-    .then(({ url }: { url: string }) => {
-        logger.info(`🚀 Server ready at ${url}`);
-    })
-    .catch(error => Sentry.captureException(error));
+  .then(() => {
+    app.listen(3000)
+    logger.info(`🚀 Server ready at http://localhost:3000`);
+  })

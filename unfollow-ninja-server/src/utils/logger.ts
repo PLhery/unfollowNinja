@@ -1,13 +1,14 @@
-import { worker } from 'cluster';
+import cluster from 'cluster';
 import * as fs from 'fs';
 import { createLogger, format, transports } from 'winston';
 
-let workerInfo = worker ? `work ${worker.id}` : 'master';
+let workerInfo = cluster.worker ? `work ${cluster.worker.id}` : 'master';
 export const setLoggerPrefix = (prefix: string) => workerInfo = prefix + ' '.repeat(6 - prefix.length);
 
 const customFormat = format.combine(
     format.timestamp(),
     format.splat(),
+    format.errors({ stack: true }),
     format.printf((info) => `${info.timestamp} ${workerInfo} ${info.level}: ${info.message}`),
 );
 

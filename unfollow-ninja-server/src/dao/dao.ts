@@ -105,6 +105,10 @@ export default class Dao {
         await this.redis.expire(`session:${uid}`, 3600); // 1h sessions
     }
 
+    public async deleteSession(uid: string): Promise<void> {
+        await this.redis.del(`session:${uid}`);
+    }
+
     public async getTokenSecret(token: string): Promise<string> {
         return await this.redis.get(`tokensecret:${token}`) || null;
     }
