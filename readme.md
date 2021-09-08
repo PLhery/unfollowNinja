@@ -21,7 +21,7 @@ Indeed, this software is under apache v2 license which means:
 
 - clone the repo `git clone git@github.com:PLhery/unfollowNinja.git`
 - `cd unfollowNinja/unfollow-ninja-ui`
-- change `api.unfollow.ninja` to you own server endpoints in App.js
+- change `api.unfollow.ninja` to you own server endpoints in ui/src/components/MiniApp.js
 - `npm install && npm start` to serve the UI in dev mode
 - `npm run build` to build the UI static files in the `build` folder.
 

@@ -1,8 +1,4 @@
 import React from 'react';
-import { BrowserRouter as Router } from "react-router-dom";
-import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
-import { nanoid } from 'nanoid';
-import Cookies from 'js-cookie'
 
 import './style.scss';
 import 'react-github-cards/dist/default.css';
@@ -42,22 +38,6 @@ const theme = {
   },
 };
 
-if (!Cookies.get('uid')) {
-  if (sessionStorage['uid']) { // for the transition sessionStorage->cookie TODO remove
-    Cookies.set('uid', sessionStorage['uid'], { secure: window.location.protocol === 'https:' });
-  } else {
-    Cookies.set('uid', nanoid(), { secure: true });
-  }
-}
-
-const client = new ApolloClient({
-  cache: new InMemoryCache(),
-  uri: 'https://api.unfollow.ninja',
-  headers: {
-    uid: Cookies.get('uid'),
-  }
-});
-
 function App() {
   const isForeigner = !navigator.language?.startsWith?.('fr') && navigator.userAgent !== 'ReactSnap';
   return (
@@ -73,11 +53,7 @@ function App() {
               {isForeigner ? <Paragraph margin={{top: 'xsmall'}}>
                 English speaker? An international version is available at <Link href='https://unfollow-monkey.com/?utm_source=unfollowninja'>https://unfollow-monkey.com</Link>
               </Paragraph> : null}
-              <ApolloProvider client={client}>
-                <Router>
-                  <MiniApp/>
-                </Router>
-              </ApolloProvider>
+			  <MiniApp/>
             </Box>
             <Box basis='medium' flex={true} pad='medium'>
               <Image width='100%' title='Exemple de notification' src={Images.DmScreenshot}/>

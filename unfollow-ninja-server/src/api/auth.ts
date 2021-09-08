@@ -4,8 +4,9 @@ import type { Queue } from 'kue';
 import { promisify } from 'util';
 
 import logger from '../utils/logger';
-import Dao, {UserCategory} from '../dao/dao';
-import type { Session } from 'koa-session';
+import type Dao from '../dao/dao';
+import { UserCategory } from '../dao/dao';
+import type { NinjaSession } from '../api';
 
 const authRouter = new Router();
 
@@ -18,12 +19,6 @@ if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET ||
 
 const _STEP1_CREDENTIALS = { appKey: process.env.CONSUMER_KEY, appSecret: process.env.CONSUMER_SECRET } as const;
 const _STEP2_CREDENTIALS = { appKey: process.env.DM_CONSUMER_KEY, appSecret: process.env.DM_CONSUMER_SECRET } as const;
-
-interface NinjaSession {
-  twitterTokenSecret?: Record<string, string>;
-  userId?: string;
-  username?: string;
-}
 
 export function createAuthRouter(dao: Dao, queue: Queue) {
   return authRouter
@@ -92,11 +87,18 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
       session.userId = loginResult.userId;
       session.username = loginResult.screenName;
 
-      ctx.body = {
-        username: loginResult.screenName,
-        dmUsername: params.dmId ? await dao.getCachedUsername(params.dmId) : null,
-        category,
-      };
+      const msgContent = encodeURI(JSON.stringify({
+          username: loginResult.screenName,
+          dmUsername: params.dmId ? await dao.getCachedUsername(params.dmId) : null,
+          category,
+      }));
+
+      ctx.type = 'html';
+      ctx.body = `You successfully logged in! closing this window...
+      <script>
+        window.opener && window.opener.postMessage({msg: 'step1', content: "${msgContent}"}, '${process.env.WEB_URL}');
+        close();
+      </script>`;
     })
     .get('/step-2', async ctx => {
       // Generate an authentication URL
@@ -155,10 +157,18 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
           .save(cb),
       )();
 
-      ctx.body = {
+
+      const msgContent = encodeURI(JSON.stringify({
         username: session.username,
         dmUsername: loginResult.screenName,
         category: UserCategory.enabled,
-      };
+      }));
+
+      ctx.type = 'html';
+      ctx.body = `You successfully logged in! closing this window...
+      <script>
+        window.opener && window.opener.postMessage({msg: 'step2', content: "${msgContent}"}, '${process.env.WEB_URL}');
+        close();
+      </script>`;
     });
 }

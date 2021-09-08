@@ -3,8 +3,8 @@ import 'dotenv/config';
 import * as Sentry from '@sentry/node';
 import Koa from 'koa';
 import Router from 'koa-router';
-import session from 'koa-session';
-import Dao from './dao/dao';
+import koaSession from 'koa-session';
+import Dao, {UserCategory} from './dao/dao';
 import kue from 'kue';
 import logger, {setLoggerPrefix} from './utils/logger';
 import { createAuthRouter } from './api/auth';
@@ -32,13 +32,58 @@ const dao = new Dao();
 const queue = kue.createQueue({redis: process.env.REDIS_KUE_URI});
 const authRouter = createAuthRouter(dao, queue);
 
+export interface NinjaSession {
+  twitterTokenSecret?: Record<string, string>;
+  userId?: string;
+  username?: string;
+}
+
 const router = new Router()
   .get('/', ctx => {
     ctx.body = {status: 'ᕕ( ᐛ )ᕗ Hello, fellow human'};
   })
   .use('/auth', authRouter.routes(), authRouter.allowedMethods())
-  .get('/test', ctx => {
-    ctx.body = {status: ctx.session};
+  .use(async (ctx, next) => {
+    ctx.set('Access-Control-Allow-Origin', process.env.WEB_URL);
+    ctx.set('Access-Control-Allow-Credentials', 'true');
+    ctx.set('Vary', 'origin');
+    await next();
+  })
+  .get('/get-status', async ctx => {
+    const session = ctx.session as NinjaSession;
+    if (!session.userId) {
+      ctx.body = {
+        username: null,
+        dmUsername: null,
+        category: null,
+      };
+    } else {
+      const [params, category] = await Promise.all([
+        dao.getUserDao(session.userId).getUserParams(),
+        dao.getUserDao(session.userId).getCategory(),
+      ])
+      ctx.body = {
+        username: session.username,
+        dmUsername: params.dmId ? await dao.getCachedUsername(params.dmId) : null,
+        category,
+      };
+    }
+  })
+  .post('/disable', async ctx => {
+    const session = ctx.session as NinjaSession;
+    await dao.getUserDao(session.userId).setCategory(UserCategory.disabled);
+    await dao.getUserDao(session.userId).setUserParams({
+      dmId: null,
+      dmToken: null,
+      dmTokenSecret: null,
+    });
+    ctx.status = 200;
+  })
+  .post('/logout', async ctx => {
+    const session = ctx.session as NinjaSession;
+    session.userId = null;
+    session.username = null;
+    ctx.status = 200;
   });
 
 // Create the server app with its router/log/session and error management
@@ -50,7 +95,7 @@ app
     await next();
     logger.info(`${ctx.method} ${ctx.url} - ${Date.now() - start}ms`);
   })
-  .use(session({
+  .use(koaSession({
     store: {
       get: key => dao.getSession(key),
       set: (key, sess) => dao.setSession(key, sess),

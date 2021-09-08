@@ -1,57 +1,12 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Box, Button, Paragraph} from "grommet/es6";
 import {Alert, Twitter, ChatOption, UserExpert, Validate} from "grommet-icons";
-import { useHistory, useLocation } from "react-router-dom";
 import Confetti from 'react-dom-confetti';
-import { useQuery, useMutation, gql } from '@apollo/client';
 
 import Styles from './MiniApp.module.scss';
 import Link from "./Link";
 
-const GET_INFO = gql`
-    {
-        info {
-            id,
-            twitterStep1AuthUrl,
-            twitterStep2AuthUrl,
-            user {id, username, dmUsername, category}
-        }
-    }
-`;
-
-const LOGIN = gql`
-    mutation Login($oauthToken: String!, $oauthVerifier: String!) {
-        login(token: $oauthToken, verifier: $oauthVerifier) {
-            id,
-            twitterStep1AuthUrl,
-            twitterStep2AuthUrl,
-            user {id, username, dmUsername, category}
-        }
-    }
-`;
-
-const ADD_DMS = gql`
-    mutation AddDms($oauthToken: String!, $oauthVerifier: String!) {
-        addDmAccount(token: $oauthToken, verifier: $oauthVerifier) {id, username, dmUsername}
-    }
-`;
-
-const REMOVE_DMS = gql`
-    mutation RemoveDms {
-        removeDmAccount {id, username, dmUsername, category}
-    }
-`;
-
-const LOGOUT = gql`
-    mutation Logout {
-        logout {
-            id,
-            twitterStep1AuthUrl,
-            twitterStep2AuthUrl,
-            user {id, username, dmUsername, category}
-        }
-    }
-`;
+const API_URL = 'http://localhost:3000';
 
 const LoggedInIntro = ({ user, logout, removeDMs }) => {
     if (!user) return null; // not logged in
@@ -78,77 +33,96 @@ const LoggedInIntro = ({ user, logout, removeDMs }) => {
     </div>
 };
 
-function sendStep3Event() {
-    if (window.gtag) {
-        window.gtag('event', 'click', {
-            'event_category': 'outbound',
-            'event_label': 'step 3',
-        });
-    }
-}
+const storedUserInfo = JSON.parse(sessionStorage.getItem('userInfo')); // can be null
 
 function MiniApp(props) {
-  const location = useLocation();
-  const history = useHistory();
+  const [userInfo, setUserInfo] = useState(storedUserInfo);
+  const [hasError, setHasError] = useState(false);
+  // persist the userInfo in sessionStorage
+  useEffect(() => { sessionStorage.setItem('userInfo', JSON.stringify(userInfo)) }, [userInfo]);
 
+  useEffect(() => {
+	fetch(API_URL + '/get-status', {credentials: 'include'})
+	  .then(response => response.ok ? response.json() : null)
+	  .then(data => data || Promise.reject())
+	  .then(data => setUserInfo(data.username ? data : null))
+	  .catch(() => {
+		setHasError(true)
+	  })
+  }, []);
 
-    const [login, loginRequest] = useMutation(LOGIN);
-  const [addDms, addDmsRequest] = useMutation(ADD_DMS);
-  const [removeDMs] = useMutation(REMOVE_DMS);
-  const [logout] = useMutation(LOGOUT);
-  let { error, data, refetch } = useQuery(GET_INFO);
-  data = data?.info;
-  error = error || loginRequest.error || addDmsRequest.error;
-  if (navigator.userAgent === 'ReactSnap') {
-      data = null; // ReactSnap should capture a loading state
-  }
+  const logout = () => {
+	setUserInfo(null);
+    fetch(API_URL + '/logout', {method: 'post',credentials: 'include'})
+	  .then(response => response.ok || Promise.reject())
+	  .catch(() => {
+	    setUserInfo(userInfo);
+	    setHasError(true)
+	  })
+  };
+  const removeDMs = () => {
+	setUserInfo({
+	  ...userInfo,
+	  dmUsername: null,
+	  category: 3, // disabled
+	});
+	fetch(API_URL + '/disable', {method: 'post',credentials: 'include'})
+	  .then(response => response.ok || Promise.reject())
+	  .catch(() => {
+		setUserInfo(userInfo);
+		setHasError(true)
+	  });
+  };
 
-  if (!loginRequest.called && location.pathname === '/1') {
-    const urlParams = new URLSearchParams(location.search);
-    const [ oauthToken, oauthVerifier ] = [ urlParams.get('oauth_token'), urlParams.get('oauth_verifier') ];
-    if (oauthToken && oauthVerifier) { // otherwise, probably denied
-        login({variables: {oauthToken, oauthVerifier}});
-        setTimeout(() => window.gtag && window.gtag('event', 'login'), 1000); // ganalaytics
-    } else {
-        setTimeout(() => window.gtag && window.gtag('event', 'exception', {description: 'login_failed'}), 1000);
-    }
-    history.push('/');
-  } else if (!addDmsRequest.called && location.pathname === '/2') {
-      const urlParams = new URLSearchParams(location.search);
-      const [ oauthToken, oauthVerifier ] = [ urlParams.get('oauth_token'), urlParams.get('oauth_verifier') ];
-      if (oauthToken && oauthVerifier) { // otherwise, probably denied
-          addDms({variables: {oauthToken, oauthVerifier}});
-          setTimeout(() => window.gtag && window.gtag('event', 'sign_up'), 1000); // ganalaytics
-      } else {
-          setTimeout(() => window.gtag && window.gtag('event', 'exception', {description: 'add_dms_failed'}), 1000);
-      }
-      history.push('/');
-  }
+  // Listen and process postmessages from the API
+  // (these are sent in the log in callback page)
+  useEffect(() => {
+    const processMessage = (event) => {
+      if (event.origin !== API_URL) {
+		return;
+	  }
+      const content = JSON.parse(decodeURI(event.data.content));
+	  setUserInfo(content);
+	}
 
-  const step0 = !data?.user && !addDmsRequest.loading && !loginRequest.loading; // not logged in or loading
-  const step1 = data?.user && !data.user.dmUsername; // logged in but no DM account
-  const step2 = !!data?.user?.dmUsername; // logged in and have a DM account
+	window.addEventListener('message', processMessage);
+    return function cleanup() {
+      window.removeEventListener('message', processMessage);
+	};
+  }, [])
+
+  const step0 = !userInfo?.username; // not logged in
+  const step1 = userInfo?.username && !userInfo.dmUsername; // logged in but no DM account
+  const step2 = !!userInfo?.dmUsername; // logged in and have a DM account
 
   return (
       <Box gap='small' margin={{horizontal: 'small', vertical: 'medium'}} {...props}>
-        {error ? <Paragraph textAlign='center'><Alert/><br/>Impossible de joindre le serveur, réessayez plus tard...</Paragraph> : null}
-        <Confetti active={step2} className={Styles.confettis}/>
-        <LoggedInIntro user={data?.user} logout={logout} removeDMs={removeDMs} getInfo={refetch}/>
+        {hasError ?
+		  <Paragraph textAlign='center'><Alert/><br/>Impossible de joindre le serveur, réessayez plus tard...</Paragraph> :
+		  <>
+			<Confetti active={step2 } className={Styles.confettis}/>
+			<LoggedInIntro user={userInfo} logout={logout} removeDMs={removeDMs}/>
+		  </>
+        }
         <Button
             icon={<Twitter color={step0 ? 'white' : null}/>}
             label='Connectez-vous à votre compte'
             primary={step0}
             style={step0 ? {color: 'white'} : {}}
-            disabled={!data?.twitterStep1AuthUrl || !step0}
-            href={data?.twitterStep1AuthUrl}
+            disabled={!step0 || hasError}
+            href={`${API_URL}/auth/step-1`}
+			target='_blank'
+			rel='opener'
         />
         <Button
             icon={<ChatOption color={step1 ? 'white' : null}/>}
             label={step2 ? 'Changer le compte d\'envoi de DMs' : 'Activez les notifications par DM'}
             primary={step1}
             style={step1 ? {color: 'white'} : {}}
-            disabled={!data?.twitterStep2AuthUrl || step0}
-            href={step2 ? data.twitterStep2AuthUrl?.replace('oauth/authenticate', 'oauth/authorize') : data?.twitterStep2AuthUrl}
+            disabled={step0 || hasError}
+			href={step2 ? `${API_URL}/auth/step-2` : `${API_URL}/auth/step-2?force_login=true`}
+			target='_blank'
+			rel='opener'
         />
         <Button
             icon={<UserExpert color={step2 ? 'white' : null}/>}
@@ -156,11 +130,11 @@ function MiniApp(props) {
             primary={step2}
             style={step2 ? {color: 'white'} : {}}
             href='https://twitter.com/unfollowninja'
-            onClick={sendStep3Event}
             target='_blank'
             rel='noopener'
         />
       </Box>
   );
 }
+
 export default MiniApp;
