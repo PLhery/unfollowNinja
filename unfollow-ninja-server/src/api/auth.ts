@@ -20,6 +20,12 @@ if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET ||
 const _STEP1_CREDENTIALS = { appKey: process.env.CONSUMER_KEY, appSecret: process.env.CONSUMER_SECRET } as const;
 const _STEP2_CREDENTIALS = { appKey: process.env.DM_CONSUMER_KEY, appSecret: process.env.DM_CONSUMER_SECRET } as const;
 
+if (!process.env.API_URL || !process.env.WEB_URL) {
+  logger.error('Some required environment variables are missing (API_URL/WEB_URL).');
+  logger.error('Make sure you added them in a .env file in you cwd or that you defined them.');
+  process.exit();
+}
+
 export function createAuthRouter(dao: Dao, queue: Queue) {
   return authRouter
     .get('/step-1', async (ctx) => {
