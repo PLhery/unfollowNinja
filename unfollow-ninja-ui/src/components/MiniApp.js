@@ -9,7 +9,7 @@ import Link from "./Link";
 const API_URL = 'https://api.unfollow.ninja';
 
 const LoggedInIntro = ({ user, logout, removeDMs }) => {
-    if (!user) return null; // not logged in
+    if (!user?.username) return null; // not logged in
 
     let message = <Paragraph>Plus qu'une étape pour activer le service :<br/> Choisissez un compte pour vous envoyer les notifications</Paragraph>;
     if (user.category === 2) { // revoked tokens
@@ -33,16 +33,22 @@ const LoggedInIntro = ({ user, logout, removeDMs }) => {
     </div>
 };
 
-const storedUserInfo = JSON.parse(sessionStorage.getItem('userInfo')); // can be null
-
 function MiniApp(props) {
-  const [userInfo, setUserInfo] = useState(storedUserInfo);
+  const [userInfo, setUserInfo] = useState(null);
   const [hasError, setHasError] = useState(false);
+
   // persist the userInfo in sessionStorage
-  useEffect(() => { sessionStorage.setItem('userInfo', JSON.stringify(userInfo)) }, [userInfo]);
+  useEffect(() => { userInfo && sessionStorage.setItem('userInfo', JSON.stringify(userInfo)) }, [userInfo]);
 
   useEffect(() => {
 	if (navigator.userAgent !== "ReactSnap") { // We don't want to risk hasError=true on ReactSnap
+	  // first: load userInfo from the sessionStorage
+	  const storedUserInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+	  if (storedUserInfo?.username) { // logged in user
+		setUserInfo(storedUserInfo);
+	  }
+
+	  // second: load it more accurately from the server
 	  fetch(API_URL + '/get-status', {credentials: 'include'})
 		.then(response => response.ok ? response.json() : null)
 		.then(data => data || Promise.reject())
@@ -54,7 +60,7 @@ function MiniApp(props) {
   }, []);
 
   const logout = () => {
-	setUserInfo(null);
+	setUserInfo({});
     fetch(API_URL + '/logout', {method: 'post',credentials: 'include'})
 	  .then(response => response.ok || Promise.reject())
 	  .catch(() => {
