@@ -102,8 +102,9 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
     })
     .get('/step-2', async ctx => {
       // Generate an authentication URL
+      const forceLogin = Boolean(ctx.query.force_login);
       const { url, oauth_token, oauth_token_secret } = await new TwitterApi(_STEP2_CREDENTIALS)
-        .generateAuthLink(process.env.API_URL + '/auth/step-2-callback');
+        .generateAuthLink(process.env.API_URL + '/auth/step-2-callback', {forceLogin});
 
       // store the relevant information in the session
       const session = ctx.session as NinjaSession;

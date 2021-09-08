@@ -6,7 +6,7 @@ import Confetti from 'react-dom-confetti';
 import Styles from './MiniApp.module.scss';
 import Link from "./Link";
 
-const API_URL = 'http://localhost:3000';
+const API_URL = 'https://api.unfollow.ninja';
 
 const LoggedInIntro = ({ user, logout, removeDMs }) => {
     if (!user) return null; // not logged in
@@ -42,13 +42,15 @@ function MiniApp(props) {
   useEffect(() => { sessionStorage.setItem('userInfo', JSON.stringify(userInfo)) }, [userInfo]);
 
   useEffect(() => {
-	fetch(API_URL + '/get-status', {credentials: 'include'})
-	  .then(response => response.ok ? response.json() : null)
-	  .then(data => data || Promise.reject())
-	  .then(data => setUserInfo(data.username ? data : null))
-	  .catch(() => {
-		setHasError(true)
-	  })
+	if (navigator.userAgent !== "ReactSnap") { // We don't want to risk hasError=true on ReactSnap
+	  fetch(API_URL + '/get-status', {credentials: 'include'})
+		.then(response => response.ok ? response.json() : null)
+		.then(data => data || Promise.reject())
+		.then(data => setUserInfo(data.username ? data : null))
+		.catch(() => {
+		  setHasError(true)
+		})
+	}
   }, []);
 
   const logout = () => {
@@ -120,7 +122,7 @@ function MiniApp(props) {
             primary={step1}
             style={step1 ? {color: 'white'} : {}}
             disabled={step0 || hasError}
-			href={step2 ? `${API_URL}/auth/step-2` : `${API_URL}/auth/step-2?force_login=true`}
+			href={(step0 || hasError) ? null : (step2 ? `${API_URL}/auth/step-2?force_login=true` : `${API_URL}/auth/step-2`)}
 			target='_blank'
 			rel='opener'
         />
