@@ -1,13 +1,11 @@
 import React from 'react';
 
 import './style.scss';
-import 'react-github-cards/dist/default.css';
 
 import {Box, Grommet, Heading, Image, Paragraph, Text} from 'grommet';
-import { RepoCard } from 'react-github-cards';
 import GithubCorner from "react-github-corner";
 
-import { Faq, Link, MiniApp, Navbar, Section }  from "./components";
+import { Faq, Link, MiniApp, Navbar, Section, Repo }  from "./components";
 import * as Images from './images';
 
 const theme = {
@@ -69,8 +67,10 @@ function App() {
               <Heading level={2} color='dark'>UnfollowNinja est libre et gratuit</Heading>
               <Paragraph>UnfollowNinja est un projet <Link href='https://github.com/PLhery/unfollowNinja'>open-source</Link>, maintenu par <Link href='https://twitter.com/plhery'>@plhery</Link> et hébergé par <Link href='https://twitter.com/hivanenetwork'>HivaneNetwork</Link>.</Paragraph>
               <Paragraph>Merci à Hivane d'aider le projet à rester performant, libre, et gratuit, soutenant 100 000+ utilisateurs actifs.</Paragraph>
-              <Box gap='small' alignSelf='center' style={{overflow: 'hidden'}}>
-                <RepoCard username="plhery" repo="unfollowninja"/>
+			  <Paragraph>UnfollowNinja s'appuie sur la librairie node <i>twitter-api-v2</i>, par le même auteur.</Paragraph>
+              <Box gap='small' alignSelf='center' direction='row'>
+				<Repo title='unfollowNinja' description='Get notified when your Twitter account loses a follower.' stars={138} forks={12}/>
+				<Repo title='node-twitter-api-v2' description='Strongly typed, full-featured, light, versatile yet powerful Twitter API v1.1 and v2 client for Node.js.' stars={121} forks={10}/>
               </Box>
             </Box>
           </Box>
