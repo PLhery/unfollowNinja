@@ -51,7 +51,6 @@
     "@types/moment": "^2.13.0",
     "@types/node": "^16.7.10",
     "@types/oauth": "^0.9.1",
-    "@types/p-limit": "^2.2.0",
     "@types/twit": "^2.2.28",
     "big-integer": "^1.6.48",
     "bull": "^3.29.3",
