@@ -1,7 +1,6 @@
 import TwitterApi from 'twitter-api-v2';
 import Router from 'koa-router';
-import type { Queue } from 'kue';
-import { promisify } from 'util';
+import type { Queue } from 'bull';
 
 import logger from '../utils/logger';
 import type Dao from '../dao/dao';
@@ -154,16 +153,10 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
         dao.addTwittoToCache({ id: loginResult.userId, username: loginResult.screenName }),
       ]);
       await dao.getUserDao(userId).setCategory(UserCategory.enabled);
-      await promisify((cb) =>
-        queue
-          .create('sendWelcomeMessage', {
-            userId,
-            username: ctx.session.username,
-          })
-          .removeOnComplete(true)
-          .save(cb),
-      )();
-
+      await queue.add('sendWelcomeMessage', {
+          userId,
+          username: ctx.session.username,
+      });
 
       const msgContent = encodeURI(JSON.stringify({
         username: session.username,

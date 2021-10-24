@@ -4,8 +4,9 @@ import * as Sentry from '@sentry/node';
 import Koa from 'koa';
 import Router from 'koa-router';
 import koaSession from 'koa-session';
+import Bull from 'bull';
+
 import Dao, {UserCategory} from './dao/dao';
-import kue from 'kue';
 import logger, {setLoggerPrefix} from './utils/logger';
 import { createAuthRouter } from './api/auth';
 
@@ -29,8 +30,20 @@ if (SENTRY_DSN) {
 assertEnvVariable('REDIS_URI');
 assertEnvVariable('POSTGRES_URI');
 const dao = new Dao();
-const queue = kue.createQueue({redis: process.env.REDIS_KUE_URI});
-const authRouter = createAuthRouter(dao, queue);
+const bullQueue = new Bull('ninja', process.env.REDIS_BULL_URI, {
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: 60000,
+    removeOnComplete: true,
+    removeOnFail: true
+  }
+});
+bullQueue.on('error', (err) => {
+  logger.error('Bull error: ' + err.stack);
+  Sentry.captureException(err);
+})
+
+const authRouter = createAuthRouter(dao, bullQueue);
 
 export interface NinjaSession {
   twitterTokenSecret?: Record<string, string>;

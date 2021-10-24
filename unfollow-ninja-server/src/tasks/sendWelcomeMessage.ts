@@ -1,7 +1,6 @@
 import * as i18n from 'i18n';
-import { Job } from 'kue';
+import type { Job } from 'bull';
 import {Params, Twitter} from 'twit';
-import { promisify } from 'util';
 import {UserCategory} from '../dao/dao';
 import logger from '../utils/logger';
 import Task from './task';
@@ -59,20 +58,14 @@ export default class extends Task {
                     break;
                 // twitter errors
                 case 130: // over capacity
+                case 130: // over capacity
                 case 131: // internal error`
                 case 88: // rate limit
                     // retry in 15 minutes
-                    await promisify((cb) =>
-                        this.queue
-                            .create('sendWelcomeMessage', {
-                                title: `Resend welcome message to @${username} following an error ${code}`,
-                                userId,
-                                username,
-                            })
-                            .delay(15 * 60 * 1000)
-                            .removeOnComplete(true)
-                            .save(cb),
-                    )();
+                    await this.queue.add('sendWelcomeMessage', {
+                        userId,
+                        username,
+                    }, {delay: 15 * 60 * 1000});
                     break;
                 default:
                     throw new Error(`An unexpected twitter error occured: ${code} ${message}`);

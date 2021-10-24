@@ -45,7 +45,7 @@ By default, the db files and logs are stored in /data subfolders. Feel free to e
 - `cd unfollowNinja/unfollow-ninja-server`
 - install the dependencies and build the project `npm ci && npm build`
 - create a .env file (see [.env file](#.env-file))
-- install redis and optionally set a custom REDIS_URI + REDIS_KUE_URI in .env
+- install redis and optionally set a custom REDIS_URI + REDIS_BULL_URI in .env
 - launch the workers `node ./dist/api/workers`
 - launch the api server `node ./dist/api`
 - or launch both in the as a daemon with pm2 `pm2 start pm2.yml`

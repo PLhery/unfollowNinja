@@ -1,4 +1,4 @@
-import { Job } from 'kue';
+import type { Job } from 'bull';
 import NotifyUser from '../../src/tasks/notifyUser';
 import { IUnfollowerInfo } from '../../src/utils/types';
 import { daoMock, queueMock } from '../utils';
@@ -10,8 +10,12 @@ const queue = queueMock();
 const dao = daoMock();
 const userDao = dao.userDao['01'];
 const unfollowersInfo: IUnfollowerInfo[] = [];
-const job = new Job('notifyUser', {username: 'testUsername', userId: '01', unfollowersInfo });
-job.started_at = Date.now();
+
+const job = {
+  data: {username: 'testUsername', userId: '01', unfollowersInfo },
+  processedOn: Date.now(),
+} as Job;
+
 // @ts-ignore
 const task = new NotifyUser(dao, queue);
 
@@ -66,7 +70,7 @@ describe('notifyUser task', () => {
         mockUsersLookupReply(['123'], ['twitto123']);
         mockFriendshipShowReply();
         await task.run(job);
-        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(queue.add).toHaveBeenCalledTimes(0);
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
@@ -81,7 +85,7 @@ describe('notifyUser task', () => {
         mockFriendshipShowReply();
         mockFriendshipShowReply();
         await task.run(job);
-        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(queue.add).toHaveBeenCalledTimes(0);
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
@@ -113,7 +117,7 @@ describe('notifyUser task', () => {
         mockFriendshipShowReply();
         mockFriendshipShowReplyNotFound();
         await task.run(job);
-        expect(queue.save).toHaveBeenCalledTimes(1);
+        expect(queue.add).toHaveBeenCalledTimes(1);
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
@@ -130,7 +134,7 @@ describe('notifyUser task', () => {
         job.data.isSecondTry = true;
         await task.run(job);
         job.data.isSecondTry = false;
-        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(queue.add).toHaveBeenCalledTimes(0);
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
     });
@@ -143,7 +147,7 @@ describe('notifyUser task', () => {
         mockFriendshipShowReply();
         dao.getCachedUsername.mockResolvedValue('twitto234');
         await task.run(job);
-        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(queue.add).toHaveBeenCalledTimes(0);
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
@@ -161,7 +165,7 @@ describe('notifyUser task', () => {
         mockFriendshipShowReply();
         mockFriendshipShowReply();
         await task.run(job);
-        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(queue.add).toHaveBeenCalledTimes(0);
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
@@ -189,7 +193,7 @@ describe('notifyUser task', () => {
         mockUsersLookupReply([louanBenId], ['louanben']);
         mockFriendshipShowReply();
         await task.run(job);
-        expect(queue.save).toHaveBeenCalledTimes(0);
+        expect(queue.add).toHaveBeenCalledTimes(0);
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)

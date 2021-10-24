@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node';
-import {Job} from 'kue';
+import type { Job } from 'bull';
 
 import {UserCategory} from '../dao/dao';
 import logger from '../utils/logger';
@@ -32,7 +32,7 @@ export default class extends Task {
                 }
             }),
         ).then(() => {
-            metrics.gauge('uninja.reenableFollowers.duration', Date.now() - Number(job.started_at));
+            metrics.gauge('uninja.reenableFollowers.duration', Date.now() - job.processedOn);
         });
     }
 

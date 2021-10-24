@@ -1,8 +1,7 @@
-import type { Job, Queue } from 'kue';
+import type { Queue } from 'bull';
 import pLimit from 'p-limit';
 import * as Sentry from '@sentry/node';
 import { difference } from 'lodash';
-import { promisify } from 'util';
 import * as Twit from 'twit';
 
 import Dao, { UserCategory } from '../dao/dao';
@@ -205,17 +204,10 @@ async function detectUnfollows(userId: string, followers: string[], dao: Dao, qu
             }),
         );
 
-        await promisify((cb) =>
-                queue
-                    .create('notifyUser', {
-                        userId,
-                        unfollowersInfo,
-                    })
-                    .removeOnComplete(true)
-                    .attempts(5)
-                    .backoff( {delay: 60000, type: 'exponential'})
-                    .save(cb),
-            )(),
+        await queue.add('notifyUser', {
+            userId,
+            unfollowersInfo,
+        });
         await userDao.updateFollowers(followers, newFollowers, unfollowers, newUser ? 0 : Date.now())
     } else if (newFollowers.length > 0) {
         await userDao.updateFollowers(followers, newFollowers, unfollowers, newUser ? 0 : Date.now());

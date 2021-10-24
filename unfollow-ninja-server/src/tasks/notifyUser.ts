@@ -1,6 +1,6 @@
 import i18n from 'i18n';
-import { Job } from 'kue';
-import { defaults, difference, get, keyBy, split } from 'lodash';
+import type { Job } from 'bull';
+import { defaults, difference, get, keyBy } from 'lodash';
 import moment from 'moment-timezone';
 import { Params, Twitter } from 'twit';
 import { promisify } from 'util';
@@ -126,22 +126,15 @@ export default class extends Task {
 
             // If it's the first check, check them again in 15min to be sure that they were really glitches
             if (potentialGlitches.length > 0) {
-                await promisify((cb) =>
-                    this.queue
-                        .create('notifyUser', {
-                            title: `(second check) Notify @${username} that he's been unfollowed by ` +
-                                potentialGlitches.map((u) => u.id).toString(),
-                            userId,
-                            username,
-                            unfollowersInfo: potentialGlitches,
-                            isSecondTry: true,
-                        })
-                        .delay(15 * 60 * 1000)
-                        .attempts(5)
-                        .backoff( {delay: 60000, type: 'exponential'})
-                        .removeOnComplete(true)
-                        .save(cb),
-                )();
+              await this.queue.add('notifyUser',
+                  {
+                    userId,
+                    username,
+                    unfollowersInfo: potentialGlitches,
+                    isSecondTry: true,
+                  },
+                  { delay: 15 * 60 * 1000 }
+                );
                 realUnfollowersInfo = difference(realUnfollowersInfo, potentialGlitches);
             }
             metrics.increment('uninja.notifyUser.nbFirstTry');

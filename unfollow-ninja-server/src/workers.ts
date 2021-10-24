@@ -2,15 +2,13 @@ import 'dotenv/config';
 
 import * as Sentry from '@sentry/node';
 import cluster from 'cluster';
-import * as kue from 'kue';
 import { cpus } from 'os';
+import Bull from 'bull';
 import Dao from './dao/dao';
 import { checkAllFollowers, checkAllVipFollowers } from './workers/checkAllFollowers';
 import { cacheAllFollowers } from './workers/cacheAllFollowers';
 import tasks from './tasks';
-import type Task from './tasks/task';
 import logger from './utils/logger';
-import Scheduler from './utils/scheduler';
 import Metrics from './utils/metrics';
 
 // parsing process.env variables
@@ -33,15 +31,20 @@ if (!process.env.DM_CONSUMER_KEY || !process.env.DM_CONSUMER_SECRET) {
     process.exit();
 }
 
-const queue = kue.createQueue({redis: process.env.REDIS_KUE_URI});
-queue.setMaxListeners(200);
-
-queue.on( 'error',  ( err: Error ) => {
-    logger.error('Oops... ', err);
+const bullQueue = new Bull('ninja', process.env.REDIS_BULL_URI, {
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: 60000,
+    removeOnComplete: true,
+    removeOnFail: true
+  }
 });
+bullQueue.on('error', (err) => {
+  logger.error('Bull error: ' + err.stack);
+  Sentry.captureException(err);
+})
 
 const dao = new Dao();
-let scheduler: Scheduler;
 if (cluster.isMaster) {
     logger.info('Unfollow ninja - Server');
 
@@ -49,53 +52,45 @@ if (cluster.isMaster) {
         logger.error('Please check that your redis server is launched');
         process.exit(0);
     }
-    queue.once( 'error', initFailed);
-
-    queue.client.once('connect', () => {
-        queue.removeListener('error', initFailed);
-        logger.info('Connected to the kue redis server');
-    });
 
     logger.info('Connecting to the databases..');
     dao.load()
-        .then(() => {
-            // every 3 minutes, create the checkFollowers tasks for everyone
-            scheduler = new Scheduler(dao, queue);
-            scheduler.start();
-
-            logger.info('Launching the %s workers...', CLUSTER_SIZE);
+        .then(async () => {
+            logger.info('Launching the 2*%s workers...', CLUSTER_SIZE);
             for (let i = 0; i < 2*CLUSTER_SIZE; i++) {
                 cluster.fork();
             }
+
+            // reenable suspended followers every 3h
+            await bullQueue.add('reenableFollowers', {}, { repeat: { cron: '0 */8 * * *' } });
+
+            // update nbUsers metrics every minute
+            await bullQueue.add('updateMetrics', {}, { repeat: { cron: '* * * * *' } });
         })
         .catch(error => {
             logger.error(error.stack);
             Sentry.captureException(error)
         });
-
-    // watchdog - recommended by Kue
-    queue.watchStuckJobs(1000);
 } else {
     // if CLUSTER_SIZE=3, we'll create 6 workers
-    // workers 1,2,3 will be used to check new unfollowers, workers 4,5,6 to process new kue tasks
+    // workers 1,2,3 will be used to check new unfollowers, workers 4,5,6 to process new bull tasks
     if (cluster.worker.id <= CLUSTER_SIZE) {
         // start checking the worker's followers
-        checkAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao, queue)
+        checkAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao, bullQueue)
             .catch(err => Sentry.captureException(err));
-        checkAllVipFollowers(cluster.worker.id, CLUSTER_SIZE, dao, queue)
+        checkAllVipFollowers(cluster.worker.id, CLUSTER_SIZE, dao, bullQueue)
             .catch(err => Sentry.captureException(err));
         // Also start caching its follower's username and follow time
         cacheAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao)
             .catch(err => Sentry.captureException(err));
     } else {
         for (const taskName in tasks) {
-            const task: Task = new tasks[taskName](dao, queue);
-            queue.process(
+            const task = new tasks[taskName](dao, bullQueue);
+            bullQueue.process(
                 taskName,
                 WORKER_RATE_LIMIT,
-                (job: kue.Job, done: kue.DoneCallback) => {
+                (job) =>
                     task.run(job)
-                        .then(() => done())
                         .catch(async (err) => {
                             const username = job.data.userId ? await dao.getCachedUsername(job.data.userId) : null;
                             logger.error(`An error happened with ${taskName} / @${username || ''}: ${err.stack}`);
@@ -104,9 +99,8 @@ if (cluster.isMaster) {
                                 scope.setUser({ username });
                                 Sentry.captureException(err);
                             });
-                            done(err);
-                        });
-                },
+                            throw err;
+                        })
             );
         }
     }
@@ -114,23 +108,16 @@ if (cluster.isMaster) {
     logger.info('Worker %d ready', cluster.worker.id);
 }
 
-function death() {
+async function death() {
     process.removeAllListeners(); // be sure death is not called twice (sigterm & sigint)
-    if (cluster.isMaster) {
-        scheduler.stop();
+    logger.info('Queue closing..');
+    await bullQueue.close();
+    logger.info('Queue closed..');
+    dao.disconnect().catch(error => Sentry.captureException(error));
+    Metrics.kill();
+    if (cluster.isWorker) {
+        process.exit(0);
     }
-    queue.shutdown( 15000, (err: Error) => {
-        logger.info('Kue shutdown - %s', cluster.isMaster ? 'master' : 'worker ' + cluster.worker.id);
-        if (err) {
-            Sentry.captureException(err);
-            logger.error(err.message);
-        }
-        dao.disconnect().catch(error => Sentry.captureException(error));
-        Metrics.kill();
-        if (cluster.isWorker) {
-            process.exit(0);
-        }
-    });
 }
 process.once( 'SIGTERM', death);
 process.once( 'SIGINT', death);

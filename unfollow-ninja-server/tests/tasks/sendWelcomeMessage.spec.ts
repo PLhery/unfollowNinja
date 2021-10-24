@@ -1,4 +1,4 @@
-import { Job } from 'kue';
+import type { Job } from 'bull';
 import SendWelcomeMessage from '../../src/tasks/sendWelcomeMessage';
 import { daoMock, queueMock } from '../utils';
 
@@ -8,8 +8,12 @@ process.env.CONSUMER_SECRET = 'consumerSecret';
 const queue = queueMock();
 const dao = daoMock();
 const userDao = dao.userDao['01'];
-const job = new Job('notifyUser', {username: 'testUsername', userId: '01' });
-job.started_at = Date.now();
+
+const job = {
+  data: {username: 'testUsername', userId: '01' },
+  processedOn: Date.now(),
+} as Job;
+
 // @ts-ignore
 const task = new SendWelcomeMessage(dao, queue);
 
