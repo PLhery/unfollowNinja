@@ -93,6 +93,9 @@ export default class Dao {
 
     public async addTwittoToCache(twittoInfo: ITwittoInfo, time = Date.now()): Promise<void> {
         const { id, username } = twittoInfo;
+        if (username.length > 20 && username.startsWith('erased_')) {
+          return; // these are weird deleted users 'erased_{userid}'
+        }
         await this.CachedUsername.upsert({twitterId: id, username});
     }
 
