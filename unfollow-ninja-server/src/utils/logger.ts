@@ -13,8 +13,9 @@ const customFormat = format.combine(
 );
 
 const fileParams = {
-    maxsize: 20000000, // 20MB
-    maxFiles: 200,
+    maxsize: 50000000, // 50MB
+    maxFiles: 10,
+    tailable: true,
 };
 
 const testEnv = typeof it === 'function'; // jest
@@ -29,24 +30,24 @@ const logger = createLogger({
             level: testEnv ? 'warn' : 'info',
         }),
         !testEnv && new transports.File({
+          ...fileParams,
+          filename: 'logs/error.log',
+          level: 'error',
+        }),
+        !testEnv && new transports.File({
+          ...fileParams,
+          filename: 'logs/warn.log',
+          level: 'warn',
+        }),
+        !testEnv && new transports.File({
             ...fileParams,
             filename: 'logs/info.log',
             level: 'info',
         }),
         !testEnv && new transports.File({
             ...fileParams,
-            filename: 'logs/error.log',
-            level: 'error',
-        }),
-        !testEnv && new transports.File({
-            ...fileParams,
             filename: 'logs/debug.log',
             level: 'debug',
-        }),
-        !testEnv && new transports.File({
-            ...fileParams,
-            filename: 'logs/warn.log',
-            level: 'warn',
         }),
     ].filter(t => t),
     exceptionHandlers: [
