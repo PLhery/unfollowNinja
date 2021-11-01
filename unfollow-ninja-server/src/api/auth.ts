@@ -156,7 +156,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
       await queue.add('sendWelcomeMessage', {
           userId,
           username: ctx.session.username,
-      });
+      }, {delay: 500}); // otherwise it looks like it weirdly may start before setUserParams finished :/
 
       const msgContent = encodeURI(JSON.stringify({
         username: session.username,
