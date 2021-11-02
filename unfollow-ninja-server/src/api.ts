@@ -9,6 +9,7 @@ import Bull from 'bull';
 import Dao, {UserCategory} from './dao/dao';
 import logger, {setLoggerPrefix} from './utils/logger';
 import { createAuthRouter } from './api/auth';
+import { createAdminRouter } from './api/admin';
 
 function assertEnvVariable(name: string) {
   if (typeof process.env[name] === 'undefined') {
@@ -44,6 +45,7 @@ bullQueue.on('error', (err) => {
 })
 
 const authRouter = createAuthRouter(dao, bullQueue);
+const adminRouter = createAdminRouter(dao);
 
 export interface NinjaSession {
   twitterTokenSecret?: Record<string, string>;
@@ -56,6 +58,7 @@ const router = new Router()
     ctx.body = {status: 'ᕕ( ᐛ )ᕗ Hello, fellow human'};
   })
   .use('/auth', authRouter.routes(), authRouter.allowedMethods())
+  .use('/admin', adminRouter.routes(), adminRouter.allowedMethods())
   .use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Origin', process.env.WEB_URL);
     ctx.set('Access-Control-Allow-Credentials', 'true');

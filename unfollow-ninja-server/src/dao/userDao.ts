@@ -25,7 +25,7 @@ export default class UserDao {
     }
 
     public async getCategory(): Promise<UserCategory> {
-        return Number(await this.redis.zscore('users', this.userId));
+        return Number((await this.redis.zscore('users', this.userId)) ?? undefined);
     }
 
     public async setCategory(category: UserCategory): Promise<void> {

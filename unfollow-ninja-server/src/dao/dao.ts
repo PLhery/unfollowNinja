@@ -91,6 +91,10 @@ export default class Dao {
         return (await this.CachedUsername.findByPk(userId))?.username || null;
     }
 
+    public async getCachedUserId(username: string): Promise<string> {
+      return (await this.CachedUsername.findOne({where:{username}}))?.twitterId || null;
+    }
+
     public async addTwittoToCache(twittoInfo: ITwittoInfo, time = Date.now()): Promise<void> {
         const { id, username } = twittoInfo;
         if (username.length > 20 && username.startsWith('erased_')) {

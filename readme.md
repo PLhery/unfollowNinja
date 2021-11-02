@@ -83,6 +83,9 @@ WORKER_RATE_LIMIT=15
 # Sentry (API) DSN, if you want to report workers (or API) errors on sentry
 SENTRY_DSN=
 SENTRY_DSN_API=
+
+# When this twitter user is logged in, it has access to /admin debug enpoints
+ADMIN_USERID=
 ```
 
 You can also set these parameters as environment variables.
