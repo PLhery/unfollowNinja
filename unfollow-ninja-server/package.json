@@ -62,12 +62,16 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.33",
-    "p-limit": "^4.0.0",
+    "p-limit": "^3.1.0",
     "pg": "^8.7.1",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.6.5",
     "twit": "^2.2.11",
     "twitter-api-v2": "^1.4.1",
     "winston": "^3.3.3"
-  }
+  },
+  "//": [
+    "sqlite3 stuck at v4 because of a insecure dependency in v5",
+    "p-limit stuck at v3 because of esm module incompatibility"
+  ]
 }
