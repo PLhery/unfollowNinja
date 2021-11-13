@@ -4,10 +4,10 @@ Get notified when your Twitter account loses a follower
 
 Used by ~150 000 Twitter users (07/2020)
 
-🇬🇧 https://unfollow-monkey.com/ (branch unfollow-monkey)  
+🇬🇧 https://unfollow-monkey.com
 🇫🇷 https://unfollow.ninja  
 
-![Screenshot](https://raw.githubusercontent.com/PLhery/unfollowNinja/unfollow-monkey/unfollow-ninja-ui/public/preview.png)
+![Screenshot](https://raw.githubusercontent.com/PLhery/unfollowNinja/master/unfollow-monkey-ui/public/preview.png)
 
 ---
 Feel free to reuse the UI on a personal server, but please don't reuse the name/logo on a public instance.
@@ -20,8 +20,8 @@ Indeed, this software is under apache v2 license which means:
 ## Build the UI
 
 - clone the repo `git clone git@github.com:PLhery/unfollowNinja.git`
-- `cd unfollowNinja/unfollow-ninja-ui`
-- change `api.unfollow.ninja` to you own server endpoints in ui/src/components/MiniApp.js
+- `cd unfollowNinja/unfollow-monkey-ui`
+- change `api.unfollow-monkey.com` to you own server endpoints in ui/src/components/MiniApp.js
 - `npm install && npm start` to serve the UI in dev mode
 - `npm run build` to build the UI static files in the `build` folder.
 

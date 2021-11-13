@@ -1,0 +1,41 @@
+{
+  "name": "unfollow-ninja-ui",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@sentry/browser": "^6.12.0",
+    "grommet": "^2.17.5",
+    "grommet-icons": "^4.6.2",
+    "node-sass": "^6.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-dom-confetti": "^0.2.0",
+    "react-github-corner": "^2.5.0",
+    "react-scripts": "^4.0.3",
+    "react-snap": "^1.23.0",
+    "styled-components": "^5.3.1",
+    "web-vitals": "^2.1.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "postbuild": "react-snap",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">1%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

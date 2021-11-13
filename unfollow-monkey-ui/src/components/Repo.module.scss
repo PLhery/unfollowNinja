@@ -1,0 +1,48 @@
+.card {
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  background: white;
+  padding: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #24292e;
+  max-width: 300px;
+}
+
+
+.section {
+  display: flex;
+  align-items: center
+}
+
+.title {
+  text-decoration: none;
+  font-weight: 600;
+  color: #0366d6!important;
+}
+
+.description {
+  font-size: 12px;
+  margin-bottom: 16px;
+  margin-top: 8px;
+  color: #586069;
+}
+
+.footer {
+  font-size: 12px;
+  color: #586069;
+  display: flex;
+}
+.languageName {
+  width: 12px;
+  height: 12px;
+  border-radius: 100%;
+  background-color: #2b7489;
+  display: inline-block; top: 1px;
+  position: relative;
+}
+
+.svg {
+  fill: #586069;
+}
