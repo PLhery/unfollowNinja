@@ -26,29 +26,14 @@ export async function checkAllFollowers(workerId: number, nbWorkers: number, dao
     try {
         const promises = (await dao.getUserIdsByCategory(UserCategory.enabled))
           .filter(userId => hashCode(userId) % nbWorkers === workerId - 1) // we process 1/x users
-          .map((userId) => limit(async () => {
-              try {
-                  await checkFollowers(userId, dao, queue);
-              } catch (error) {
-                  const username: string = (await dao.getCachedUsername(userId)) || userId;
-                  logger.error(`An error happened with checkFollowers / @${username}: ${error.stack}`);
-                  Sentry.withScope(scope => {
-                      scope.setTag('task-name', 'checkFollowers');
-                      scope.setUser({username});
-                      Sentry.captureException(error);
-                  });
-              }
-          }));
+          .map((userId) => limit(() => checkFollowersWithTimeout(userId, dao, queue)));
 
         await Promise.all(promises);
+
         metrics.gauge(`uninja.check-duration.worker.${workerId}`, Date.now() - startedAt);
     } catch (error) {
-        try {
-            Sentry.captureException(error);
-        } catch(sentryError) {
-            logger.error(sentryError);
-        }
-        logger.error(error);
+      logger.error(error);
+      Sentry.captureException(error);
     }
 
     // check every minute minimum (Twitter's limit for the followers/ids API requests)
@@ -66,34 +51,18 @@ export async function checkAllVipFollowers(workerId: number, nbWorkers: number, 
             .filter(userId => hashCode(userId) % nbWorkers === workerId - 1) // we process 1/x users
 
         for (const userId of userIds) {
-            try {
-                await checkFollowers(userId, dao, queue);
-            } catch (error) {
-                const username: string = (await dao.getCachedUsername(userId)) || userId;
-                logger.error(`An error happened with checkFollowers / @${username}: ${error.stack}`);
-                Sentry.withScope(scope => {
-                    scope.setTag('task-name', 'checkFollowers');
-                    scope.setUser({username});
-                    Sentry.captureException(error);
-                });
-            }
+            await checkFollowersWithTimeout(userId, dao, queue);
         }
 
         metrics.gauge(`uninja.check-vip-duration.worker.${workerId}`, Date.now() - startedAt);
     } catch (error) {
-        try {
-            Sentry.captureException(error);
-        } catch(sentryError) {
-            logger.error(sentryError);
-        }
-        logger.error(error);
+      logger.error(error);
+      Sentry.captureException(error);
     }
-
-    const checkDuration =  Date.now() - startedAt;
     // check every minute minimum (Twitter's limit for the followers/ids API requests)
     setTimeout(
         () => checkAllVipFollowers(workerId, nbWorkers, dao, queue),
-        Math.max(0, 60*1000 - checkDuration)
+        Math.max(0, 60*1000 + startedAt - Date.now())
     );
 }
 
@@ -104,6 +73,36 @@ function hashCode(s: string) {
         // tslint:disable-next-line:no-bitwise
         h = Math.imul(31, h) + s.charCodeAt(i) | 0;
     return Math.abs(h);
+}
+
+/**
+ * Check Followers, making sure errors are logged into sentry and with a 2min timeout
+ * @param userId the ID of the user we want to check followers from
+ * @param dao the global dao object
+ * @param queue the global queue object
+ */
+async function checkFollowersWithTimeout(userId: string, dao: Dao, queue: Queue) {
+  try {
+    let watchdogTimeout;
+    await Promise.race([
+      checkFollowers(userId, dao, queue),
+      new Promise((_, reject) =>
+        watchdogTimeout = setTimeout(
+          () => reject(new Error('Timeout - checkFollowers took more than 2mins')),
+          2*60*1000
+        )
+      )
+    ]);
+    clearTimeout(watchdogTimeout)
+  } catch (error) {
+    const username: string = (await dao.getCachedUsername(userId)) || userId;
+    logger.error(`An error happened with checkFollowers / @${username}: ${error.stack}`);
+    Sentry.withScope(scope => {
+      scope.setTag('task-name', 'checkFollowers');
+      scope.setUser({username});
+      Sentry.captureException(error);
+    });
+  }
 }
 
 async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
