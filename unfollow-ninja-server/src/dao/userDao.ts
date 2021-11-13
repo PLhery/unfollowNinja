@@ -80,10 +80,10 @@ export default class UserDao {
         throw new Error('Tried to create a new twitter client but the user didn\'t have any credentials stored');
       }
       return new TwitterApi({
-        appKey: token,
-        appSecret: tokenSecret,
-        accessToken: process.env.CONSUMER_KEY,
-        accessSecret: process.env.CONSUMER_SECRET,
+        accessToken: token,
+        accessSecret: tokenSecret,
+        appKey: process.env.CONSUMER_KEY,
+        appSecret: process.env.CONSUMER_SECRET,
       });
     }
 
@@ -106,10 +106,10 @@ export default class UserDao {
         throw new Error('Tried to create a new Twit DM client but the user didn\'t have any DM credentials stored');
       }
       return new TwitterApi({
-        appKey: dmToken,
-        appSecret: dmTokenSecret,
-        accessToken: process.env.DM_CONSUMER_KEY,
-        accessSecret: process.env.DM_CONSUMER_SECRET,
+        accessToken: dmToken,
+        accessSecret: dmTokenSecret,
+        appKey: process.env.DM_CONSUMER_KEY,
+        appSecret: process.env.DM_CONSUMER_SECRET,
       });
     }
 
