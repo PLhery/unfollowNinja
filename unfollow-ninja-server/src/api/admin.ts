@@ -15,9 +15,18 @@ export function createAdminRouter(dao: Dao) {
       await next();
     })
     .get('/user/:usernameOrId', async (ctx) => {
-      const userId = Number.isNaN(Number(ctx.params.usernameOrId)) ?
-        await dao.getCachedUserId(ctx.params.usernameOrId) :
-        ctx.params.usernameOrId;
+      let userId: string;
+      if(!Number.isNaN(Number(ctx.params.usernameOrId)))  { // usernameOrId is an ID
+        userId = ctx.params.usernameOrId;
+      } else { // usernameOrId is a username, look for the ID
+        const client = await dao.getUserDao(process.env.ADMIN_USERID).getTwitterApi();
+        try {
+          const result = await client.v1.user({screen_name: ctx.params.usernameOrId});
+          userId = result.id_str;
+        } catch {
+          userId = await dao.getCachedUserId(ctx.params.usernameOrId); // can take some time as the username is not indexed
+        }
+      }
 
       const userDao = dao.getUserDao(userId);
       const params = await userDao.getUserParams();
