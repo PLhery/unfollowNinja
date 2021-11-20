@@ -57,6 +57,9 @@ const router = new Router()
   .get('/', ctx => {
     ctx.body = {status: 'ᕕ( ᐛ )ᕗ Hello, fellow human'};
   })
+  .get('/robots.txt', ctx => {
+    ctx.body = 'User-agent: *\nDisallow: /';
+  })
   .use('/auth', authRouter.routes(), authRouter.allowedMethods())
   .use('/admin', adminRouter.routes(), adminRouter.allowedMethods())
   .use(async (ctx, next) => {
