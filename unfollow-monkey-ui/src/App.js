@@ -84,7 +84,7 @@ function App() {
             </Text>
           </Box>
         </Section>
-        <GithubCorner href="https://github.com/PLhery/unfollowNinja" bannerColor="#70B7FD"/>
+        <GithubCorner href="https://github.com/PLhery/unfollowNinja" bannerColor="#b742a0"/>
       </Grommet>
   );
 }
