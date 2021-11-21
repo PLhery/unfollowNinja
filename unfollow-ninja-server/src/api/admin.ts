@@ -8,7 +8,7 @@ export function createAdminRouter(dao: Dao) {
   return new Router()
     .use(async (ctx, next) => {
       const session = ctx.session as NinjaSession;
-      if (process.env.ADMIN_USERID && session.userId !== process.env.ADMIN_USERID) {
+      if (!process.env.ADMIN_USERID || session.userId !== process.env.ADMIN_USERID) {
         await ctx.throw(401);
         return;
       }
