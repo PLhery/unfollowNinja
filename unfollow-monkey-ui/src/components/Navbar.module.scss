@@ -4,12 +4,32 @@
   }
 
   transition: margin .2s ease;
-  img {
-    transition: transform .4s ease;
+
+  .logoContainer {
+    overflow: hidden;
+    z-index: -1;
+    position: absolute;
+    .logo {
+      transition: margin .6s ease;
+    }
   }
 
   &:hover {
     margin-top: -5px;
     margin-bottom: 5px;
+
+    .logo {
+      margin-top: 7px;
+      margin-bottom: -7px;
+
+      animation: shake 0.4s;
+      animation-iteration-count: infinite;
+    }
   }
+}
+
+@keyframes shake {
+  0% { transform: rotate(-2deg)}
+  50% { transform: rotate(2deg) }
+  100% { transform: rotate(-2deg)}
 }

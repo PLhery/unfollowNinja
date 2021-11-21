@@ -11,8 +11,11 @@ const Navbar = (props) => (
             direction='row'
             pad={{horizontal: 'medium', vertical: 'small'}}
         >
-            <Image title='logo' height={40} margin={{horizontal: 'xsmall'}} src={Images.Logo}/>
-            <Heading level={4} color='dark' margin={{vertical: 'small'}} style={{fontWeight: 500}}>UnfollowMonkey</Heading>
+		  <div className={Styles.logoContainer}>
+            <Image className={Styles.logo} title='logo' height={40} margin={{horizontal: 'xsmall'}} src={Images.Logo}/>
+		  </div>
+		  <Image title='logo-hands' height={40} margin={{horizontal: 'xsmall'}} src={Images.UnfollowMonkeyHands}/>
+		  <Heading level={4} color='dark' margin={{vertical: 'small'}} style={{fontWeight: 500}}>UnfollowMonkey</Heading>
         </Box>
       </Link>
     </header>
