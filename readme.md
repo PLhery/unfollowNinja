@@ -2,7 +2,7 @@
 
 Get notified when your Twitter account loses a follower
 
-Used by ~150 000 Twitter users (07/2020)
+Used by ~500 000 Twitter users (11/2021)
 
 🇬🇧 https://unfollow-monkey.com
 🇫🇷 https://unfollow.ninja  

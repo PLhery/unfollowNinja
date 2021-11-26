@@ -65,8 +65,8 @@ function App() {
               <Paragraph>Thanks to PulseHeberg for helping the project to remain substainable, efficient, free, supporting 100 000+ users. They also provide <Link href='https://pulseheberg.com/'>great and affordable servers and web hosting solutions</Link>, if you'd like to have a look!</Paragraph>
 			  <Paragraph>UnfollowMonkey is powered by the <i>twitter-api-v2</i> node library, by the same author.</Paragraph>
 			  <Box gap='small' alignSelf='center' direction='row'>
-				<Repo title='unfollowNinja' description='Get notified when your Twitter account loses a follower.' stars={139} forks={12}/>
-				<Repo title='node-twitter-api-v2' description='Strongly typed, full-featured, light, versatile yet powerful Twitter API v1.1 and v2 client for Node.js.' stars={139} forks={9}/>
+				<Repo title='unfollowNinja' description='Get notified when your Twitter account loses a follower.' stars={140} forks={12}/>
+				<Repo title='node-twitter-api-v2' description='Strongly typed, full-featured, light, versatile yet powerful Twitter API v1.1 and v2 client for Node.js.' stars={182} forks={12}/>
               </Box>
             </Box>
           </Box>
