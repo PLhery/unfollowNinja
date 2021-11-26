@@ -75,6 +75,7 @@ const router = new Router()
         username: null,
         dmUsername: null,
         category: null,
+        lang: null
       };
     } else {
       const [params, category] = await Promise.all([
@@ -85,6 +86,7 @@ const router = new Router()
         username: session.username,
         dmUsername: params.dmId ? await dao.getCachedUsername(params.dmId) : null,
         category,
+        lang: params.lang
       };
     }
   })
