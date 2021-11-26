@@ -76,24 +76,27 @@ COOKIE_SIGNING_KEY=Kg8hfQoGj9GHjdKjsYqPtk6ShJqaoP
 # optionally:
 
 # -- The twitter account quoted in the notifications (ex. welcome to @[TWITTER_ACCOUNT]!)
-TWITTER_ACCOUNT=unfollowNinja
+TWITTER_ACCOUNT=unfollowninja
+
+# -- Default language for the notifications (for new users).
+DEFAULT_LANGUAGE=en
 
 # -- Number of workers, defaults to number of CPUs
 CLUSTER_SIZE=2
 # -- Number of unique tasks managed at the same time, defaults to 15
 WORKER_RATE_LIMIT=15
 
-# When this twitter user is logged in, it has access to the /admin/user/[username] debug enpoint
+# -- When this twitter user is logged in, it has access to the /admin/user/[username] debug enpoint
 ADMIN_USERID=
 
-# Sentry (API) DSN, if you want to report workers (or API) errors on sentry
+# -- Sentry (API) DSN, if you want to report workers (or API) errors on sentry
 SENTRY_DSN=
 SENTRY_DSN_API=
 
-# If you set these variables, the server will send some metrics to these statsd / datadog servers
+# -- If you set these variables, the server will send some metrics to these statsd / datadog servers
 STATSD_HOST=
 DD_AGENT_HOST=
-# The metrics will start with this prefix (ex metric: [prefix].check-duration.worker.[cluster-nb])
+# -- The metrics will start with this prefix (ex metric: [prefix].check-duration.worker.[cluster-nb])
 METRICS_PREFIX=uninja
 ```
 

@@ -6,6 +6,7 @@ import logger from '../utils/logger';
 import type Dao from '../dao/dao';
 import { UserCategory } from '../dao/dao';
 import type { NinjaSession } from '../api';
+import {Lang} from '../utils/types';
 
 const authRouter = new Router();
 
@@ -24,6 +25,8 @@ if (!process.env.API_URL || !process.env.WEB_URL) {
   logger.error('Make sure you added them in a .env file in you cwd or that you defined them.');
   process.exit();
 }
+
+const DEFAULT_LANGUAGE = (process.env.DEFAULT_LANGUAGE || 'en') as Lang;
 
 export function createAuthRouter(dao: Dao, queue: Queue) {
   return authRouter
@@ -71,7 +74,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
       if (!params.token) { // params = {} => the user doesn't exists, let's create it
         params = {
           added_at: Date.now(),
-          lang: 'fr',
+          lang: DEFAULT_LANGUAGE,
           token: loginResult.accessToken,
           tokenSecret: loginResult.accessSecret,
         };
