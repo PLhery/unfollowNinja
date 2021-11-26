@@ -9,6 +9,6 @@
 	"This account followed you for {{duration}} ({{{time}}}).": "Esta conta seguia-te por {{duration}} ({{{time}}}).",
 	"This account followed you before you signed up to @unfollowninja!": "Esta conta seguiu-te antes de te inscreveres no @unfollowninja!",
 	"and {{nbLeftovers}} more.": "e {{nbLeftovers}} mais.",
-	"All set, welcome to @unfollowNinja {{emoji}}!\nYou will soon know all about your unfollowers here!": "Tudo pronto, bem vindo ao @unfollowNinja {{emoji}}!\nBrevemente vais saber tudo sobre aqueles que te deixam de seguir aqui!",
+	"All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Tudo pronto, bem vindo ao @{{twitterAccount}} {{emoji}}!\nBrevemente vais saber tudo sobre aqueles que te deixam de seguir aqui!",
 	"{{username}}'s account has been locked {{emoji}}.": "A conta do {{username}} foi temporariamente trancada {{emoji}}."
 }

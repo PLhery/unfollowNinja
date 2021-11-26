@@ -75,6 +75,9 @@ COOKIE_SIGNING_KEY=Kg8hfQoGj9GHjdKjsYqPtk6ShJqaoP
 
 # optionally:
 
+# -- The twitter account quoted in the notifications (ex. welcome to @{TWITTER_ACCOUNT}!)
+TWITTER_ACCOUNT=unfollowNinja
+
 # -- Number of workers, defaults to number of CPUs
 CLUSTER_SIZE=2
 # -- Number of unique tasks managed at the same time, defaults to 15
@@ -84,7 +87,7 @@ WORKER_RATE_LIMIT=15
 SENTRY_DSN=
 SENTRY_DSN_API=
 
-# When this twitter user is logged in, it has access to /admin debug enpoints
+# When this twitter user is logged in, it has access to the /admin/user/[username] debug enpoint
 ADMIN_USERID=
 ```
 

@@ -10,6 +10,8 @@ i18n.configure({
     directory: __dirname + '/../../locales',
 });
 
+const TWITTER_ACCOUNT = process.env.TWITTER_ACCOUNT || 'unfollowninja';
+
 export default class extends Task {
     public async run(job: Job) {
         const { username, userId } = job.data;
@@ -17,8 +19,10 @@ export default class extends Task {
         const dmTwit = await userDao.getDmTwit();
         i18n.setLocale(await userDao.getLang());
 
-        const message = i18n.__('All set, welcome to @unfollowNinja {{emoji}}!\n' +
-            'You will soon know all about your unfollowers here!', { emoji: '🙌' });
+        const message = i18n.__('All set, welcome to @{{twitterAccount}} {{emoji}}!\n' +
+            'You will soon know all about your unfollowers here!',
+          { twitterAccount: TWITTER_ACCOUNT, emoji: '🙌' }
+        );
 
         await dmTwit.post('direct_messages/events/new', {
             event: {

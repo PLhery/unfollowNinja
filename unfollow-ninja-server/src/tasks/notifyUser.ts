@@ -19,6 +19,7 @@ moment.tz.setDefault('Europe/Paris');
 
 // const BETA_USERS = split(process.env.BETA_USERS, ',').concat('testUsername');
 const MINUTES_BETWEEN_CHECKS = Number(process.env.MINUTES_BETWEEN_CHECKS) || 2;
+const TWITTER_ACCOUNT = process.env.TWITTER_ACCOUNT || 'unfollowninja';
 
 // friendships/show can be called 180 times/15min
 // with this limit it can be called max 200 times/15min (if checked 8 times)
@@ -210,7 +211,10 @@ export default class extends Task {
                 const time = moment(unfollower.followTime).locale(lang).calendar();
                 followTimeMsg = i18n.__('This account followed you for {{duration}} ({{{time}}}).', {duration, time});
             } else {
-                followTimeMsg = i18n.__('This account followed you before you signed up to @unfollowninja!');
+                followTimeMsg = i18n.__(
+                  'This account followed you before you signed up to @{{twitterAccount}}!',
+                  {twitterAccount: TWITTER_ACCOUNT}
+                );
             }
 
             return action + '\n' + followTimeMsg;
