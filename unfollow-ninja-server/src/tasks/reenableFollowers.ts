@@ -32,7 +32,7 @@ export default class extends Task {
                 }
             }),
         ).then(() => {
-            metrics.gauge('uninja.reenableFollowers.duration', Date.now() - job.processedOn);
+            metrics.gauge('reenableFollowers.duration', Date.now() - job.processedOn);
         });
     }
 
@@ -45,7 +45,7 @@ export default class extends Task {
             .then(() => twitDM.get('followers/ids'))
             .then(() => {
                 logger.debug('suspension check - @%s is not ' + UserCategory[category] + ' anymore :)', username);
-                metrics.increment('uninja.reenableFollowers.reenabled');
+                metrics.increment('reenableFollowers.reenabled');
                 return userDao.setCategory(UserCategory.enabled);
             })
             .catch(() => {

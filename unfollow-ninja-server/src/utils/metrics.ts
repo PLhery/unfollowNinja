@@ -2,6 +2,7 @@ import { StatsD } from 'hot-shots';
 
 const STATSD_HOST = process.env.STATSD_HOST || undefined;
 const DD_AGENT_HOST = process.env.DD_AGENT_HOST || undefined;
+const METRICS_PREFIX = process.env.METRICS_PREFIX || 'uninja';
 
 export default class Metrics {
     private static statsDClients: StatsD[] = [];
@@ -12,12 +13,12 @@ export default class Metrics {
 
     public static gauge(metric: string, value: number) {
         this.statsDClients
-            .forEach(client => client.gauge(metric, value));
+            .forEach(client => client.gauge(METRICS_PREFIX + '.' + metric, value));
     }
 
     public static increment(metric: string, value: number = 1) {
         this.statsDClients
-            .forEach(client => client.increment(metric, value));
+            .forEach(client => client.increment(METRICS_PREFIX + '.' + metric, value));
     }
 
     public static kill() {

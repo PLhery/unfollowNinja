@@ -6,7 +6,7 @@ import metrics from '../utils/metrics';
 export default class extends Task {
     public async run(job: Job) {
       for (const [category, count] of Object.entries(await this.dao.getUserCountByCategory())) {
-        metrics.gauge(`uninja.users.${UserCategory[category]}`, count)
+        metrics.gauge(`users.${UserCategory[category]}`, count)
       }
     }
 }

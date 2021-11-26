@@ -39,7 +39,7 @@ export async function cacheAllFollowers(workerId: number, nbWorkers: number, dao
             }));
 
         await Promise.all(promises);
-        metrics.gauge(`uninja.cache-duration.worker.${workerId}`, Date.now() - startedAt);
+        metrics.gauge(`cache-duration.worker.${workerId}`, Date.now() - startedAt);
     } catch (error) {
         try {
             Sentry.captureException(error);

@@ -30,7 +30,7 @@ export async function checkAllFollowers(workerId: number, nbWorkers: number, dao
 
         await Promise.all(promises);
 
-        metrics.gauge(`uninja.check-duration.worker.${workerId}`, Date.now() - startedAt);
+        metrics.gauge(`check-duration.worker.${workerId}`, Date.now() - startedAt);
     } catch (error) {
       logger.error(error);
       Sentry.captureException(error);
@@ -54,7 +54,7 @@ export async function checkAllVipFollowers(workerId: number, nbWorkers: number, 
             await checkFollowersWithTimeout(userId, dao, queue);
         }
 
-        metrics.gauge(`uninja.check-vip-duration.worker.${workerId}`, Date.now() - startedAt);
+        metrics.gauge(`check-vip-duration.worker.${workerId}`, Date.now() - startedAt);
     } catch (error) {
       logger.error(error);
       Sentry.captureException(error);

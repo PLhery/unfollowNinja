@@ -138,9 +138,9 @@ export default class extends Task {
                 );
                 realUnfollowersInfo = difference(realUnfollowersInfo, potentialGlitches);
             }
-            metrics.increment('uninja.notifyUser.nbFirstTry');
+            metrics.increment('notifyUser.nbFirstTry');
         }
-        metrics.increment('uninja.notifyUser.count');
+        metrics.increment('notifyUser.count');
 
         if (realUnfollowersInfo.length > 0) {
             userDao.addUnfollowers(realUnfollowersInfo.concat(leftovers));
@@ -166,8 +166,8 @@ export default class extends Task {
             } as Params)
                 .catch((err) => this.manageTwitterErrors(err, username, userId));
 
-            metrics.increment('uninja.notifyUser.dmsSent');
-            metrics.increment('uninja.notifyUser.nbUnfollowers', realUnfollowersInfo.length + leftovers.length);
+            metrics.increment('notifyUser.dmsSent');
+            metrics.increment('notifyUser.nbUnfollowers', realUnfollowersInfo.length + leftovers.length);
         }
     }
 
