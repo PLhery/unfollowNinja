@@ -62,7 +62,7 @@ if (cluster.isMaster) {
             }
 
             // reenable suspended followers every 3h
-            await bullQueue.add('reenableFollowers', {}, { repeat: { cron: '0 */8 * * *' } });
+            await bullQueue.add('reenableFollowers', {}, { repeat: { cron: '0 * * * *' } });
 
             // update nbUsers metrics every minute
             await bullQueue.add('updateMetrics', {}, { repeat: { cron: '* * * * *' } });
