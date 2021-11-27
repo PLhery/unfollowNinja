@@ -4,9 +4,10 @@ import * as Sentry from '@sentry/node';
 import Koa from 'koa';
 import Router from 'koa-router';
 import koaSession from 'koa-session';
+import koaCors from '@koa/cors';
 import Bull from 'bull';
 
-import Dao, {UserCategory} from './dao/dao';
+import Dao from './dao/dao';
 import logger, {setLoggerPrefix} from './utils/logger';
 import { createAuthRouter } from './api/auth';
 import { createAdminRouter } from './api/admin';
@@ -63,13 +64,13 @@ const router = new Router()
     ctx.body = 'User-agent: *\nDisallow: /';
   })
   .use('/auth', authRouter.routes(), authRouter.allowedMethods())
-  .use('/user', userRouter.routes(), userRouter.allowedMethods())
   .use('/admin', adminRouter.routes(), adminRouter.allowedMethods())
+  .use(koaCors({
+    origin: process.env.WEB_URL,
+    credentials: true,
+  }))
+  .use('/user', userRouter.routes(), userRouter.allowedMethods())
   .get('/get-status', async ctx => {
-    ctx.set('Access-Control-Allow-Origin', process.env.WEB_URL);
-    ctx.set('Access-Control-Allow-Credentials', 'true');
-    ctx.set('Vary', 'origin');
-
     const session = ctx.session as NinjaSession;
     if (!session.userId) {
       ctx.body = {

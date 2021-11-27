@@ -12,17 +12,7 @@ export function createUserRouter(dao: Dao) {
         await ctx.throw(401);
         return;
       }
-
-      // Allow cross-origin requests from our UI
-      ctx.set('Access-Control-Allow-Origin', process.env.WEB_URL);
-      ctx.set('Access-Control-Allow-Credentials', 'true');
-      ctx.set('Vary', 'origin');
-
-      if (ctx.method === 'OPTIONS') { // Preflight Request
-        ctx.status = 204;
-      } else {
-        await next();
-      }
+      await next();
     })
     .post('/disable', async ctx => {
       const session = ctx.session as NinjaSession;
