@@ -10,7 +10,7 @@ import Dao, {UserCategory} from './dao/dao';
 import logger, {setLoggerPrefix} from './utils/logger';
 import { createAuthRouter } from './api/auth';
 import { createAdminRouter } from './api/admin';
-import {createUserRouter} from "./api/user";
+import { createUserRouter } from './api/user';
 
 function assertEnvVariable(name: string) {
   if (typeof process.env[name] === 'undefined') {
