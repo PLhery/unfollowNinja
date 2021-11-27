@@ -99,6 +99,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
           username: loginResult.screenName,
           dmUsername: params.dmId ? await dao.getCachedUsername(params.dmId) : null,
           category,
+          lang: params.lang,
       }));
 
       ctx.type = 'html';
@@ -165,6 +166,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
         username: session.username,
         dmUsername: loginResult.screenName,
         category: UserCategory.enabled,
+        lang: await dao.getUserDao(userId).getLang(),
       }));
 
       ctx.type = 'html';
