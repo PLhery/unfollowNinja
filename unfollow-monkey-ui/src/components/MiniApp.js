@@ -54,7 +54,7 @@ function MiniApp(props) {
 	  fetch(API_URL + '/get-status', {credentials: 'include'})
 		.then(response => response.ok ? response.json() : null)
 		.then(data => data || Promise.reject())
-		.then(data => setUserInfo(data.username ? data : null))
+		.then(data => setUserInfo(data))
 		.catch(() => {
 		  setHasError(true)
 		})
@@ -91,6 +91,7 @@ function MiniApp(props) {
 	fetch(API_URL + '/user/lang', {
 	  method: 'put',
 	  credentials: 'include',
+	  headers: { 'Content-Type': 'application/json' },
 	  body: JSON.stringify({lang: newLang})
 	})
 	  .then(response => response.ok || Promise.reject())

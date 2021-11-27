@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/node';
 import Koa from 'koa';
 import Router from 'koa-router';
 import koaSession from 'koa-session';
+import koaBodyParser from 'koa-bodyparser';
 import koaCors from '@koa/cors';
 import Bull from 'bull';
 
@@ -65,7 +66,7 @@ const router = new Router()
   })
   .use('/auth', authRouter.routes(), authRouter.allowedMethods())
   .use('/admin', adminRouter.routes(), adminRouter.allowedMethods())
-  .use(koaCors({
+  .all('/(.*)', koaCors({ // only routes below are allowed for CORS
     origin: process.env.WEB_URL,
     credentials: true,
   }))
@@ -73,12 +74,7 @@ const router = new Router()
   .get('/get-status', async ctx => {
     const session = ctx.session as NinjaSession;
     if (!session.userId) {
-      ctx.body = {
-        username: null,
-        dmUsername: null,
-        category: null,
-        lang: null
-      };
+      ctx.body = {};
     } else {
       const [params, category] = await Promise.all([
         dao.getUserDao(session.userId).getUserParams(),
@@ -110,6 +106,7 @@ app
     },
     maxAge: 3600000 // 1h
   }, app))
+  .use(koaBodyParser())
   .use(router.routes())
   .use(router.allowedMethods())
   .on('error', err => {

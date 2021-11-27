@@ -32,10 +32,11 @@ export function createUserRouter(dao: Dao) {
     })
     .put('/lang', async ctx => {
       const session = ctx.session as NinjaSession;
-      if (!['en', 'fr', 'pt', 'es'].includes(ctx.body?.lang)) {
+      const lang = (ctx.request as any).body?.lang;
+      if (!['en', 'fr', 'pt', 'es'].includes(lang)) {
         await ctx.throw(400);
       }
-      await dao.getUserDao(session.userId).setUserParams({lang: ctx.body.lang});
+      await dao.getUserDao(session.userId).setUserParams({lang});
       ctx.status = 204;
     });
 }
