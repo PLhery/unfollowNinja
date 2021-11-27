@@ -12,10 +12,17 @@ export function createUserRouter(dao: Dao) {
         await ctx.throw(401);
         return;
       }
+
+      // Allow cross-origin requests from our UI
       ctx.set('Access-Control-Allow-Origin', process.env.WEB_URL);
       ctx.set('Access-Control-Allow-Credentials', 'true');
       ctx.set('Vary', 'origin');
-      await next();
+
+      if (ctx.method === 'OPTIONS') { // Preflight Request
+        ctx.status = 204;
+      } else {
+        await next();
+      }
     })
     .post('/disable', async ctx => {
       const session = ctx.session as NinjaSession;
@@ -25,13 +32,13 @@ export function createUserRouter(dao: Dao) {
         dmToken: null,
         dmTokenSecret: null,
       });
-      ctx.status = 200;
+      ctx.status = 204;
     })
     .post('/logout', async ctx => {
       const session = ctx.session as NinjaSession;
       session.userId = null;
       session.username = null;
-      ctx.status = 200;
+      ctx.status = 204;
     })
     .put('/lang', async ctx => {
       const session = ctx.session as NinjaSession;
@@ -39,6 +46,6 @@ export function createUserRouter(dao: Dao) {
         await ctx.throw(400);
       }
       await dao.getUserDao(session.userId).setUserParams({lang: ctx.body.lang});
-      ctx.status = 200;
+      ctx.status = 204;
     });
 }
