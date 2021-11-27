@@ -10,6 +10,7 @@ import Dao, {UserCategory} from './dao/dao';
 import logger, {setLoggerPrefix} from './utils/logger';
 import { createAuthRouter } from './api/auth';
 import { createAdminRouter } from './api/admin';
+import {createUserRouter} from "./api/user";
 
 function assertEnvVariable(name: string) {
   if (typeof process.env[name] === 'undefined') {
@@ -45,6 +46,7 @@ bullQueue.on('error', (err) => {
 })
 
 const authRouter = createAuthRouter(dao, bullQueue);
+const userRouter = createUserRouter(dao);
 const adminRouter = createAdminRouter(dao);
 
 export interface NinjaSession {
@@ -61,6 +63,7 @@ const router = new Router()
     ctx.body = 'User-agent: *\nDisallow: /';
   })
   .use('/auth', authRouter.routes(), authRouter.allowedMethods())
+  .use('/user', userRouter.routes(), userRouter.allowedMethods())
   .use('/admin', adminRouter.routes(), adminRouter.allowedMethods())
   .use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Origin', process.env.WEB_URL);
@@ -90,7 +93,7 @@ const router = new Router()
       };
     }
   })
-  .post('/disable', async ctx => {
+  .post('/disable', async ctx => { // DEPRECATED, moved to /user/disable
     const session = ctx.session as NinjaSession;
     await dao.getUserDao(session.userId).setCategory(UserCategory.disabled);
     await dao.getUserDao(session.userId).setUserParams({
@@ -100,7 +103,7 @@ const router = new Router()
     });
     ctx.status = 200;
   })
-  .post('/logout', async ctx => {
+  .post('/logout', async ctx => { // DEPRECATED, moved to /user/logout
     const session = ctx.session as NinjaSession;
     session.userId = null;
     session.username = null;
