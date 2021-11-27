@@ -12,6 +12,9 @@ export function createUserRouter(dao: Dao) {
         await ctx.throw(401);
         return;
       }
+      ctx.set('Access-Control-Allow-Origin', process.env.WEB_URL);
+      ctx.set('Access-Control-Allow-Credentials', 'true');
+      ctx.set('Vary', 'origin');
       await next();
     })
     .post('/disable', async ctx => {

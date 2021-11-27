@@ -65,13 +65,11 @@ const router = new Router()
   .use('/auth', authRouter.routes(), authRouter.allowedMethods())
   .use('/user', userRouter.routes(), userRouter.allowedMethods())
   .use('/admin', adminRouter.routes(), adminRouter.allowedMethods())
-  .use(async (ctx, next) => {
+  .get('/get-status', async ctx => {
     ctx.set('Access-Control-Allow-Origin', process.env.WEB_URL);
     ctx.set('Access-Control-Allow-Credentials', 'true');
     ctx.set('Vary', 'origin');
-    await next();
-  })
-  .get('/get-status', async ctx => {
+
     const session = ctx.session as NinjaSession;
     if (!session.userId) {
       ctx.body = {
@@ -92,22 +90,6 @@ const router = new Router()
         lang: params.lang
       };
     }
-  })
-  .post('/disable', async ctx => { // DEPRECATED, moved to /user/disable
-    const session = ctx.session as NinjaSession;
-    await dao.getUserDao(session.userId).setCategory(UserCategory.disabled);
-    await dao.getUserDao(session.userId).setUserParams({
-      dmId: null,
-      dmToken: null,
-      dmTokenSecret: null,
-    });
-    ctx.status = 200;
-  })
-  .post('/logout', async ctx => { // DEPRECATED, moved to /user/logout
-    const session = ctx.session as NinjaSession;
-    session.userId = null;
-    session.username = null;
-    ctx.status = 200;
   });
 
 // Create the server app with its router/log/session and error management
