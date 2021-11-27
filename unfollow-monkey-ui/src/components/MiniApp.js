@@ -88,7 +88,11 @@ function MiniApp(props) {
 	  ...userInfo,
 	  lang: newLang,
 	});
-	fetch(API_URL + '/user/lang', {method: 'put',credentials: 'include', body: {lang: newLang}})
+	fetch(API_URL + '/user/lang', {
+	  method: 'put',
+	  credentials: 'include',
+	  body: JSON.stringify({lang: newLang})
+	})
 	  .then(response => response.ok || Promise.reject())
 	  .catch(() => {
 		setUserInfo(userInfo);
