@@ -1,14 +1,15 @@
 import React, {useEffect, useState} from 'react';
-import {Box, Button, Paragraph} from "grommet/es6";
+import {Box, Button, Paragraph} from "grommet";
 import {Alert, Twitter, ChatOption, UserExpert, Validate} from "grommet-icons";
 import Confetti from 'react-dom-confetti';
 
 import Styles from './MiniApp.module.scss';
 import Link from "./Link";
+import LanguageSelector from "./MiniApp/LanguageSelector";
 
 const API_URL = 'https://api.unfollow-monkey.com';
 
-const LoggedInIntro = ({ user, logout, removeDMs }) => {
+const LoggedInIntro = ({ user, logout, removeDMs, changeLang }) => {
     if (!user?.username) return null; // not logged in
 
     let message = <Paragraph>One more step to activate the service:<br/> Choose an account to send you notifications</Paragraph>;
@@ -25,6 +26,7 @@ const LoggedInIntro = ({ user, logout, removeDMs }) => {
     return <div className={Styles.loggedInDetails}>
         <Paragraph><Validate color='neutral-1' className={Styles.centerIcon}/> Welcome, <b>@{user.username}</b> !</Paragraph>
         {message}
+	  {user.dmUsername && <LanguageSelector value={user.lang} onChange={changeLang}/> }
         <Paragraph>
             <Link href='#' onClick={e => {logout();e.preventDefault();}} source='disconnect'>Log out</Link>
             {user.dmUsername ? <span> — <Link href='#' onClick={e => {removeDMs();e.preventDefault();}} source='disable'>Disable the service</Link>
@@ -61,7 +63,7 @@ function MiniApp(props) {
 
   const logout = () => {
 	setUserInfo({});
-    fetch(API_URL + '/logout', {method: 'post',credentials: 'include'})
+    fetch(API_URL + '/user/logout', {method: 'post',credentials: 'include'})
 	  .then(response => response.ok || Promise.reject())
 	  .catch(() => {
 	    setUserInfo(userInfo);
@@ -74,14 +76,25 @@ function MiniApp(props) {
 	  dmUsername: null,
 	  category: 3, // disabled
 	});
-	fetch(API_URL + '/disable', {method: 'post',credentials: 'include'})
+	fetch(API_URL + '/user/disable', {method: 'post',credentials: 'include'})
 	  .then(response => response.ok || Promise.reject())
 	  .catch(() => {
 		setUserInfo(userInfo);
 		setHasError(true)
 	  });
   };
-
+  const changeLang = (newLang) => {
+	setUserInfo({
+	  ...userInfo,
+	  lang: newLang,
+	});
+	fetch(API_URL + '/user/lang', {method: 'put',credentials: 'include', body: {lang: newLang}})
+	  .then(response => response.ok || Promise.reject())
+	  .catch(() => {
+		setUserInfo(userInfo);
+		setHasError(true)
+	  });
+  }
   // Listen and process postmessages from the API
   // (these are sent in the log in callback page)
   useEffect(() => {
@@ -109,7 +122,7 @@ function MiniApp(props) {
 		  <Paragraph textAlign='center'><Alert/><br/>Unable to reach the server, try again later...</Paragraph> :
 		  <>
 			<Confetti active={step2 } className={Styles.confettis}/>
-			<LoggedInIntro user={userInfo} logout={logout} removeDMs={removeDMs}/>
+			<LoggedInIntro user={userInfo} logout={logout} removeDMs={removeDMs} changeLang={changeLang}/>
 		  </>
         }
         <Button

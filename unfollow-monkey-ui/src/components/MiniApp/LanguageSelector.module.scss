@@ -1,0 +1,14 @@
+.languageSelector {
+  padding-left: 10px;
+}
+
+.element {
+  display: flex;
+  align-items: center;
+
+  .flag {
+    height: 17px;
+    width: 23px;
+    margin: 0 5px;
+  }
+}

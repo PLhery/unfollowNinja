@@ -61,7 +61,7 @@ function MiniApp(props) {
 
   const logout = () => {
 	setUserInfo({});
-    fetch(API_URL + '/logout', {method: 'post',credentials: 'include'})
+    fetch(API_URL + '/user/logout', {method: 'post',credentials: 'include'})
 	  .then(response => response.ok || Promise.reject())
 	  .catch(() => {
 	    setUserInfo(userInfo);
@@ -74,7 +74,7 @@ function MiniApp(props) {
 	  dmUsername: null,
 	  category: 3, // disabled
 	});
-	fetch(API_URL + '/disable', {method: 'post',credentials: 'include'})
+	fetch(API_URL + '/user/disable', {method: 'post',credentials: 'include'})
 	  .then(response => response.ok || Promise.reject())
 	  .catch(() => {
 		setUserInfo(userInfo);
