@@ -3,6 +3,7 @@ import Router from 'koa-router';
 import type Dao from '../dao/dao';
 import type { NinjaSession } from '../api';
 import { UserCategory } from '../dao/dao';
+import { WebEvent } from '../dao/userEventDao';
 
 export function createAdminRouter(dao: Dao) {
   return new Router()
@@ -30,16 +31,20 @@ export function createAdminRouter(dao: Dao) {
 
       const userDao = dao.getUserDao(userId);
       const params = await userDao.getUserParams();
+      const username = await userDao.getUsername();
+
+      dao.userEventDao.logWebEvent(ctx.session.userId, WebEvent.adminFetchUser, ctx.ip, username, userId);
 
       ctx.body = JSON.stringify({
         id: userId,
-        username: await userDao.getUsername(),
+        username,
         category: await userDao.getCategory(),
         categoryStr: UserCategory[await userDao.getCategory()],
         addedAt: params.added_at,
         lang: params.lang,
         dmId: params.dmId,
         dmUsername: await dao.getCachedUsername(params.dmId),
+        webEvents: await dao.userEventDao.getWebEvents(userId),
         followers: await userDao.getFollowers(),
         uncachables: await userDao.getUncachableFollowers(),
       }, null, 2);

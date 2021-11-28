@@ -13,9 +13,17 @@ services:
     environment:
       REDIS_TEST_URI: redis://redis
       POSTGRES_TEST_URI: postgres://postgres:unfollowninja@postgres/postgres
+      POSTGRES_LOGS_TEST_URI: postgres://postgres:unfollowninja@postgres-logs/postgres
   postgres:
     image: postgres:13
     environment:
       POSTGRES_PASSWORD: "unfollowninja"
+  postgres-logs:
+    restart: always
+    image: postgres:14
+    environment:
+      POSTGRES_PASSWORD: "unfollowninja"
+    volumes:
+      - /data/postgres-logs:/var/lib/postgresql/data
   redis:
     image: redis:6

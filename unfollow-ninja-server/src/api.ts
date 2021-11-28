@@ -92,6 +92,7 @@ const router = new Router()
 // Create the server app with its router/log/session and error management
 const app = new Koa();
 app.keys = [ process.env.COOKIE_SIGNING_KEY ]; // random key used to sign cookies
+app.proxy = true;
 app
   .use(async (ctx, next) => {
     const start = Date.now();

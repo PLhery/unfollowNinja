@@ -3,6 +3,7 @@ import Router from 'koa-router';
 import type Dao from '../dao/dao';
 import type { NinjaSession } from '../api';
 import { UserCategory } from '../dao/dao';
+import { WebEvent } from '../dao/userEventDao';
 
 export function createUserRouter(dao: Dao) {
   return new Router()
@@ -22,10 +23,12 @@ export function createUserRouter(dao: Dao) {
         dmToken: null,
         dmTokenSecret: null,
       });
+      dao.userEventDao.logWebEvent(session.userId, WebEvent.disable, ctx.ip, session.username);
       ctx.status = 204;
     })
     .post('/logout', async ctx => {
       const session = ctx.session as NinjaSession;
+      dao.userEventDao.logWebEvent(session.userId, WebEvent.logout, ctx.ip, session.username);
       session.userId = null;
       session.username = null;
       ctx.status = 204;
@@ -37,6 +40,7 @@ export function createUserRouter(dao: Dao) {
         await ctx.throw(400);
       }
       await dao.getUserDao(session.userId).setUserParams({lang});
+      dao.userEventDao.logWebEvent(session.userId, WebEvent.setLang, ctx.ip, session.username, lang);
       ctx.status = 204;
     });
 }

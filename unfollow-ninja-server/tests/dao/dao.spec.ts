@@ -10,10 +10,14 @@ const redis = process.env.REDIS_TEST_URI ?
     new RedisMock({ lazyConnect: true });
 
 const sequelize = process.env.POSTGRES_TEST_URI ?
-    new Sequelize(process.env.POSTGRES_TEST_URI, { logging: false }) :
-    new Sequelize( { dialect: 'sqlite', storage: ':memory:', logging: false});
+  new Sequelize(process.env.POSTGRES_TEST_URI, { logging: false }) :
+  new Sequelize( { dialect: 'sqlite', storage: ':memory:', logging: false});
 
-const dao = new Dao(redis, sequelize);
+const sequelizeLogs = process.env.POSTGRES_LOGS_TEST_URI ?
+  new Sequelize(process.env.POSTGRES_LOGS_TEST_URI, { logging: false }) :
+  new Sequelize( { dialect: 'sqlite', storage: ':memory:', logging: false });
+
+const dao = new Dao(redis, sequelize, sequelizeLogs);
 
 describe('Test DAO', () => {
     beforeAll(async () => {

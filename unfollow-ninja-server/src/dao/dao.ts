@@ -3,6 +3,7 @@ import {DataTypes, Model, ModelCtor, Sequelize} from 'sequelize';
 
 import {ITwittoInfo, IUserEgg, IUserParams, Session} from '../utils/types';
 import UserDao from './userDao';
+import UserEventDao from './userEventDao';
 
 export enum UserCategory {
     enabled,
@@ -17,43 +18,53 @@ export enum UserCategory {
 interface ICachedUsername extends Model {twitterId: string, username: string}
 
 export default class Dao {
-    private readonly redis: Redis.Redis;
-    private readonly sequelize: Sequelize;
+    public readonly redis: Redis.Redis;
+    public readonly sequelize: Sequelize;
+    public readonly sequelizeLogs: Sequelize;
+    public readonly userEventDao: UserEventDao;
 
     private readonly CachedUsername: ModelCtor<ICachedUsername>;
 
     constructor(
         redis = new Redis(process.env.REDIS_URI, { lazyConnect: true }),
-        sequelize = new Sequelize(process.env.POSTGRES_URI, { logging: false })
+        sequelize = new Sequelize(process.env.POSTGRES_URI, { logging: false }),
+        sequelizeLogs = new Sequelize(process.env.POSTGRES_LOGS_URI, { logging: false })
     ) {
         this.redis = redis;
         this.sequelize = sequelize;
+        this.sequelizeLogs = sequelizeLogs;
 
         this.CachedUsername = this.sequelize.define('CachedUsername', {
             twitterId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
             username: { type: DataTypes.STRING(20), allowNull: false }
         });
+        this.userEventDao = new UserEventDao(this);
     }
 
     /**
      * Wait for the databases to be connected, and create the tables if necessary
      */
     public async load(): Promise<Dao> {
-        await this.sequelize.authenticate(); // check that postgresql is connected
+        await Promise.all([ // check that postgresql is connected
+          await this.sequelize.authenticate(),
+          await this.sequelizeLogs.authenticate(),
+        ]);
         await this.CachedUsername.sync({ alter: true }); // create the missing postgresql tables
+        await this.userEventDao.createTables();
         await this.redis.connect(); // wait for redis to load its data
         return this;
     }
 
     public async disconnect() {
+        this.redis.disconnect()
         await Promise.all([
             this.sequelize.close(),
-            this.redis.disconnect(),
+            this.sequelizeLogs.close(),
         ]);
     }
 
     public getUserDao(userId: string) {
-        return new UserDao(userId, this.redis, this);
+        return new UserDao(userId, this);
     }
 
     public async addUser(userEgg: IUserEgg): Promise<void> {

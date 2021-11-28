@@ -4,7 +4,7 @@ import Twit from 'twit';
 import { TwitterApi } from 'twitter-api-v2';
 
 import type { default as Dao, UserCategory } from './dao';
-import {IUnfollowerInfo, IUserParams, Lang} from '../utils/types';
+import type { IUnfollowerInfo, IUserParams, Lang } from '../utils/types';
 import { twitterCursorToTime } from '../utils/utils';
 
 export default class UserDao {
@@ -12,14 +12,11 @@ export default class UserDao {
     private readonly dao: Dao;
     private readonly userId: string;
 
-    constructor(userId: string, redis = new Redis(process.env.REDIS_URI), dao: Dao) {
-        this.redis = redis;
+    constructor(userId: string, dao: Dao) {
         this.userId = userId;
         this.dao = dao;
-    }
 
-    public disconnect() {
-        return this.redis.disconnect();
+        this.redis = dao.redis;
     }
 
     public getUsername(): Promise<string> {

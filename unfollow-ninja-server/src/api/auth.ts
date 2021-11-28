@@ -1,12 +1,13 @@
 import TwitterApi from 'twitter-api-v2';
 import Router from 'koa-router';
-import type { Queue } from 'bull';
+import type {Queue} from 'bull';
 
 import logger from '../utils/logger';
 import type Dao from '../dao/dao';
-import { UserCategory } from '../dao/dao';
-import type { NinjaSession } from '../api';
+import {UserCategory} from '../dao/dao';
+import type {NinjaSession} from '../api';
 import {Lang} from '../utils/types';
+import { WebEvent } from '../dao/userEventDao';
 
 const authRouter = new Router();
 
@@ -85,6 +86,8 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
           username: loginResult.screenName,
           ...params,
         });
+
+        dao.userEventDao.logWebEvent(loginResult.userId, WebEvent.createAccount, ctx.ip, loginResult.screenName);
       } else { // not a new user
         if (params.tokenSecret !== loginResult.accessSecret) { // after a revoked token => refresh the token
           await dao.getUserDao(loginResult.userId)
@@ -94,6 +97,8 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
       const session = ctx.session as NinjaSession;
       session.userId = loginResult.userId;
       session.username = loginResult.screenName;
+
+      dao.userEventDao.logWebEvent(loginResult.userId, WebEvent.signIn, ctx.ip, loginResult.screenName);
 
       const msgContent = encodeURI(JSON.stringify({
           username: loginResult.screenName,
@@ -157,6 +162,14 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
         dao.addTwittoToCache({ id: loginResult.userId, username: loginResult.screenName }),
       ]);
       await dao.getUserDao(userId).setCategory(UserCategory.enabled);
+
+      dao.userEventDao
+        .logWebEvent(userId, WebEvent.addDmAccount, ctx.ip, loginResult.screenName, loginResult.userId);
+      if(userId !== loginResult.userId) {
+        dao.userEventDao
+          .logWebEvent(loginResult.userId, WebEvent.addedAsSomeonesDmAccount, ctx.ip, session.username, userId);
+      }
+
       await queue.add('sendWelcomeMessage', {
           userId,
           username: ctx.session.username,
