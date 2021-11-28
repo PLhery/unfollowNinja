@@ -1,0 +1,14 @@
+{
+    "This account followed you before you signed up to @{{twitterAccount}}!": "Akun ini sudah mengikuti kamu sebelum kamu mendaftar ke @{{twitterAccount}}!",
+    "{{username}} unfollowed you {{emoji}}.": "{{username}} berhenti mengikuti kamu {{emoji}}.",
+    "one of you followers": "salah satu pengikut kamu",
+    "{{username}} blocked you {{emoji}}.": "{{username}} memblokir kamu {{emoji}}.",
+    "You blocked {{username}} {{emoji}}.": "Kamu memblokir {{username}} {{emoji}}.",
+    "{{username}} has been suspended {{emoji}}.": "{{username}} sudah ditangguhkan {{emoji}}.",
+    "{{username}} has left Twitter {{emoji}}.": "{{username}} sudah meninggalkan Twitter {{emoji}}.",
+    "This account followed you for {{duration}} ({{{time}}}).": "Akun ini sudah mengikuti kamu selama {{duration}} ({{{time}}}).",
+    "and {{nbLeftovers}} more.": "dan {{nbLeftovers}} lainnya.",
+    "{{username}}'s account has been locked {{emoji}}.": "{{username}} akunnya sudah dikunci {{emoji}}.",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Selesai, selamat datang di @{{twitterAccount}} {{emoji}}!\nKamu akan segera tahu tentang semua pengikutmu di sini!",
+    "{{nbUnfollows}} twitter users unfollowed you:": "{{nbUnfollows}} pengguna twitter berhenti mengikuti kamu:"
+}
