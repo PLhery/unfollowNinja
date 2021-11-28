@@ -7,7 +7,7 @@
 	"{{username}} blocked you {{emoji}}.": "{{username}} bloqueou-te {{emoji}}.",
 	"You blocked {{username}} {{emoji}}.": "Tu bloqueaste o {{username}} {{emoji}}.",
 	"This account followed you for {{duration}} ({{{time}}}).": "Esta conta seguia-te por {{duration}} ({{{time}}}).",
-	"This account followed you before you signed up to @unfollowninja!": "Esta conta seguiu-te antes de te inscreveres no @unfollowninja!",
+	"This account followed you before you signed up to @{{twitterAccount}}!": "Esta conta seguiu-te antes de te inscreveres no @{{twitterAccount}}!",
 	"and {{nbLeftovers}} more.": "e {{nbLeftovers}} mais.",
 	"All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Tudo pronto, bem vindo ao @{{twitterAccount}} {{emoji}}!\nBrevemente vais saber tudo sobre aqueles que te deixam de seguir aqui!",
 	"{{username}}'s account has been locked {{emoji}}.": "A conta do {{username}} foi temporariamente trancada {{emoji}}."
