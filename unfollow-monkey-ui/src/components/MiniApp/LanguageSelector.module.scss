@@ -2,6 +2,19 @@
   padding-left: 10px;
 }
 
+div[role=menubar] button:disabled {
+  opacity: 0.8;
+
+  a {
+    svg {
+      margin-left: 11px;
+      margin-right: 5px;
+    }
+    text-decoration: none;
+    font-weight: inherit!important;
+  }
+}
+
 .element {
   display: flex;
   align-items: center;
