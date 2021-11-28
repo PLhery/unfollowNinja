@@ -3,7 +3,6 @@ import type { Job } from 'bull';
 import { defaults, difference, get, keyBy } from 'lodash';
 import moment from 'moment-timezone';
 import { Params, Twitter } from 'twit';
-import { promisify } from 'util';
 import { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
 import { IUnfollowerInfo, Lang } from '../utils/types';
@@ -11,11 +10,11 @@ import Task from './task';
 import metrics from '../utils/metrics';
 
 i18n.configure({
-    locales: ['en', 'fr'],
+    locales: ['en', 'fr', 'es', 'pt', 'id'],
     directory: __dirname + '/../../locales',
 });
 
-moment.tz.setDefault('Europe/Paris');
+moment.tz.setDefault(process.env.TIMEZONE || 'UTC');
 
 // const BETA_USERS = split(process.env.BETA_USERS, ',').concat('testUsername');
 const MINUTES_BETWEEN_CHECKS = Number(process.env.MINUTES_BETWEEN_CHECKS) || 2;

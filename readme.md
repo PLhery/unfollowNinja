@@ -78,6 +78,9 @@ COOKIE_SIGNING_KEY=Kg8hfQoGj9GHjdKjsYqPtk6ShJqaoP
 # -- The twitter account quoted in the notifications (ex. welcome to @[TWITTER_ACCOUNT]!)
 TWITTER_ACCOUNT=unfollowninja
 
+# -- The timezone use for follow time. ex: Europe/Paris
+TIMEZONE=UTC 
+
 # -- Default language for the notifications (for new users).
 DEFAULT_LANGUAGE=en
 

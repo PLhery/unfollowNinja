@@ -6,7 +6,7 @@ import logger from '../utils/logger';
 import Task from './task';
 
 i18n.configure({
-    locales: ['en', 'fr'],
+    locales: ['en', 'fr', 'es', 'pt', 'id'],
     directory: __dirname + '/../../locales',
 });
 
