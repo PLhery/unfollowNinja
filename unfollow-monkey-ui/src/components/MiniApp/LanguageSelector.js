@@ -11,7 +11,8 @@ function LanguageSelector(props) {
 	{label: 'English', code: 'en'},
 	{label: 'French', code: 'fr'},
 	{label: 'Spanish', code: 'es'},
-	{label: 'Portuguese', code: 'pt'}
+	{label: 'Portuguese', code: 'pt'},
+	{label: 'Indonesian', code: 'id'}
   ];
 
   const options = LANGUAGES.map((lang) =>

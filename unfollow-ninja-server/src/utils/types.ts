@@ -1,6 +1,6 @@
 import type { UserCategory } from '../dao/dao';
 
-export type Lang = 'fr' | 'en' | 'es' | 'pt';
+export type Lang = 'fr' | 'en' | 'es' | 'pt' | 'id';
 
 export interface IFollowerInfo {
     id: string;
