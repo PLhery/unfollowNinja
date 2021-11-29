@@ -1,11 +1,12 @@
 import Router from 'koa-router';
+import type { Queue } from 'bull';
 
 import type Dao from '../dao/dao';
 import type { NinjaSession } from '../api';
 import { UserCategory } from '../dao/dao';
 import { WebEvent } from '../dao/userEventDao';
 
-export function createUserRouter(dao: Dao) {
+export function createUserRouter(dao: Dao, queue: Queue) {
   return new Router()
     .use(async (ctx, next) => {
       const session = ctx.session as NinjaSession;
@@ -41,6 +42,12 @@ export function createUserRouter(dao: Dao) {
       }
       await dao.getUserDao(session.userId).setUserParams({lang});
       dao.userEventDao.logWebEvent(session.userId, WebEvent.setLang, ctx.ip, session.username, lang);
+
+      await queue.add('sendWelcomeMessage', {
+        userId: session.userId,
+        username: session.username,
+      });
+
       ctx.status = 204;
     });
 }

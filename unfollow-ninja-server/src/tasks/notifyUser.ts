@@ -223,7 +223,7 @@ export default class extends Task {
             return messages[0];
         }
         const nbUnfollows = (messages.length + nbLeftovers).toString();
-        let message = i18n.__('{{nbUnfollows}} twitter users unfollowed you:', { nbUnfollows });
+        let message = i18n.__('{{nbUnfollows}} Twitter users unfollowed you:', { nbUnfollows });
         for (const unfollowerMessage of messages) {
             message += '\n  • ' + unfollowerMessage;
         }

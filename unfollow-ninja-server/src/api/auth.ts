@@ -1,6 +1,6 @@
 import TwitterApi from 'twitter-api-v2';
 import Router from 'koa-router';
-import type {Queue} from 'bull';
+import type { Queue } from 'bull';
 
 import logger from '../utils/logger';
 import type Dao from '../dao/dao';

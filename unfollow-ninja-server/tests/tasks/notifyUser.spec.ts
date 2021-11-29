@@ -89,7 +89,7 @@ describe('notifyUser task', () => {
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
-            .toBe('2 twitter users unfollowed you:\n' +
+            .toBe('2 Twitter users unfollowed you:\n' +
                 '  • @twitto123 unfollowed you 👋.\n' +
                 'This account followed you for 33 minutes (01/01/1970).\n' +
                 '  • @twitto234 unfollowed you 👋.\n' +
@@ -151,7 +151,7 @@ describe('notifyUser task', () => {
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
-            .toBe('2 twitter users unfollowed you:\n' +
+            .toBe('2 Twitter users unfollowed you:\n' +
                 '  • @twitto123 unfollowed you 👋.\n' +
                 'This account followed you for 33 minutes (01/01/1970).\n' +
                 '  • @twitto234 has been suspended 🙈.\n' +
@@ -169,7 +169,7 @@ describe('notifyUser task', () => {
         expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
-          .toBe('2 twitter users unfollowed you:\n' +
+          .toBe('2 Twitter users unfollowed you:\n' +
             '  • @twitto123 unfollowed you 👋.\n' +
             'This account followed you for 33 minutes (01/01/1970).\n' +
             '  • @twitto234\'s account has been locked 🔒.\n' +

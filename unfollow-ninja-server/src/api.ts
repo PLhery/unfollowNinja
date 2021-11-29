@@ -48,7 +48,7 @@ bullQueue.on('error', (err) => {
 })
 
 const authRouter = createAuthRouter(dao, bullQueue);
-const userRouter = createUserRouter(dao);
+const userRouter = createUserRouter(dao, bullQueue);
 const adminRouter = createAdminRouter(dao);
 
 export interface NinjaSession {

@@ -1,5 +1,5 @@
 {
-    "{{nbUnfollows}} twitter users unfollowed you:": "{{nbUnfollows}} usuarios de twitter te han dejado de seguir:",
+    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} usuarios de twitter te han dejado de seguir:",
     "one of you followers": "Uno de tus seguidores",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} te dejó de seguir {{emoji}}.",
     "{{username}} has been suspended {{emoji}}.": "{{username}} ha sido suspendido {{emoji}}.",
