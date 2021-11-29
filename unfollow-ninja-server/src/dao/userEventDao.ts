@@ -120,7 +120,7 @@ export default class UserEventDao {
         following: { type: DataTypes.BOOLEAN, defaultValue: false },
         followedBy: { type: DataTypes.BOOLEAN, defaultValue: false },
         skippedBecauseGlitchy: { type: DataTypes.BOOLEAN, defaultValue: false },
-        isSecondCheck: { type: DataTypes.BOOLEAN, allowNull: false },
+        isSecondCheck: { type: DataTypes.BOOLEAN, defaultValue: false },
       }, {
         timestamps: true,
         updatedAt: false, // We'll never update these fields
