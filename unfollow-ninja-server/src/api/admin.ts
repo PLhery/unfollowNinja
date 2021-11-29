@@ -44,7 +44,11 @@ export function createAdminRouter(dao: Dao) {
         lang: params.lang,
         dmId: params.dmId,
         dmUsername: await dao.getCachedUsername(params.dmId),
+        notificationEvents: await dao.userEventDao.getNotificationEvents(userId),
+        categoryEvents: await dao.userEventDao.getCategoryEvents(userId),
         webEvents: await dao.userEventDao.getWebEvents(userId),
+        followEvents: await dao.userEventDao.getFollowEvent(userId),
+        unfollowerEvents: await dao.userEventDao.getUnfollowerEvents(userId),
         followers: await userDao.getFollowers(),
         uncachables: await userDao.getUncachableFollowers(),
       }, null, 2);
