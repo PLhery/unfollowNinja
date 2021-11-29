@@ -24,10 +24,11 @@ export default class UserDao {
     }
 
     public async getCategory(): Promise<UserCategory> {
-        return Number((await this.redis.zscore('users', this.userId)) ?? undefined);
+        return Number((await this.redis.zscore('users', this.userId)) ?? 3); // default = disabled
     }
 
     public async setCategory(category: UserCategory): Promise<void> {
+        this.dao.userEventDao.logCategoryEvent(this.userId, category, await this.getCategory());
         await this.redis.zadd('users', category.toString(), this.userId);
     }
 
@@ -114,6 +115,10 @@ export default class UserDao {
         return await this.redis.hget(`user:${this.userId}`, 'lang') as Lang;
     }
 
+    public getDmId(): Promise<string> {
+      return this.redis.hget(`user:${this.userId}`, 'dmId');
+    }
+
     // list of follower IDs stored during last checkFollowers (in Twitter's order)
     // return null if there are no IDs
     public async getFollowers(): Promise<string[]> {
@@ -173,12 +178,6 @@ export default class UserDao {
     // get the timestamp when the follower was added to the db (in ms)
     public async getFollowDetectedTime(followerId: string): Promise<number> {
         return Number(await this.redis.hget(`followers:follow-time:${this.userId}`, followerId));
-    }
-
-    // Add some unfollowers to the list of unfollowers (without removing them from the followers)
-    public async addUnfollowers(unfollowersInfo: IUnfollowerInfo[]) {
-        // TODO: store this in mongodb
-        // await this.redis.lpush(`unfollowers:${this.userId}`, ...unfollowersInfo.map(info => JSON.stringify(info)));
     }
 
     // return true if some followers were never cached by cacheFollowers

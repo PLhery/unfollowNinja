@@ -20,6 +20,7 @@ export interface IUnfollowerInfo extends IFollowerInfo {
     friendship_error_code?: number;
     notified_time?: number;
     username?: string;
+    skippedBecauseGlitchy?: boolean;
 }
 
 export interface ITwittoInfo {

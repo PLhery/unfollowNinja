@@ -1,14 +1,15 @@
-import type { Queue } from 'bull';
+import type {Queue} from 'bull';
 import pLimit from 'p-limit';
 import * as Sentry from '@sentry/node';
-import { difference } from 'lodash';
+import {difference} from 'lodash';
 import * as Twit from 'twit';
 
-import Dao, { UserCategory } from '../dao/dao';
+import Dao, {UserCategory} from '../dao/dao';
 import logger from '../utils/logger';
 import metrics from '../utils/metrics';
 import {IUnfollowerInfo} from '../utils/types';
 import UserDao from '../dao/userDao';
+import { FollowEvent } from '../dao/userEventDao';
 
 const WORKER_RATE_LIMIT = Number(process.env.WORKER_RATE_LIMIT) || 15;
 
@@ -186,9 +187,13 @@ async function detectUnfollows(userId: string, followers: string[], dao: Dao, qu
     const newFollowers = difference(followers, formerFollowers);
     const unfollowers = difference(formerFollowers, followers);
 
-    if (newFollowers.length > 0 || unfollowers.length > 0) {
-        logger.debug('%s had %d followers and now has %d followers (+%d -%d)',
-            await userDao.getUsername(), formerFollowers.length, followers.length, newFollowers.length, unfollowers.length);
+    if (!newUser) {
+      newFollowers
+        .forEach((fid) => dao.userEventDao.logFollowEvent(userId, FollowEvent.followDetected, fid, followers.length))
+      unfollowers
+        .forEach((fid) => dao.userEventDao.logFollowEvent(userId, FollowEvent.unfollowDetected, fid, followers.length))
+    } else {
+      dao.userEventDao.logFollowEvent(userId, FollowEvent.accountCreatedAndFollowersLoaded, '', followers.length)
     }
 
     if (unfollowers.length > 0) { // remove unfollowers

@@ -4,6 +4,7 @@ import {Params, Twitter} from 'twit';
 import {UserCategory} from '../dao/dao';
 import logger from '../utils/logger';
 import Task from './task';
+import { NotificationEvent } from '../dao/userEventDao';
 
 i18n.configure({
     locales: ['en', 'fr', 'es', 'pt', 'id'],
@@ -23,6 +24,9 @@ export default class extends Task {
             'You will soon know all about your unfollowers here!',
           { twitterAccount: TWITTER_ACCOUNT, emoji: '🙌' }
         );
+
+      this.dao.userEventDao
+        .logNotificationEvent(userId, NotificationEvent.welcomeMessage, await userDao.getDmId(), message);
 
         await dmTwit.post('direct_messages/events/new', {
             event: {

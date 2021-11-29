@@ -1,13 +1,14 @@
 import i18n from 'i18n';
-import type { Job } from 'bull';
-import { defaults, difference, get, keyBy } from 'lodash';
+import type {Job} from 'bull';
+import {defaults, difference, get, keyBy} from 'lodash';
 import moment from 'moment-timezone';
-import { Params, Twitter } from 'twit';
-import { UserCategory } from '../dao/dao';
+import {Params, Twitter} from 'twit';
+import {UserCategory} from '../dao/dao';
 import logger from '../utils/logger';
-import { IUnfollowerInfo, Lang } from '../utils/types';
+import {IUnfollowerInfo, Lang} from '../utils/types';
 import Task from './task';
 import metrics from '../utils/metrics';
+import { NotificationEvent } from '../dao/userEventDao';
 
 i18n.configure({
     locales: ['en', 'fr', 'es', 'pt', 'id'],
@@ -16,7 +17,6 @@ i18n.configure({
 
 moment.tz.setDefault(process.env.TIMEZONE || 'UTC');
 
-// const BETA_USERS = split(process.env.BETA_USERS, ',').concat('testUsername');
 const MINUTES_BETWEEN_CHECKS = Number(process.env.MINUTES_BETWEEN_CHECKS) || 2;
 const TWITTER_ACCOUNT = process.env.TWITTER_ACCOUNT || 'unfollowninja';
 
@@ -29,7 +29,6 @@ export default class extends Task {
         const {userId, isSecondTry} = job.data;
         const userDao = this.dao.getUserDao(userId);
         const username = await userDao.getUsername();
-        logger.debug('notifying @%s...', username);
 
         const twit = await userDao.getTwit();
         const unfollowersInfo: IUnfollowerInfo[] = job.data.unfollowersInfo;
@@ -51,12 +50,6 @@ export default class extends Task {
         ) as { data: Twitter.User[] };
 
         if (stopThere) {
-            return;
-        }
-
-        if (!Array.isArray(usersLookup.data)) {
-            logger.warn('@%s - expected userLookup.data to be an array, was %s instead.',
-                username, JSON.stringify(usersLookup.data));
             return;
         }
 
@@ -111,15 +104,18 @@ export default class extends Task {
             }
         }));
 
-        logger.debug('@%s has new unfollowers: %s', username, JSON.stringify(unfollowersInfo.concat(leftovers)));
-
         // we remove unfollowers that followed the user < 24h and that "left twitter" (glitches very probably)
         let realUnfollowersInfo = unfollowersInfo.filter(unfollowerInfo => {
             const followDuration = unfollowerInfo.unfollowTime - unfollowerInfo.followDetectedTime;
-            return unfollowerInfo.followed_by !== true &&
+            unfollowerInfo.skippedBecauseGlitchy =
+                unfollowerInfo.followed_by !== true &&
                 !(unfollowerInfo.deleted && followDuration < 24 * 60 * 60 * 1000) &&
                 followDuration > Math.max(MINUTES_BETWEEN_CHECKS*2+1, 7) * 60 * 1000;
+            return unfollowerInfo.skippedBecauseGlitchy;
         });
+
+      unfollowersInfo.forEach((unfollower) =>
+        this.dao.userEventDao.logUnfollowerEvent(userId, isSecondTry, unfollower))
 
         if (!isSecondTry) {
             const potentialGlitches = realUnfollowersInfo.filter(unfollowerInfo => unfollowerInfo.deleted);
@@ -142,21 +138,14 @@ export default class extends Task {
         metrics.increment('notifyUser.count');
 
         if (realUnfollowersInfo.length > 0) {
-            userDao.addUnfollowers(realUnfollowersInfo.concat(leftovers));
             const message = this.generateMessage(realUnfollowersInfo, await userDao.getLang(), leftovers.length);
 
-            let dmTwit;
-            try {
-                dmTwit = await userDao.getDmTwit();
-            } catch (error) {
-                // temporary: some accounts that didn't pass the second step were enabled due to an API code bug
-                if (error?.message?.endsWith('didn\'t have any DM credentials stored')) {
-                    await userDao.setCategory(UserCategory.disabled);
-                }
-                throw error;
-            }
+            this.dao.userEventDao
+              .logNotificationEvent(userId, NotificationEvent.unfollowersMessage, await userDao.getDmId(), message);
+
+            const dmTwit = await userDao.getDmTwit();
             logger.info('sending a DM to @%s', username);
-            logger.debug('sending a DM to @%s: %s', username, message);
+
             await dmTwit.post('direct_messages/events/new', {
                 event: {
                     type: 'message_create',

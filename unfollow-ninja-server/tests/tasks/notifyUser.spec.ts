@@ -71,7 +71,7 @@ describe('notifyUser task', () => {
         mockFriendshipShowReply();
         await task.run(job);
         expect(queue.add).toHaveBeenCalledTimes(0);
-        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(dao.userEventDao.logUnfollowerEvent).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
             .toBe('@twitto123 unfollowed you 👋.\n' +
@@ -86,7 +86,7 @@ describe('notifyUser task', () => {
         mockFriendshipShowReply();
         await task.run(job);
         expect(queue.add).toHaveBeenCalledTimes(0);
-        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(dao.userEventDao.logUnfollowerEvent).toHaveBeenCalledTimes(2);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
             .toBe('2 Twitter users unfollowed you:\n' +
@@ -103,7 +103,7 @@ describe('notifyUser task', () => {
         mockFriendshipShowReply();
         mockFriendshipShowReply(false, false, false, true, 'twitto234');
         await task.run(job);
-        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(dao.userEventDao.logUnfollowerEvent).toHaveBeenCalledTimes(2);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
             .toBe('@twitto123 unfollowed you 👋.\n' +
@@ -118,7 +118,7 @@ describe('notifyUser task', () => {
         mockFriendshipShowReplyNotFound();
         await task.run(job);
         expect(queue.add).toHaveBeenCalledTimes(1);
-        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(dao.userEventDao.logUnfollowerEvent).toHaveBeenCalledTimes(2);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
             .toBe('@twitto123 unfollowed you 👋.\n' +
@@ -135,7 +135,7 @@ describe('notifyUser task', () => {
         await task.run(job);
         job.data.isSecondTry = false;
         expect(queue.add).toHaveBeenCalledTimes(0);
-        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(dao.userEventDao.logUnfollowerEvent).toHaveBeenCalledTimes(2);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
     });
 
@@ -148,7 +148,7 @@ describe('notifyUser task', () => {
         dao.getCachedUsername.mockResolvedValue('twitto234');
         await task.run(job);
         expect(queue.add).toHaveBeenCalledTimes(0);
-        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(dao.userEventDao.logUnfollowerEvent).toHaveBeenCalledTimes(2);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
             .toBe('2 Twitter users unfollowed you:\n' +
@@ -166,7 +166,7 @@ describe('notifyUser task', () => {
         mockFriendshipShowReply();
         await task.run(job);
         expect(queue.add).toHaveBeenCalledTimes(0);
-        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(dao.userEventDao.logUnfollowerEvent).toHaveBeenCalledTimes(2);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
           .toBe('2 Twitter users unfollowed you:\n' +
@@ -194,7 +194,7 @@ describe('notifyUser task', () => {
         mockFriendshipShowReply();
         await task.run(job);
         expect(queue.add).toHaveBeenCalledTimes(0);
-        expect(userDao.addUnfollowers).toHaveBeenCalledTimes(1);
+        expect(dao.userEventDao.logUnfollowerEvent).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
             .toBe('@louanben 👦🏽 unfollowed you \n👁👄👁.\n' +
