@@ -110,9 +110,14 @@ app
   .use(koaBodyParser())
   .use(router.routes())
   .use(router.allowedMethods())
-  .on('error', err => {
+  .on('error', (err, ctx) => {
     logger.error(err.stack);
-    Sentry.captureException(err);
+    Sentry.withScope((scope) => {
+      scope.addEventProcessor((event) => {
+        return Sentry.Handlers.parseRequest(event, ctx.request);
+      });
+      Sentry.captureException(err);
+    });
   });
 
 logger.info('Connecting to the databases...')
