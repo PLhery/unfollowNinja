@@ -7,11 +7,18 @@
 
   .logoContainer {
     overflow: hidden;
-    z-index: -1;
     position: absolute;
     .logo {
       transition: margin .6s ease;
+      height: 40px;
     }
+  }
+
+  .logoHands {
+    height: 40px;
+    box-shadow: 0 0 0 1px #ffffff; // better hide background logo during shakes
+    z-index: 1;
+    pointer-events: none;
   }
 
   &:hover {
