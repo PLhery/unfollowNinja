@@ -52,7 +52,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
         ctx.status = 401;
         return;
       }
-      const oauthTokenSecret = ctx.session.twitterTokenSecret[oauth_token];
+      const oauthTokenSecret = ctx.session.twitterTokenSecret?.[oauth_token];
       if (typeof oauthTokenSecret !== 'string') {
         ctx.body = {status: 'Oops, it looks like your session has expired.. Try again!'};
         ctx.status = 401;
