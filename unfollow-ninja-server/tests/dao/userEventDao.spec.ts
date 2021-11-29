@@ -141,12 +141,16 @@ describe('Test UserEventDAO', () => {
       expect.objectContaining({
         id: 1,
         category: UserCategory.enabled,
+        categoryName: 'enabled',
         formerCategory: UserCategory.disabled,
+        formerCategoryName: 'disabled',
       }),
       expect.objectContaining({
         id: 2,
         category: UserCategory.revoked,
+        categoryName: 'revoked',
         formerCategory: UserCategory.enabled,
+        formerCategoryName: 'enabled',
       })
     ]);
   });

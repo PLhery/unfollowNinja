@@ -112,14 +112,14 @@ export default class UserEventDao {
         followerId: { type: DataTypes.STRING(30), allowNull: false },
         followTime: { type: DataTypes.INTEGER, allowNull: false },
         followDetectedTime: { type: DataTypes.INTEGER, allowNull: false },
-        blocking: { type: DataTypes.BOOLEAN, allowNull: false },
-        blockedBy: { type: DataTypes.BOOLEAN, allowNull: false },
-        suspended: { type: DataTypes.BOOLEAN, allowNull: false },
-        locked: { type: DataTypes.BOOLEAN, allowNull: false },
-        deleted: { type: DataTypes.BOOLEAN, allowNull: false },
-        following: { type: DataTypes.BOOLEAN, allowNull: false },
-        followedBy: { type: DataTypes.BOOLEAN, allowNull: false },
-        skippedBecauseGlitchy: { type: DataTypes.BOOLEAN, allowNull: false },
+        blocking: { type: DataTypes.BOOLEAN, defaultValue: false },
+        blockedBy: { type: DataTypes.BOOLEAN, defaultValue: false },
+        suspended: { type: DataTypes.BOOLEAN, defaultValue: false },
+        locked: { type: DataTypes.BOOLEAN, defaultValue: false },
+        deleted: { type: DataTypes.BOOLEAN, defaultValue: false },
+        following: { type: DataTypes.BOOLEAN, defaultValue: false },
+        followedBy: { type: DataTypes.BOOLEAN, defaultValue: false },
+        skippedBecauseGlitchy: { type: DataTypes.BOOLEAN, defaultValue: false },
         isSecondCheck: { type: DataTypes.BOOLEAN, allowNull: false },
       }, {
         timestamps: true,
@@ -224,6 +224,10 @@ export default class UserEventDao {
     public async getCategoryEvents(userId: string) {
       return (await this.categoryEvent.findAll({
         where: { userId }
+      })).map((event) => ({
+        categoryName: UserCategory[event.category],
+        formerCategoryName: UserCategory[event.formerCategory],
+        ...event.get()
       }));
     }
 }
