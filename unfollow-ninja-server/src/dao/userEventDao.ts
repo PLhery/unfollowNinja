@@ -86,7 +86,7 @@ export default class UserEventDao {
 
         this.webEvent = dao.sequelizeLogs.define('WebEvent', {
           userId: { type: DataTypes.STRING(30), allowNull: false },
-          event: { type: DataTypes.INTEGER, allowNull: false },
+          event: { type: DataTypes.SMALLINT, allowNull: false },
           ip: { type: DataTypes.STRING(45), allowNull: false },
           username: { type: DataTypes.STRING(20), allowNull: false }, // either the user's or the extraInfo one
           extraInfo: { type: DataTypes.STRING(30), allowNull: true }, // lang, DM account ID or admin fetched ID
@@ -98,7 +98,7 @@ export default class UserEventDao {
 
         this.followEvent = dao.sequelizeLogs.define('FollowEvent', {
           userId: { type: DataTypes.STRING(30), allowNull: false },
-          event: { type: DataTypes.INTEGER, allowNull: false },
+          event: { type: DataTypes.SMALLINT, allowNull: false },
           followerId: { type: DataTypes.STRING(30), allowNull: false },
           nbFollowers: { type: DataTypes.INTEGER, allowNull: false },
         }, {
@@ -110,8 +110,8 @@ export default class UserEventDao {
       this.unfollowerEvent = dao.sequelizeLogs.define('UnfollowerEvent', {
         userId: { type: DataTypes.STRING(30), allowNull: false },
         followerId: { type: DataTypes.STRING(30), allowNull: false },
-        followTime: { type: DataTypes.INTEGER, allowNull: false },
-        followDetectedTime: { type: DataTypes.INTEGER, allowNull: false },
+        followTime: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+        followDetectedTime: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
         blocking: { type: DataTypes.BOOLEAN, defaultValue: false },
         blockedBy: { type: DataTypes.BOOLEAN, defaultValue: false },
         suspended: { type: DataTypes.BOOLEAN, defaultValue: false },
@@ -129,7 +129,7 @@ export default class UserEventDao {
 
       this.notificationEvent = dao.sequelizeLogs.define('NotificationEvent', {
         userId: { type: DataTypes.STRING(30), allowNull: false },
-        event: { type: DataTypes.INTEGER, allowNull: false },
+        event: { type: DataTypes.SMALLINT, allowNull: false },
         fromId: { type: DataTypes.STRING(30), allowNull: true }, // null would mean an error would follow
         message: { type: DataTypes.STRING(5000), allowNull: false },
       }, {
@@ -140,8 +140,8 @@ export default class UserEventDao {
 
       this.categoryEvent = dao.sequelizeLogs.define('CategoryEvent', {
         userId: { type: DataTypes.STRING(30), allowNull: false },
-        category: { type: DataTypes.INTEGER, allowNull: false },
-        formerCategory: { type: DataTypes.INTEGER, allowNull: false }
+        category: { type: DataTypes.SMALLINT, allowNull: false },
+        formerCategory: { type: DataTypes.SMALLINT, allowNull: false }
       }, {
         timestamps: true,
         updatedAt: false, // We'll never update these fields
@@ -190,8 +190,12 @@ export default class UserEventDao {
         locked, deleted, following, followed_by, skippedBecauseGlitchy } = info;
 
       this.unfollowerEvent.create({
-        userId, followerId: info.id, followTime, followDetectedTime, blocking, blockedBy: blocked_by,
-        suspended, locked, deleted, following, followedBy: followed_by, skippedBecauseGlitchy, isSecondCheck,
+        userId,
+        followerId: info.id,
+        followTime: Math.floor(followTime/1000),
+        followDetectedTime: Math.floor(followDetectedTime/1000),
+        blocking, blockedBy: blocked_by, suspended, locked, deleted,
+        following, followedBy: followed_by, skippedBecauseGlitchy, isSecondCheck,
       })
         .catch((error) => Sentry.captureException(error))
     }

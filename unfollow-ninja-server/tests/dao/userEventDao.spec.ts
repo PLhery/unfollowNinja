@@ -80,9 +80,9 @@ describe('Test UserEventDAO', () => {
   test('should log unfollowerEvent', async () => {
     userEventDao.logUnfollowerEvent('user1', false, {
       id: 'user2',
-      followTime: 1300,
+      followTime: 3000,
       unfollowTime: 0,
-      followDetectedTime: 1400,
+      followDetectedTime: 5000,
       blocking: true,
       blocked_by: false,
       suspended: true,
@@ -100,8 +100,8 @@ describe('Test UserEventDAO', () => {
         userId: 'user1',
         isSecondCheck: false,
         followerId: 'user2',
-        followTime: 1300,
-        followDetectedTime: 1400,
+        followTime: 3,
+        followDetectedTime: 5,
         blocking: true,
         blockedBy: false,
         suspended: true,
