@@ -9,6 +9,7 @@ services:
       - /usr/app/node_modules
     depends_on:
       - postgres
+      - postgres-logs
       - redis
     environment:
       REDIS_TEST_URI: redis://redis

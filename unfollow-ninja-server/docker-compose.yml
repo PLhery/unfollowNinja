@@ -6,6 +6,7 @@ services:
     build: .
     depends_on:
       - postgres
+      - postgres-logs
       - redis-bull
       - redis
     volumes:
@@ -23,6 +24,7 @@ services:
       - "127.0.0.1:4000:4000"
     depends_on:
       - postgres
+      - postgres-logs
       - redis-bull
       - redis
     environment:
