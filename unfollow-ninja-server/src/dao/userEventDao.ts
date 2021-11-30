@@ -110,8 +110,8 @@ export default class UserEventDao {
       this.unfollowerEvent = dao.sequelizeLogs.define('UnfollowerEvent', {
         userId: { type: DataTypes.STRING(30), allowNull: false },
         followerId: { type: DataTypes.STRING(30), allowNull: false },
-        followTime: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-        followDetectedTime: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
+        followTime: { type: DataTypes.INTEGER, allowNull: false },
+        followDetectedTime: { type: DataTypes.INTEGER, allowNull: false },
         blocking: { type: DataTypes.BOOLEAN, defaultValue: false },
         blockedBy: { type: DataTypes.BOOLEAN, defaultValue: false },
         suspended: { type: DataTypes.BOOLEAN, defaultValue: false },
