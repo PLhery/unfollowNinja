@@ -42,6 +42,14 @@ function MiniApp(props) {
   // persist the userInfo in sessionStorage
   useEffect(() => { userInfo && sessionStorage.setItem('userInfo', JSON.stringify(userInfo)) }, [userInfo]);
 
+  // send the user's username and info to the support chatbot
+  useEffect(() => {
+	if (userInfo?.username) {
+	  window.$crisp?.push(['set', 'user:nickname', [userInfo.username]]);
+	  window.$crisp?.push(['set', 'session:data', [[Object.entries(userInfo)]]]);
+	}
+  }, [userInfo]);
+
   useEffect(() => {
 	if (navigator.userAgent !== "ReactSnap") { // We don't want to risk hasError=true on ReactSnap
 	  // first: load userInfo from the sessionStorage
