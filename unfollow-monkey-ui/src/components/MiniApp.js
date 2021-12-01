@@ -42,6 +42,13 @@ function MiniApp(props) {
   // persist the userInfo in sessionStorage
   useEffect(() => { userInfo && sessionStorage.setItem('userInfo', JSON.stringify(userInfo)) }, [userInfo]);
 
+  // send the user's username and info to the support chatbot
+  useEffect(() => {
+	if (userInfo?.username) {
+	  window.$crisp?.push(['set', 'session:data', [Object.entries(userInfo)]]);
+	}
+  }, [userInfo]);
+
   useEffect(() => {
 	if (navigator.userAgent !== "ReactSnap") { // We don't want to risk hasError=true on ReactSnap
 	  // first: load userInfo from the sessionStorage
@@ -69,6 +76,7 @@ function MiniApp(props) {
 	    setUserInfo(userInfo);
 	    setHasError(true)
 	  })
+	window.$crisp?.push(['set', 'session:event', [[['logout']]]]);
   };
   const removeDMs = () => {
 	setUserInfo({
@@ -82,6 +90,7 @@ function MiniApp(props) {
 		setUserInfo(userInfo);
 		setHasError(true)
 	  });
+	window.crisp?.push(['set', 'session:event', [[['removeDms']]]]);
   };
   const changeLang = (newLang) => {
 	setUserInfo({
@@ -99,6 +108,7 @@ function MiniApp(props) {
 		setUserInfo(userInfo);
 		setHasError(true)
 	  });
+	window.$crisp?.push(['set', 'session:event', [[['changeLang', { old: userInfo.lang, new: newLang}]]]]);
   }
   // Listen and process postmessages from the API
   // (these are sent in the log in callback page)
@@ -109,6 +119,7 @@ function MiniApp(props) {
 	  }
       const content = JSON.parse(decodeURI(event.data.content));
 	  setUserInfo(content);
+	  window.$crisp?.push(['set', 'session:event', [[['logged-in']]]]);
 	}
 
 	window.addEventListener('message', processMessage);
