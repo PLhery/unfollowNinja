@@ -71,6 +71,7 @@ export default class extends Task {
                 case 88: // rate limit
                     // retry in 15 minutes
                     await this.queue.add('sendWelcomeMessage', {
+                        id: Date.now(), // otherwise some seem stuck??
                         userId,
                         username,
                     }, {delay: 15 * 60 * 1000});

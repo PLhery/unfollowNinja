@@ -44,6 +44,7 @@ export function createUserRouter(dao: Dao, queue: Queue) {
       dao.userEventDao.logWebEvent(session.userId, WebEvent.setLang, ctx.ip, session.username, lang);
 
       await queue.add('sendWelcomeMessage', {
+        id: Date.now(), // otherwise some seem stuck??
         userId: session.userId,
         username: session.username,
       });

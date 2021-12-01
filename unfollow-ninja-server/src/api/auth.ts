@@ -171,6 +171,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
       }
 
       await queue.add('sendWelcomeMessage', {
+          id: Date.now(), // otherwise some seem stuck??
           userId,
           username: ctx.session.username,
       }, {delay: 500}); // otherwise it looks like it weirdly may start before setUserParams finished :/
