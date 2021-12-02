@@ -5,6 +5,7 @@ import type Dao from '../dao/dao';
 import type { NinjaSession } from '../api';
 import { UserCategory } from '../dao/dao';
 import { WebEvent } from '../dao/userEventDao';
+import { SUPPORTED_LANGUAGES_CONST } from '../utils/utils';
 
 export function createUserRouter(dao: Dao, queue: Queue) {
   return new Router()
@@ -37,7 +38,7 @@ export function createUserRouter(dao: Dao, queue: Queue) {
     .put('/lang', async ctx => {
       const session = ctx.session as NinjaSession;
       const lang = (ctx.request as any).body?.lang;
-      if (!['en', 'fr', 'pt', 'es', 'id', 'de'].includes(lang)) {
+      if (!SUPPORTED_LANGUAGES_CONST.includes(lang)) {
         await ctx.throw(400);
       }
       await dao.getUserDao(session.userId).setUserParams({lang});

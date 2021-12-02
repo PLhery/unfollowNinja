@@ -9,9 +9,10 @@ import {IUnfollowerInfo, Lang} from '../utils/types';
 import Task from './task';
 import metrics from '../utils/metrics';
 import { NotificationEvent } from '../dao/userEventDao';
+import { SUPPORTED_LANGUAGES } from '../utils/utils';
 
 i18n.configure({
-    locales: ['en', 'fr', 'es', 'pt', 'id', 'de'],
+    locales: SUPPORTED_LANGUAGES,
     directory: __dirname + '/../../locales',
 });
 

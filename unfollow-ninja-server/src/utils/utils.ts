@@ -7,3 +7,6 @@ import bigInt from 'big-integer';
 export function twitterCursorToTime(cursor: string): number {
     return cursor ? bigInt(cursor).abs().shiftRight(20).valueOf() : null;
 }
+
+export const SUPPORTED_LANGUAGES_CONST = ['en', 'fr', 'es', 'pt', 'id', 'de', 'th'] as const;
+export const SUPPORTED_LANGUAGES = SUPPORTED_LANGUAGES_CONST as any as string[];
