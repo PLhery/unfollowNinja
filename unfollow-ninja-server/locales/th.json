@@ -1,1 +1,14 @@
-{}
+{
+    "{{username}} has been suspended {{emoji}}.": "{{username}} ได้ถูกระงับการใช้งาน {{emoji}}.",
+    "{{username}} blocked you {{emoji}}.": "{{username}} ทำการบล็อคคุณ {{emoji}}.",
+    "You blocked {{username}} {{emoji}}.": "คุณได้บล็อค {{username}} {{emoji}}.",
+    "This account followed you before you signed up to @{{twitterAccount}}!": "บัญชีผู้ใช้นี้ติดตามคุณ ก่อนที่คุณจะลงชื่อสมัครใช้ @{{twitterAccount}}!",
+    "{{username}}'s account has been locked {{emoji}}.": "{{username}}'s บัญชีผู้ใช้นี้ได้ทำการล็อคบัญชี {{emoji}}.",
+    "one of you followers": "หนึ่งในผู้ติดตามของคุณ",
+    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} บัญชีผู้ใช้ทวิตเตอร์นี้ได้เลิกติดตามคุณ:",
+    "{{username}} unfollowed you {{emoji}}.": "{{username}} เลิกติดตามคุณ {{emoji}}.",
+    "{{username}} has left Twitter {{emoji}}.": "{{username}} ได้ปิดบัญชีทวิตเตอร์ {{emoji}}.",
+    "This account followed you for {{duration}} ({{{time}}}).": "บัญชีผู้ใช้นี้ติดตามคุณเมื่อ {{duration}} ({{{time}}}).",
+    "and {{nbLeftovers}} more.": "และ {{nbLeftovers}} อื่นๆ.",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "ขั้นตอนเสร็จสิ้น, ยินดีต้อนรับสู่ @{{twitterAccount}} {{emoji}}!\nในไม่ช้าคุณจะรู้ทุกอย่างเกี่ยวกับผู้ที่ติดตามของคุณอยู่!"
+}
