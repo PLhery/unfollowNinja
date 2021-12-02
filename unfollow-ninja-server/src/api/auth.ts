@@ -102,7 +102,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
 
       const msgContent = encodeURI(JSON.stringify({
           username: loginResult.screenName,
-          dmUsername: params.dmId ? await dao.getCachedUsername(params.dmId) : null,
+          dmUsername: params.dmId && category === UserCategory.enabled ? await dao.getCachedUsername(params.dmId) : null,
           category,
           lang: params.lang,
       }));

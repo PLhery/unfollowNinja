@@ -8,11 +8,11 @@ import koaBodyParser from 'koa-bodyparser';
 import koaCors from '@koa/cors';
 import Bull from 'bull';
 
-import Dao from './dao/dao';
+import Dao, {UserCategory} from './dao/dao';
 import logger, {setLoggerPrefix} from './utils/logger';
-import { createAuthRouter } from './api/auth';
-import { createAdminRouter } from './api/admin';
-import { createUserRouter } from './api/user';
+import {createAuthRouter} from './api/auth';
+import {createAdminRouter} from './api/admin';
+import {createUserRouter} from './api/user';
 
 function assertEnvVariable(name: string) {
   if (typeof process.env[name] === 'undefined') {
@@ -82,7 +82,7 @@ const router = new Router()
       ])
       ctx.body = {
         username: session.username,
-        dmUsername: params.dmId ? await dao.getCachedUsername(params.dmId) : null,
+        dmUsername: params.dmId && category === UserCategory.enabled ? await dao.getCachedUsername(params.dmId) : null,
         category,
         lang: params.lang
       };

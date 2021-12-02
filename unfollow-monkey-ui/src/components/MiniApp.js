@@ -13,9 +13,9 @@ const LoggedInIntro = ({ user, logout, removeDMs, changeLang }) => {
     if (!user?.username) return null; // not logged in
 
     let message = <Paragraph>One more step to activate the service:<br/> Choose an account to send you notifications</Paragraph>;
-    if (user.category === 2) { // revoked tokens
-        message = <Paragraph>It seems that your Twitter account has been deactivated:<br/> Log in again to reactivate the service.</Paragraph>;
-    }
+	if (user.category === 2) { // revoked tokens
+	  	message = <Paragraph>It seems that your Twitter account has been deactivated:<br/> Log in again to reactivate the service.</Paragraph>;
+	}
     if (user.dmUsername) {
         message = <Paragraph>All clear! Don't forget to follow <Link href='https://twitter.com/unfollowmonkey' source='logged-in-intro'>@unfollowMonkey</Link></Paragraph>;
     }
@@ -24,7 +24,7 @@ const LoggedInIntro = ({ user, logout, removeDMs, changeLang }) => {
             Don't forget to follow <Link href='https://twitter.com/unfollowmonkey' source='logged-in-intro'>@unfollowMonkey</Link></Paragraph>;
     }
     return <div className={Styles.loggedInDetails}>
-        <Paragraph><Validate color='neutral-1' className={Styles.centerIcon}/> Welcome, <b>@{user.username}</b> !</Paragraph>
+        <Paragraph>{user.dmUsername && <Validate color='neutral-1' className={Styles.centerIcon}/>} Welcome, <b>@{user.username}</b>!</Paragraph>
         {message}
 	  {user.dmUsername && <LanguageSelector value={user.lang} onChange={changeLang}/> }
         <Paragraph>
