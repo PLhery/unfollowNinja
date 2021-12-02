@@ -11,7 +11,7 @@ import metrics from '../utils/metrics';
 import { NotificationEvent } from '../dao/userEventDao';
 
 i18n.configure({
-    locales: ['en', 'fr', 'es', 'pt', 'id'],
+    locales: ['en', 'fr', 'es', 'pt', 'id', 'de'],
     directory: __dirname + '/../../locales',
 });
 
