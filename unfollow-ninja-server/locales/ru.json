@@ -1,1 +1,6 @@
-{}
+{
+    "one of you followers": "один из ваших подписчиков",
+    "{{username}} blocked you {{emoji}}.": "{{username}} заблокировал вас {{emoji}}.",
+    "and {{nbLeftovers}} more.": "и {{nbLeftovers}} многое другое.",
+    "You blocked {{username}} {{emoji}}.": "Вы заблокировали {{username}} {{emoji}}."
+}
