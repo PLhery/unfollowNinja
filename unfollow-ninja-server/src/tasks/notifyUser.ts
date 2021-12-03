@@ -111,7 +111,8 @@ export default class extends Task {
             unfollowerInfo.skippedBecauseGlitchy = !(
                 unfollowerInfo.followed_by !== true &&
                 !(unfollowerInfo.deleted && followDuration < 24 * 60 * 60 * 1000) &&
-                followDuration > Math.max(MINUTES_BETWEEN_CHECKS*2+1, 7) * 60 * 1000
+                followDuration > Math.max(MINUTES_BETWEEN_CHECKS*2+1, 7) * 60 * 1000 &&
+                !(process.env.GLITCHY_USERS?.split(',') || []).includes(unfollowerInfo.id)
             );
             return !unfollowerInfo.skippedBecauseGlitchy;
         });
