@@ -5,7 +5,7 @@
     "{{username}} blocked you {{emoji}}.": "{{username}} hat dich blockiert {{emoji}}.",
     "one of you followers": "einer deiner Follower",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} hat dich entfolgt {{emoji}}.",
-    "This account followed you for {{duration}} ({{{time}}}).": "Dieses Konto ist dir seit {{duration}} ({{{time}}) gefolgt.",
+    "This account followed you for {{duration}} ({{{time}}}).": "Dieses Konto ist dir seit {{duration}} ({{{time}}}) gefolgt.",
     "and {{nbLeftovers}} more.": "und {{nbLeftovers}} mehr.",
     "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Alles bereit, willkommen bei @{{twitterAccount}} {{emoji}}!\nHier wirst du bald alles über deine Unfollower erfahren!",
     "You blocked {{username}} {{emoji}}.": "Du hast {{username}} blockiert {{emoji}}.",
