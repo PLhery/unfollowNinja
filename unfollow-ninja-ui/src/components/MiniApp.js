@@ -37,6 +37,14 @@ function MiniApp(props) {
   const [userInfo, setUserInfo] = useState(null);
   const [hasError, setHasError] = useState(false);
 
+  let notFrench =
+	!navigator.language?.startsWith?.('fr') &&
+	navigator.userAgent !== 'ReactSnap' &&
+	userInfo?.country &&
+	!['FR', 'BE', 'CA', 'CH'].includes(userInfo.country);
+
+  notFrench = true;
+
   // persist the userInfo in sessionStorage
   useEffect(() => { userInfo && sessionStorage.setItem('userInfo', JSON.stringify(userInfo)) }, [userInfo]);
 
@@ -52,9 +60,9 @@ function MiniApp(props) {
 	  fetch(API_URL + '/get-status', {credentials: 'include'})
 		.then(response => response.ok ? response.json() : null)
 		.then(data => data || Promise.reject())
-		.then(data => setUserInfo(data.username ? data : null))
+		.then(data => setUserInfo(data.country ? data : null))
 		.catch(() => {
-		  setHasError(true)
+		  // setHasError(true)
 		})
 	}
   }, []);
@@ -105,6 +113,13 @@ function MiniApp(props) {
 
   return (
       <Box gap='small' margin={{horizontal: 'small', vertical: 'medium'}} {...props}>
+		{notFrench &&
+		  <Paragraph textAlign='center'>
+			<Alert/><br/>Sorry, only French-speaking users can create an account. <br/>
+			Please use <Link href='https://unfollow-monkey.com/?utm_source=unfollowninja_warning'>https://unfollow-monkey.com</Link> instead. <br/>
+			You can <Link href={`${API_URL}/auth/step-1`}>log in</Link> to disable your account if you'd like.
+		  </Paragraph>
+		}
         {hasError ?
 		  <Paragraph textAlign='center'><Alert/><br/>Impossible de joindre le serveur, réessayez plus tard...</Paragraph> :
 		  <>
@@ -117,7 +132,7 @@ function MiniApp(props) {
             label='Connectez-vous à votre compte'
             primary={step0}
             style={step0 ? {color: 'white'} : {}}
-            disabled={!step0 || hasError}
+            disabled={!step0 || hasError || notFrench}
             href={`${API_URL}/auth/step-1`}
 			target='_blank'
 			rel='opener'
@@ -127,8 +142,8 @@ function MiniApp(props) {
             label={step2 ? 'Changer le compte d\'envoi de DMs' : 'Activez les notifications par DM'}
             primary={step1}
             style={step1 ? {color: 'white'} : {}}
-            disabled={step0 || hasError}
-			href={(step0 || hasError) ? null : (step2 ? `${API_URL}/auth/step-2?force_login=true` : `${API_URL}/auth/step-2`)}
+            disabled={step0 || hasError || notFrench}
+			href={(step0 || hasError || notFrench) ? null : (step2 ? `${API_URL}/auth/step-2?force_login=true` : `${API_URL}/auth/step-2`)}
 			target='_blank'
 			rel='opener'
         />
