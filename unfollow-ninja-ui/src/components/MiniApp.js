@@ -43,8 +43,6 @@ function MiniApp(props) {
 	userInfo?.country &&
 	!['FR', 'BE', 'CA', 'CH'].includes(userInfo.country);
 
-  notFrench = true;
-
   // persist the userInfo in sessionStorage
   useEffect(() => { userInfo && sessionStorage.setItem('userInfo', JSON.stringify(userInfo)) }, [userInfo]);
 
