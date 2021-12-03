@@ -7,6 +7,7 @@ import koaSession from 'koa-session';
 import koaBodyParser from 'koa-bodyparser';
 import koaCors from '@koa/cors';
 import Bull from 'bull';
+import geoip from 'geoip-country';
 
 import Dao, {UserCategory} from './dao/dao';
 import logger, {setLoggerPrefix} from './utils/logger';
@@ -74,7 +75,9 @@ const router = new Router()
   .get('/get-status', async ctx => {
     const session = ctx.session as NinjaSession;
     if (!session.userId) {
-      ctx.body = {};
+      ctx.body = {
+        country: geoip.lookup(ctx.ip)?.country,
+      };
     } else {
       const [params, category] = await Promise.all([
         dao.getUserDao(session.userId).getUserParams(),
@@ -84,7 +87,8 @@ const router = new Router()
         username: session.username,
         dmUsername: params.dmId && category === UserCategory.enabled ? await dao.getCachedUsername(params.dmId) : null,
         category,
-        lang: params.lang
+        lang: params.lang,
+        country: geoip.lookup(ctx.ip)?.country,
       };
     }
   });

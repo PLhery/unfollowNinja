@@ -1,6 +1,7 @@
 import TwitterApi from 'twitter-api-v2';
 import Router from 'koa-router';
 import type { Queue } from 'bull';
+import geoip from 'geoip-country';
 
 import logger from '../utils/logger';
 import type Dao from '../dao/dao';
@@ -105,6 +106,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
           dmUsername: params.dmId && category === UserCategory.enabled ? await dao.getCachedUsername(params.dmId) : null,
           category,
           lang: params.lang,
+          country: geoip.lookup(ctx.ip)?.country,
       }));
 
       ctx.type = 'html';
@@ -181,6 +183,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
         dmUsername: loginResult.screenName,
         category: UserCategory.enabled,
         lang: await dao.getUserDao(userId).getLang(),
+        country: geoip.lookup(ctx.ip)?.country,
       }));
 
       ctx.type = 'html';
