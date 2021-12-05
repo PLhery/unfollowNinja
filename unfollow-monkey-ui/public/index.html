@@ -36,7 +36,7 @@
       <!-- Crisp chatbot -->
       <script>
 		if (location.host === 'unfollow-monkey.com') {
-		  window.$crisp = [];
+		  window.$crisp = ["safe", true]; // safe=true removes the "addEventListener overriden" warning
 		  window.CRISP_WEBSITE_ID = "c599d544-7051-4c50-a8e7-15cb57bb2eb7";
 		  (function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();
 		}
