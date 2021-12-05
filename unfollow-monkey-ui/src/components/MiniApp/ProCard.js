@@ -54,11 +54,11 @@ function ProCard(props) {
 		You will be notified in <b>30sec</b> instead of 30min 🚀<br/>
 		{/*<Link href='#' className={Styles.subscriptionLink}>Manage subscription</Link>*/}
 	  </Paragraph>
-	  { user.friendsCodes && <>
+	  { user.friendCodes && <>
 		<Paragraph margin={{bottom: 'none'}}>You can also share these codes, thx to the <b className={Styles.pro}>friends</b> plan:</Paragraph>
 		<ul style={{marginTop: 0}}>
 		{
-		  user.friendsCodes?.map(code =>
+		  user.friendCodes?.map(code =>
 			<li><b>{code.code}</b> - {
 			  code.friendUsername ?
 				<i>used by <b>@{code.friendUsername}</b>{/*<Button plain={true} icon={<Trash size='small'/>}/>*/}</i> :

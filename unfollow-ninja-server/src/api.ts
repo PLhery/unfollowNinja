@@ -91,7 +91,7 @@ const router = new Router()
         lang: params.lang,
         country: geoip.lookup(ctx.ip)?.country,
         isPro: Number(params.pro) > 0,
-        friendsCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
+        friendCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
       };
     }
   });
