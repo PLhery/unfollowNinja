@@ -103,10 +103,13 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
 
       const msgContent = encodeURI(JSON.stringify({
           username: loginResult.screenName,
-          dmUsername: params.dmId && category === UserCategory.enabled ? await dao.getCachedUsername(params.dmId) : null,
+          dmUsername: params.dmId && [UserCategory.enabled, UserCategory.vip].includes(category) ?
+            await dao.getCachedUsername(params.dmId) : null,
           category,
           lang: params.lang,
           country: geoip.lookup(ctx.ip)?.country,
+          isPro: Number(params.pro) > 0,
+          friendsCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
       }));
 
       ctx.type = 'html';
@@ -163,7 +166,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
         }),
         dao.addTwittoToCache({ id: loginResult.userId, username: loginResult.screenName }),
       ]);
-      await dao.getUserDao(userId).setCategory(UserCategory.enabled);
+      const category = await dao.getUserDao(userId).enable();
 
       dao.userEventDao
         .logWebEvent(userId, WebEvent.addDmAccount, ctx.ip, loginResult.screenName, loginResult.userId);
@@ -178,12 +181,16 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
           username: ctx.session.username,
       }, {delay: 500}); // otherwise it looks like it weirdly may start before setUserParams finished :/
 
+      const params = await dao.getUserDao(session.userId).getUserParams();
+
       const msgContent = encodeURI(JSON.stringify({
         username: session.username,
         dmUsername: loginResult.screenName,
-        category: UserCategory.enabled,
-        lang: await dao.getUserDao(userId).getLang(),
+        category,
+        lang: params.lang,
         country: geoip.lookup(ctx.ip)?.country,
+        isPro: Number(params.pro) > 0,
+        friendsCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
       }));
 
       ctx.type = 'html';

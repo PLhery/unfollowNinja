@@ -2,9 +2,11 @@ import Redis from 'ioredis';
 import { fromPairs } from 'lodash';
 import Twit from 'twit';
 import { TwitterApi } from 'twitter-api-v2';
+import crypto from 'crypto';
 
-import type { default as Dao, UserCategory } from './dao';
-import type { IUnfollowerInfo, IUserParams, Lang } from '../utils/types';
+import type {default as Dao, IFriendCode} from './dao';
+import { UserCategory } from './dao';
+import type { IUserParams, Lang } from '../utils/types';
 import { twitterCursorToTime } from '../utils/utils';
 
 export default class UserDao {
@@ -32,6 +34,17 @@ export default class UserDao {
         await this.redis.zadd('users', category.toString(), this.userId);
     }
 
+    public async enable(): Promise<UserCategory.enabled | UserCategory.vip> {
+      const proParam = await this.redis.hget(`user:${this.userId}`, 'pro');
+      if (Number(proParam) > 0) {
+        await this.setCategory(UserCategory.vip)
+        return UserCategory.vip;
+      } else {
+        await this.setCategory(UserCategory.enabled)
+        return UserCategory.enabled;
+      }
+    }
+
     // get the minimum timestamp required to do the next followers check
     // e.g if there are not enough requests left, it's twitter's next reset time
     // e.g if a check needs 4 requests, it's probably in 3min30 (twitter limit = 15/15min)
@@ -52,6 +65,7 @@ export default class UserDao {
             ...stringUserParams,
             added_at: parseInt(stringUserParams.added_at, 10),
             lang: stringUserParams.lang as Lang,
+            pro: (stringUserParams.pro || '0') as '3' | '2' | '1' | '0',
         };
     }
 
@@ -113,6 +127,10 @@ export default class UserDao {
 
     public async getLang(): Promise<Lang> {
         return await this.redis.hget(`user:${this.userId}`, 'lang') as Lang;
+    }
+
+    public async isPro(): Promise<boolean> {
+      return Number(await this.redis.hget(`user:${this.userId}`, 'pro')) > 0;
     }
 
     public getDmId(): Promise<string> {
@@ -192,14 +210,56 @@ export default class UserDao {
         return this.redis.hkeys(`followers:snowflake-ids:${this.userId}`);
     }
 
+    public async getFriendCodes(): Promise<IFriendCode[]> {
+      return await this.dao.FriendCode.findAll({where: {userId: this.userId}});
+    }
+
+    public async getFriendCodesWithUsername(): Promise<{code: string, friendUsername: string}[]> {
+      return Promise.all(
+        (await this.dao.FriendCode.findAll({where: {userId: this.userId}}))
+          .map(async (code) => ({
+            code: code.code,
+            friendUsername: code.friendId && await this.dao.getCachedUsername(code.friendId),
+          }))
+      );
+    }
+
+    // Add friend codes until there are 5 of them
+    public async addFriendCodes(): Promise<void> {
+      const nbCodes = (await this.getFriendCodes()).length;
+      if (nbCodes > 5) {
+        throw new Error(this.userId +' has more than 5 friend codes - should not happen')
+      }
+      for (let i=0; i<5-nbCodes; ++i) {
+        const code = crypto.randomBytes(3).toString('hex').toUpperCase();
+        await this.dao.FriendCode.create({userId: this.userId, code});
+      }
+    }
+
+    public async deleteFriendCodes(code: string): Promise<void> {
+      await this.dao.FriendCode.destroy({where: {userId: this.userId, code}});
+    }
+
+    public async registerFriendCode(code: string): Promise<boolean> {
+      const [nbUpdates] = await this.dao.FriendCode.update({friendId: this.userId}, {where: {code}});
+      return nbUpdates === 1;
+    }
+
+  public async getRegisteredFriendCode(): Promise<IFriendCode> {
+      return await this.dao.FriendCode.findOne({where: {friendId: this.userId}});
+  }
+
     public async getAllUserData() {
-        const [ username, category, nextCheckTime, userParams, followers, followTimes, uncachables, snowflakeIds] =
+        const [ username, category, nextCheckTime, userParams, followers, friendCodes,
+          registeredFriendCode, followTimes, uncachables, snowflakeIds] =
             await Promise.all([
                 this.getUsername(),
                 this.getCategory(),
                 this.getNextCheckTime(),
                 this.getUserParams(),
                 this.getFollowers(),
+                this.getFriendCodes(),
+                this.getRegisteredFriendCode(),
                 this.redis.hgetall(`followers:follow-time:${this.userId}`),
                 this.redis.smembers(`followers:uncachable:${this.userId}`),
                 this.redis.hgetall(`followers:snowflake-ids:${this.userId}`),
@@ -211,6 +271,8 @@ export default class UserDao {
             nextCheckTime,
             userParams,
             followers,
+            friendCodes,
+            registeredFriendCode,
             followTimes,
             uncachables,
             snowflakeIds,
@@ -232,5 +294,6 @@ export default class UserDao {
                 `followers:snowflake-ids:${this.userId}`,
             ),
         ]);
+        await this.dao.FriendCode.destroy({where: {userId: this.userId}});
     }
 }

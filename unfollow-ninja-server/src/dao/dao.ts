@@ -16,6 +16,7 @@ export enum UserCategory {
 }
 
 interface ICachedUsername extends Model {twitterId: string, username: string}
+export interface IFriendCode extends Model {code: string, userId: string, friendId?: string}
 
 export default class Dao {
     public readonly redis: Redis.Redis;
@@ -24,6 +25,7 @@ export default class Dao {
     public readonly userEventDao: UserEventDao;
 
     private readonly CachedUsername: ModelCtor<ICachedUsername>;
+    public readonly FriendCode: ModelCtor<IFriendCode>;
 
     constructor(
         redis = new Redis(process.env.REDIS_URI, { lazyConnect: true }),
@@ -38,6 +40,13 @@ export default class Dao {
             twitterId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
             username: { type: DataTypes.STRING(20), allowNull: false }
         });
+        this.FriendCode = this.sequelize.define('FriendCode', {
+          code: { type: DataTypes.STRING(6), allowNull: false, primaryKey: true },
+          userId: { type: DataTypes.STRING(30), allowNull: false },
+          friendId: { type: DataTypes.STRING(30), allowNull: true }
+        },{
+          indexes: [{ fields: ['userId'] }, { fields: ['friendId'] }]
+        });
         this.userEventDao = new UserEventDao(this);
     }
 
@@ -50,6 +59,7 @@ export default class Dao {
           await this.sequelizeLogs.authenticate(),
         ]);
         await this.CachedUsername.sync({ alter: true }); // create the missing postgresql tables
+        await this.FriendCode.sync({ alter: true });
         await this.userEventDao.createTables();
         await this.redis.connect(); // wait for redis to load its data
         return this;
@@ -68,9 +78,8 @@ export default class Dao {
     }
 
     public async addUser(userEgg: IUserEgg): Promise<void> {
-        userEgg = {category: UserCategory.enabled, ...userEgg};
-        const { id, category, username, added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret } = userEgg;
-        const params: IUserParams = { added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret };
+        const { id, category, username, added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret, pro } = userEgg;
+        const params: IUserParams = { added_at, lang, token, tokenSecret, dmId, dmToken, dmTokenSecret, pro };
         await Promise.all([
             this.redis.zadd('users', category.toString(), id),
             this.redis.hmset(`user:${id}`, params as any), // string literal not accepted as a type

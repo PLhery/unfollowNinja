@@ -44,12 +44,9 @@ export default class extends Task {
         await twit.get('followers/ids')
             .then(() => twitDM.get('followers/ids'))
             .then(() => {
-                logger.debug('suspension check - @%s is not ' + UserCategory[category] + ' anymore :)', username);
                 metrics.increment('reenableFollowers.reenabled');
-                return userDao.setCategory(UserCategory.enabled);
+                return userDao.enable();
             })
-            .catch(() => {
-                logger.debug('suspension check - @%s is still ' + UserCategory[category], username);
-            });
+            .catch(() => null);
     }
 }

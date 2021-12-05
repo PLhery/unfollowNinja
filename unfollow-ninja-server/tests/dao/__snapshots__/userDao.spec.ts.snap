@@ -2,7 +2,7 @@
 
 exports[`Test userDao should get a stable getAllUserData 1`] = `
 Object {
-  "category": 2,
+  "category": 0,
   "followTimes": Object {
     "1": "123",
     "4": "456",
@@ -24,6 +24,7 @@ Object {
     "dmToken": "",
     "dmTokenSecret": "",
     "lang": "fr",
+    "pro": "0",
     "token": "t0k3n",
     "tokenSecret": "s3cr3t",
   },

@@ -37,10 +37,12 @@ export interface IUserParams {
     dmId?: string;
     dmToken?: string;
     dmTokenSecret?: string;
+    pro?: '3' | '2' | '1' | '0'; // friendcode-friends-pro-normal
+    friendCodes?: string;
 }
 
 export interface IUserEgg extends ITwittoInfo, IUserParams {
-    category?: UserCategory;
+    category: UserCategory;
 }
 
 export interface Session {

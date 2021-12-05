@@ -50,7 +50,7 @@ bullQueue.on('error', (err) => {
 
 const authRouter = createAuthRouter(dao, bullQueue);
 const userRouter = createUserRouter(dao, bullQueue);
-const adminRouter = createAdminRouter(dao);
+const adminRouter = createAdminRouter(dao, bullQueue);
 
 export interface NinjaSession {
   twitterTokenSecret?: Record<string, string>;
@@ -85,10 +85,13 @@ const router = new Router()
       ])
       ctx.body = {
         username: session.username,
-        dmUsername: params.dmId && category === UserCategory.enabled ? await dao.getCachedUsername(params.dmId) : null,
+        dmUsername: params.dmId && [UserCategory.enabled, UserCategory.vip].includes(category) ?
+          await dao.getCachedUsername(params.dmId) : null,
         category,
         lang: params.lang,
         country: geoip.lookup(ctx.ip)?.country,
+        isPro: Number(params.pro) > 0,
+        friendsCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
       };
     }
   });

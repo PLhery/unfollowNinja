@@ -1,9 +1,9 @@
 import Redis from 'ioredis';
-import { Sequelize } from 'sequelize';
+import {Sequelize} from 'sequelize';
 // @ts-ignore
 import RedisMock from 'ioredis-mock'; // @types/ioredis-mock doesn't exist yet
 import Dao, {UserCategory} from '../../src/dao/dao';
-import { IUserEgg } from '../../src/utils/types';
+import {IUserEgg} from '../../src/utils/types';
 
 const redis = process.env.REDIS_TEST_URI ?
     new Redis(process.env.REDIS_TEST_URI, { lazyConnect: true }) :
@@ -43,6 +43,7 @@ describe('Test DAO', () => {
             lang: 'fr',
             token: 't0k3n',
             tokenSecret: 's3cr3t',
+            category: UserCategory.enabled,
         };
         const user2: IUserEgg = {...user1, id: '2', category: UserCategory.disabled};
         await dao.addUser(user1);

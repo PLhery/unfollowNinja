@@ -20,7 +20,7 @@ export async function cacheAllFollowers(workerId: number, nbWorkers: number, dao
     const startedAt = Date.now();
 
     try {
-        const promises = (await dao.getUserIdsByCategory(UserCategory.enabled))
+        const promises = (await dao.getUserIdsByCategory(UserCategory.enabled)).concat(await dao.getUserIdsByCategory(UserCategory.vip))
             .filter(userId => hashCode(userId) % nbWorkers === workerId - 1) // we process 1/x users
             .map((userId) => limit(async () => {
                 const username: string = (await dao.getCachedUsername(userId)) || userId;

@@ -9,6 +9,9 @@ export {default as Affinitweet} from './affinitweet.png'
 export {default as Uzzy} from './uzzy.svg'
 export {default as UnfollowNinja} from './unfollowninja.svg'
 export {default as UnfollowMonkeyHands} from './unfollowmonkey-hands.svg'
+export {default as applePay} from './apple-pay.svg'
+export {default as googlePay} from './google-pay.svg'
+export {default as mastercard} from './mastercard.svg'
 
 export function useAlaska() { // react hook to get the right alaska image url
     const [supportsWebP, setWebP] = useState(null); // true if supports, otherwise false

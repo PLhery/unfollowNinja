@@ -6,10 +6,11 @@ import Confetti from 'react-dom-confetti';
 import Styles from './MiniApp.module.scss';
 import Link from "./Link";
 import LanguageSelector from "./MiniApp/LanguageSelector";
+import ProCard from "./MiniApp/ProCard";
 
-const API_URL = 'https://api.unfollow-monkey.com';
+export const API_URL = 'https://api.unfollow-monkey.com';
 
-const LoggedInIntro = ({ user, logout, removeDMs, changeLang }) => {
+const LoggedInIntro = ({ user, logout, removeDMs, changeLang, setUserInfo, setHasError }) => {
     if (!user?.username) return null; // not logged in
 
     let message = <Paragraph>One more step to activate the service:<br/> Choose an account to send you notifications</Paragraph>;
@@ -27,10 +28,12 @@ const LoggedInIntro = ({ user, logout, removeDMs, changeLang }) => {
         <Paragraph>{user.dmUsername && <Validate color='neutral-1' className={Styles.centerIcon}/>} Welcome, <b>@{user.username}</b>!</Paragraph>
         {message}
 	  {user.dmUsername && <LanguageSelector value={user.lang} onChange={changeLang}/> }
+	  {user.dmUsername && <ProCard user={user} setUserInfo={setUserInfo} setHasError={setHasError}/> }
+
         <Paragraph>
             <Link href='#' onClick={e => {logout();e.preventDefault();}} source='disconnect'>Log out</Link>
-            {user.dmUsername ? <span> — <Link href='#' onClick={e => {removeDMs();e.preventDefault();}} source='disable'>Disable the service</Link>
-            </span> : null}
+            {user.dmUsername && <> — <Link href='#' onClick={e => {removeDMs();e.preventDefault();}} source='disable'>Disable the service</Link></>}
+		  	<> — <Link href='#' onClick={e => {window.$crisp?.push(["do", "chat:open"]);e.preventDefault();}} source='talktous'>Talk with us</Link></>
         </Paragraph>
     </div>
 };
@@ -137,8 +140,8 @@ function MiniApp(props) {
         {hasError ?
 		  <Paragraph textAlign='center'><Alert/><br/>Unable to reach the server, try again later...</Paragraph> :
 		  <>
-			<Confetti active={step2 } className={Styles.confettis}/>
-			<LoggedInIntro user={userInfo} logout={logout} removeDMs={removeDMs} changeLang={changeLang}/>
+			<Confetti active={step2} className={Styles.confettis}/>
+			<LoggedInIntro {...{user: userInfo, setUserInfo, changeLang, removeDMs, logout, setHasError}}/>
 		  </>
         }
         <Button
@@ -153,7 +156,7 @@ function MiniApp(props) {
         />
         <Button
             icon={<ChatOption color={step1 ? 'white' : null}/>}
-            label={step2 ? 'Changing the DMs sending account' : 'Enable DM notifications'}
+            label={step2 ? 'Change the account that sends the DMs' : 'Enable DM notifications'}
             primary={step1}
             style={step1 ? {color: 'white'} : {}}
             disabled={step0 || hasError}

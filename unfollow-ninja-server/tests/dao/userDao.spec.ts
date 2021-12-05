@@ -26,7 +26,7 @@ const USER_PARAMS_1: IUserParams = {
     added_at: 1234,
     lang: 'fr',
     token: 't0k3n',
-    tokenSecret: 's3cr3t',
+    tokenSecret: 's3cr3t'
 };
 const USER_PARAMS_2: IUserParams = {
     added_at: 2345,
@@ -36,6 +36,7 @@ const USER_PARAMS_2: IUserParams = {
     dmId: '3',
     dmToken: 'token',
     dmTokenSecret: 'secret',
+    pro: '1',
 };
 
 describe('Test userDao', () => {
@@ -54,6 +55,7 @@ describe('Test userDao', () => {
             ...USER_PARAMS_1,
             id: '1',
             username: 'user 1',
+            category: UserCategory.enabled,
         };
         const user2: IUserEgg = {
             ...USER_PARAMS_2,
@@ -84,6 +86,9 @@ describe('Test userDao', () => {
         expect(await dao.getUserIdsByCategory(UserCategory.revoked)).toStrictEqual(['1']);
         expect(await uDao1.getCategory()).toBe(UserCategory.revoked);
         expect(await uDao2.getCategory()).toBe(UserCategory.disabled);
+
+        await uDao1.enable();
+        expect(await uDao1.getCategory()).toBe(UserCategory.enabled);
     });
 
     test('should be able to save the next time to check', async () => {
@@ -96,8 +101,8 @@ describe('Test userDao', () => {
     });
 
     test('should be able to fetch and edit user params', async () => {
-        const uParamsStr1 = {...USER_PARAMS_1, added_at: 1234, dmId: '', dmToken: '', dmTokenSecret: ''};
-        const uParamsStr2 = {...USER_PARAMS_2, added_at: 2345};
+        const uParamsStr1 = {...USER_PARAMS_1, added_at: 1234, dmId: '', dmToken: '', dmTokenSecret: '', pro: '0'};
+        const uParamsStr2 = {...USER_PARAMS_2, added_at: 2345, pro: '1'};
         expect(await uDao1.getUserParams()).toStrictEqual(uParamsStr1);
         expect(await uDao2.getUserParams()).toStrictEqual(uParamsStr2);
 
@@ -148,6 +153,11 @@ describe('Test userDao', () => {
         expect(await uDao2.getLang()).toBe('en');
     });
 
+    test('isPro', async () => {
+      expect(await uDao1.isPro()).toBe(false);
+      expect(await uDao2.isPro()).toBe(true);
+    });
+
     test('should store and retrieve a list of followers', async () => {
         expect(await uDao1.getFollowers()).toBeNull();
 
@@ -187,9 +197,36 @@ describe('Test userDao', () => {
         expect(await uDao1.getUncachableFollowers()).toStrictEqual(['1']);
     });
 
+    test('should manage friend codes', async () => {
+      expect(await uDao1.getFriendCodes()).toHaveLength(0);
+      await uDao1.addFriendCodes();
+      await uDao2.addFriendCodes();
+      await uDao1.addFriendCodes(); // the second call should not do anything
+      const codes = await uDao1.getFriendCodes();
+      expect(codes).toHaveLength(5);
+      expect(codes[0].userId).toBe('1');
+      expect(codes[0].code).toHaveLength(6);
+
+      expect(await uDao2.registerFriendCode('AAAAAA')).toBe(false);
+      expect(await uDao2.registerFriendCode(codes[1].code)).toBe(true);
+      expect((await uDao2.getRegisteredFriendCode())?.userId).toBe('1');
+
+      await uDao2.deleteFriendCodes(codes[1].code);
+      expect(await uDao1.getFriendCodes()).toHaveLength(5);
+      expect(await uDao2.getFriendCodes()).toHaveLength(5);
+
+      await uDao1.deleteFriendCodes(codes[1].code);
+      expect(await uDao1.getFriendCodes()).toHaveLength(4);
+      expect(await uDao2.getFriendCodes()).toHaveLength(5);
+      expect((await uDao2.getRegisteredFriendCode())).toBe(null);
+    });
+
     // depends heavily on other tests
     test('should get a stable getAllUserData', async () => {
-        expect(await uDao1.getAllUserData()).toMatchSnapshot();
+      const data = await uDao1.getAllUserData();
+      delete data.friendCodes; // not stable
+      delete data.registeredFriendCode; // not stable
+      expect(data).toMatchSnapshot();
     });
 
     test('should completely delete data about the user', async () => {

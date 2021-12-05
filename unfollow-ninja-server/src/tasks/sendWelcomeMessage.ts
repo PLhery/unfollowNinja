@@ -16,15 +16,22 @@ const TWITTER_ACCOUNT = process.env.TWITTER_ACCOUNT || 'unfollowninja';
 
 export default class extends Task {
     public async run(job: Job) {
-        const { username, userId } = job.data;
+        const { username, userId, isPro } = job.data;
         const userDao = this.dao.getUserDao(userId);
         const dmTwit = await userDao.getDmTwit();
         i18n.setLocale(await userDao.getLang());
 
-        const message = i18n.__('All set, welcome to @{{twitterAccount}} {{emoji}}!\n' +
-            'You will soon know all about your unfollowers here!',
-          { twitterAccount: TWITTER_ACCOUNT, emoji: '🙌' }
-        );
+        let message;
+        if (isPro) {
+          message = i18n.__('Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!',
+            { twitterAccount: TWITTER_ACCOUNT, emoji: '🚀' }
+          );
+        } else {
+          message = i18n.__('All set, welcome to @{{twitterAccount}} {{emoji}}!\n' +
+              'You will soon know all about your unfollowers here!',
+            { twitterAccount: TWITTER_ACCOUNT, emoji: '🙌' }
+          );
+        }
 
       this.dao.userEventDao
         .logNotificationEvent(userId, NotificationEvent.welcomeMessage, await userDao.getDmId(), message);

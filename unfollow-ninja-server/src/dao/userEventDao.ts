@@ -15,6 +15,10 @@ export enum WebEvent {
   logout,
   setLang,
   adminFetchUser,
+  tryFriendCode,
+  enablePro,
+  enableFriends,
+  registeredAsFriend,
 }
 
 interface IWebEvent extends Model {

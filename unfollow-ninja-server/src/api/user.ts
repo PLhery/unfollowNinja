@@ -40,6 +40,7 @@ export function createUserRouter(dao: Dao, queue: Queue) {
       const lang = (ctx.request as any).body?.lang;
       if (!SUPPORTED_LANGUAGES_CONST.includes(lang)) {
         await ctx.throw(400);
+        return;
       }
       await dao.getUserDao(session.userId).setUserParams({lang});
       dao.userEventDao.logWebEvent(session.userId, WebEvent.setLang, ctx.ip, session.username, lang);
@@ -51,5 +52,33 @@ export function createUserRouter(dao: Dao, queue: Queue) {
       });
 
       ctx.status = 204;
-    });
+    })
+    .put('/registerFriendCode', async ctx => { // /!\ to rate limit
+      const session = ctx.session as NinjaSession;
+      const code = (ctx.request as any).body?.code;
+
+      dao.userEventDao.logWebEvent(session.userId, WebEvent.tryFriendCode, ctx.ip, session.username, code);
+      if (code.length !== 6) {
+        ctx.throw(400);
+        return;
+      }
+      const success = await dao.getUserDao(session.userId).registerFriendCode(code);
+      if (!success) {
+        ctx.throw(404);
+        return;
+      }
+
+      dao.userEventDao.logWebEvent(session.userId, WebEvent.registeredAsFriend, ctx.ip, session.username, code);
+      await dao.getUserDao(session.userId).setUserParams({pro: '3'});
+      await dao.getUserDao(session.userId).setCategory(UserCategory.vip);
+
+      await queue.add('sendWelcomeMessage', {
+        id: Date.now(), // otherwise some seem stuck??
+        userId: session.userId,
+        username: session.username,
+        isPro: true,
+      });
+
+      ctx.status = 204;
+    })
 }
