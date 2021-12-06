@@ -48,7 +48,10 @@ function MiniApp(props) {
   // send the user's username and info to the support chatbot
   useEffect(() => {
 	if (userInfo?.username) {
-	  window.$crisp?.push(['set', 'session:data', [Object.entries(userInfo)]]);
+	  window.$crisp?.push(['set', 'session:data', [
+		Object.entries(userInfo)
+		  .map(kv => ['string', 'number', 'boolean'].includes(typeof kv[1]) ? kv : [kv[0], JSON.stringify(kv[1])]),
+	  ]]);
 	}
   }, [userInfo]);
 
