@@ -19,6 +19,8 @@ export enum WebEvent {
   enablePro,
   enableFriends,
   registeredAsFriend,
+  disablePro,
+  disableFriendRegistration,
 }
 
 interface IWebEvent extends Model {

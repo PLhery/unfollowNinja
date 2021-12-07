@@ -9,10 +9,7 @@ function ProCard(props) {
   const { user, setUserInfo, setHasError } = props;
 
   const [isWrongCode, setIsWrongCode] = useState(false);
-
-  if(!localStorage.getItem('beta')) {
-	return null;
-  }
+  const [planValue, setPlanValue] = useState('friends');
 
   const codeChanged = (event) => {
 	const newCode = event.target.value;
@@ -76,14 +73,17 @@ function ProCard(props) {
 			Become <b className={Styles.pro}>pro</b> to be notified in <b>30 seconds</b>!<br/>
 		</Paragraph>
 		<RadioButtonGroup
-		  defaultValue='friends'
+		  value={planValue}
 		  name='choosePlan'
 		  options={[
 			{ label: <><b>Pro</b>: 1 Twitter account - 3 dollars/year</>, value: 'pro' },
 			{ label: <><b>Friends</b>: 5 Twitter accounts - 5 dollars/year</>, value: 'friends' }
-		  ]}/>
+		  ]}
+		  onChange={(e) => setPlanValue(e.target.value)}
+		/>
 		<Button
 		  className={Styles.checkoutButton}
+		  href={`${API_URL}/user/buy-${planValue}`}
 		  label={<>
 		  <Image className={Styles.googlePayIcon} src={googlePay} alt='Google pay'/>
 		  <Image height={26} src={applePay} alt='Apple pay'/>

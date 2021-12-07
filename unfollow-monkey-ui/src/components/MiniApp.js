@@ -125,7 +125,7 @@ function MiniApp(props) {
 	  }
       const content = JSON.parse(decodeURI(event.data.content));
 	  setUserInfo(content);
-	  window.$crisp?.push(['set', 'session:event', [[['logged-in']]]]);
+	  window.$crisp?.push(['set', 'session:event', [[[event.data.msg]]]]);
 	}
 
 	window.addEventListener('message', processMessage);

@@ -70,6 +70,7 @@
     "pg": "^8.7.1",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.6.5",
+    "stripe": "^8.191.0",
     "twit": "^2.2.11",
     "twitter-api-v2": "^1.4.1",
     "winston": "^3.3.3"

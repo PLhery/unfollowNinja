@@ -241,7 +241,7 @@ export default class UserDao {
     }
 
     public async registerFriendCode(code: string): Promise<boolean> {
-      const [nbUpdates] = await this.dao.FriendCode.update({friendId: this.userId}, {where: {code}});
+      const [nbUpdates] = await this.dao.FriendCode.update({friendId: this.userId}, {where: {code, friendId: null}});
       return nbUpdates === 1;
     }
 

@@ -209,6 +209,7 @@ describe('Test userDao', () => {
 
       expect(await uDao2.registerFriendCode('AAAAAA')).toBe(false);
       expect(await uDao2.registerFriendCode(codes[1].code)).toBe(true);
+      expect(await uDao2.registerFriendCode(codes[1].code)).toBe(false);
       expect((await uDao2.getRegisteredFriendCode())?.userId).toBe('1');
 
       await uDao2.deleteFriendCodes(codes[1].code);

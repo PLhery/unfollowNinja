@@ -8,12 +8,14 @@ import koaBodyParser from 'koa-bodyparser';
 import koaCors from '@koa/cors';
 import Bull from 'bull';
 import geoip from 'geoip-country';
+import Stripe from 'stripe';
 
 import Dao, {UserCategory} from './dao/dao';
 import logger, {setLoggerPrefix} from './utils/logger';
 import {createAuthRouter} from './api/auth';
 import {createAdminRouter} from './api/admin';
 import {createUserRouter} from './api/user';
+import {disablePro, enablePro} from './api/stripe';
 
 function assertEnvVariable(name: string) {
   if (typeof process.env[name] === 'undefined') {
@@ -58,6 +60,10 @@ export interface NinjaSession {
   username?: string;
 }
 
+const stripe = process.env.STRIPE_SK ? new Stripe(process.env.STRIPE_SK, {
+  apiVersion: '2020-08-27',
+}) : null;
+
 const router = new Router()
   .get('/', ctx => {
     ctx.body = {status: 'ᕕ( ᐛ )ᕗ Hello, fellow human'};
@@ -94,6 +100,37 @@ const router = new Router()
         friendCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
       };
     }
+  })
+  .post('/stripe-webhook', async ctx => {
+    const endpointSecret = process.env.STRIPE_WH_SECRET;
+    if (!stripe || !endpointSecret) {
+      return ctx.throw(404);
+    }
+    const signature = ctx.request.headers['stripe-signature'];
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        (ctx.request as any).rawBody,
+        signature,
+        endpointSecret
+      );
+    } catch (err) {
+      return ctx.throw(400);
+    }
+    const subscription = event.data.object;
+    const { userId, plan } = subscription.metadata;
+
+    switch (event.type) {
+      case 'customer.subscription.updated':
+        if (subscription.status === 'active') { // enable pro
+          await enablePro(dao, bullQueue, userId, plan, ctx.ip, subscription.id);
+        }
+        break;
+      case 'customer.subscription.deleted':
+        await disablePro(dao, userId, ctx.ip, subscription.id);
+        break;
+    }
+    ctx.status=204;
   });
 
 // Create the server app with its router/log/session and error management

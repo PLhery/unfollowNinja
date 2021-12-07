@@ -5,6 +5,7 @@ import type Dao from '../dao/dao';
 import type { NinjaSession } from '../api';
 import { UserCategory } from '../dao/dao';
 import { WebEvent } from '../dao/userEventDao';
+import {disablePro, enablePro} from './stripe';
 
 export function createAdminRouter(dao: Dao, queue: Queue) {
   return new Router()
@@ -17,19 +18,7 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
       await next();
     })
     .get('/user/:usernameOrId', async (ctx) => {
-      let userId: string;
-      if(!Number.isNaN(Number(ctx.params.usernameOrId)))  { // usernameOrId is an ID
-        userId = ctx.params.usernameOrId;
-      } else { // usernameOrId is a username, look for the ID
-        const client = await dao.getUserDao(process.env.ADMIN_USERID).getTwitterApi();
-        try {
-          const result = await client.v1.user({screen_name: ctx.params.usernameOrId});
-          userId = result.id_str;
-        } catch {
-          userId = await dao.getCachedUserId(ctx.params.usernameOrId); // can take some time as the username is not indexed
-        }
-      }
-
+      const userId = await getUserId(ctx.params.usernameOrId);
       const userDao = dao.getUserDao(userId);
       const params = await userDao.getUserParams();
       const username = await userDao.getUsername();
@@ -60,53 +49,40 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
     })
     .get('/set-pro/:usernameOrId', async ctx => {
       const session = ctx.session as NinjaSession;
+      const userId = await getUserId(ctx.params.usernameOrId);
+      const username = await dao.getCachedUsername(userId)
 
-      let userId: string;
-      if(!Number.isNaN(Number(ctx.params.usernameOrId)))  { // usernameOrId is an ID
-        userId = ctx.params.usernameOrId;
-      } else { // usernameOrId is a username, look for the ID
-        const client = await dao.getUserDao(process.env.ADMIN_USERID).getTwitterApi();
-        const result = await client.v1.user({screen_name: ctx.params.usernameOrId});
-        userId = result.id_str;
-      }
-
-      dao.userEventDao.logWebEvent(session.userId, WebEvent.enablePro, ctx.ip, userId);
-      await dao.getUserDao(userId).setUserParams({pro: '1'});
-      await dao.getUserDao(userId).setCategory(UserCategory.vip);
-
-      await queue.add('sendWelcomeMessage', {
-        id: Date.now(), // otherwise some seem stuck??
-        userId,
-        username: await dao.getCachedUsername(userId),
-        isPro: true,
-      });
-
+      dao.userEventDao.logWebEvent(session.userId, WebEvent.enablePro, ctx.ip, username, userId);
+      await enablePro(dao, queue, userId, 'pro', ctx.ip, 'admin-' + session.userId)
       ctx.status = 204;
     })
     .get('/set-friends/:usernameOrId', async ctx => {
         const session = ctx.session as NinjaSession;
+        const userId = await getUserId(ctx.params.usernameOrId);
+        const username = await dao.getCachedUsername(userId)
 
-        let userId: string;
-        if(!Number.isNaN(Number(ctx.params.usernameOrId)))  { // usernameOrId is an ID
-          userId = ctx.params.usernameOrId;
-        } else { // usernameOrId is a username, look for the ID
-          const client = await dao.getUserDao(process.env.ADMIN_USERID).getTwitterApi();
-          const result = await client.v1.user({screen_name: ctx.params.usernameOrId});
-          userId = result.id_str;
-        }
-
-        dao.userEventDao.logWebEvent(session.userId, WebEvent.enableFriends, ctx.ip, userId);
-        await dao.getUserDao(userId).setUserParams({pro: '2'});
-        await dao.getUserDao(userId).setCategory(UserCategory.vip);
-        await dao.getUserDao(userId).addFriendCodes();
-
-        await queue.add('sendWelcomeMessage', {
-          id: Date.now(), // otherwise some seem stuck??
-          userId,
-          username: await dao.getCachedUsername(userId),
-          isPro: true,
-        });
-
+        dao.userEventDao.logWebEvent(session.userId, WebEvent.enableFriends, ctx.ip, username, userId);
+        await enablePro(dao, queue, userId, 'friends', ctx.ip, 'admin-' + session.userId)
         ctx.status = 204;
-      });
+    })
+    .get('/remove-pro/:usernameOrId', async ctx => {
+      const session = ctx.session as NinjaSession;
+      const userId = await getUserId(ctx.params.usernameOrId);
+      const username = await dao.getCachedUsername(userId)
+
+      dao.userEventDao.logWebEvent(session.userId, WebEvent.disablePro, ctx.ip, username, userId);
+      await disablePro(dao, userId, ctx.ip, 'admin-' + session.userId)
+
+      ctx.status = 204;
+    });
+
+  async function getUserId(usernameOrId: string) {
+    if(!Number.isNaN(Number(usernameOrId)))  { // usernameOrId is an ID
+      return usernameOrId;
+    } else { // usernameOrId is a username, look for the ID
+      const client = await dao.getUserDao(process.env.ADMIN_USERID).getTwitterApi();
+      const result = await client.v1.user({screen_name: usernameOrId});
+      return result.id_str;
+    }
+  }
 }
