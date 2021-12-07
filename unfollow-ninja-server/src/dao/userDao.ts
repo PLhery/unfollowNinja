@@ -8,6 +8,7 @@ import type {default as Dao, IFriendCode} from './dao';
 import { UserCategory } from './dao';
 import type { IUserParams, Lang } from '../utils/types';
 import { twitterCursorToTime } from '../utils/utils';
+import {Op} from "sequelize";
 
 export default class UserDao {
     private readonly redis: Redis.Redis;
