@@ -279,6 +279,19 @@ export default class UserDao {
         };
     }
 
+  // delete follower data about revoked users
+  // to save some RAM space
+  public async cleanUser(): Promise<void> {
+      await this.redis.del(
+        `nextCheckTime:${this.userId}`,
+        `followers:${this.userId}`,
+        `followers:count:${this.userId}`,
+        `followers:follow-time:${this.userId}`,
+        `followers:uncachable:${this.userId}`,
+        `followers:snowflake-ids:${this.userId}`,
+      );
+  }
+
     // Not safe (some tasks for that user may still exist)
     // But can be used for disabled account
     public async deleteUser(): Promise<void> {
