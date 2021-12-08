@@ -10,5 +10,6 @@
     "You blocked {{username}} {{emoji}}.": "Zablokowałeś {{username}} {{emoji}}.",
     "This account followed you for {{duration}} ({{{time}}}).": "Te konto obserwowało cię przez {{duration}} ({{{time}}}).",
     "This account followed you before you signed up to @{{twitterAccount}}!": "Te konto zaobserwowało cię przed tym jak się zarejestrowałeś na @{{twitterAccount}}!",
-    "{{username}}'s account has been locked {{emoji}}.": "Konto {{username}} zostało zablokowane {{emoji}}."
+    "{{username}}'s account has been locked {{emoji}}.": "Konto {{username}} zostało zablokowane {{emoji}}.",
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "Gratulacje, możesz teraz korzystać z @{{twitterAccount} pro {{emoji}}!"
 }

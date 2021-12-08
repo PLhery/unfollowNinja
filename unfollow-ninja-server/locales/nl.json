@@ -1,0 +1,11 @@
+{
+    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} Twittergebruikers die je ontvolgden:",
+    "one of you followers": "een van je volgers",
+    "{{username}} unfollowed you {{emoji}}.": "{{username}} heeft je ontvolgt {{emoji}}.",
+    "{{username}} has been suspended {{emoji}}.": "{{username}} is opgeschort {{emoji}}.",
+    "{{username}} has left Twitter {{emoji}}.": "{{username}} heeft Twitter verlaten {{emoji}}.",
+    "{{username}} blocked you {{emoji}}.": "{{username}} heeft je geblokkeerd {{emoji}}.",
+    "You blocked {{username}} {{emoji}}.": "Je blokkeerde {{username}} {{emoji}}.",
+    "This account followed you for {{duration}} ({{{time}}}).": "Dit account heeft je gevolgd voor {{duration}} ({{{time}}}).",
+    "This account followed you before you signed up to @{{twitterAccount}}!": "Dit account volgde je voordat je je aanmeldde bij @{{twitterAccount}}!"
+}
