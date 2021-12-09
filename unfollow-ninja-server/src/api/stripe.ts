@@ -50,6 +50,7 @@ export const enablePro = async (dao: Dao, queue: Queue, userId: string, plan: 'f
   const userDao = dao.getUserDao(userId);
   const username = await dao.getCachedUsername(userId);
 
+  const wasPro = userDao.isPro();
   if (plan === 'friends') {
     dao.userEventDao.logWebEvent(userId, WebEvent.enableFriends, ip, username, subscriptionId);
     await userDao.setUserParams({pro: '2'});
@@ -61,12 +62,14 @@ export const enablePro = async (dao: Dao, queue: Queue, userId: string, plan: 'f
   }
   await userDao.setCategory(UserCategory.vip);
 
-  await queue.add('sendWelcomeMessage', {
-    id: Date.now(),
-    userId,
-    username,
-    isPro: true,
-  });
+  if (!wasPro) {
+    await queue.add('sendWelcomeMessage', {
+      id: Date.now(),
+      userId,
+      username,
+      isPro: true,
+    });
+  }
 }
 
 export const disablePro = async (dao: Dao, userId: string, ip: string, subscriptionId: string) => {
