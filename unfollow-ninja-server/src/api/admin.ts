@@ -75,6 +75,12 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
       await disablePro(dao, userId, ctx.ip, 'admin-' + session.userId)
 
       ctx.status = 204;
+    })
+    .get('/update-params/:usernameOrId', async ctx => {
+      const session = ctx.session as NinjaSession;
+      const userId = await getUserId(ctx.params.usernameOrId);
+      dao.getUserDao(userId).setUserParams(ctx.request.query);
+      ctx.status = 204;
     });
 
   async function getUserId(usernameOrId: string) {
