@@ -33,7 +33,7 @@ describe('Test UserEventDAO', () => {
     });
 
     // because logWebEvent doesn't have any await, these tests can be flacky when run on docker
-    jest.retryTimes(2);
+    jest.retryTimes(5);
 
     test('should log webEvents', async () => {
       userEventDao.logWebEvent('user1', WebEvent.signIn, '127.0.0.1', 'username1');
