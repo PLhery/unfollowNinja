@@ -37,6 +37,7 @@ const USER_PARAMS_2: IUserParams = {
     dmToken: 'token',
     dmTokenSecret: 'secret',
     pro: '1',
+    customerId: 'cus_xXx1fff000999fY'
 };
 
 describe('Test userDao', () => {
@@ -101,7 +102,8 @@ describe('Test userDao', () => {
     });
 
     test('should be able to fetch and edit user params', async () => {
-        const uParamsStr1 = {...USER_PARAMS_1, added_at: 1234, dmId: '', dmToken: '', dmTokenSecret: '', pro: '0'};
+        const uParamsStr1 = {...USER_PARAMS_1,
+          added_at: 1234, dmId: '', dmToken: '', dmTokenSecret: '', customerId: '', pro: '0'};
         const uParamsStr2 = {...USER_PARAMS_2, added_at: 2345, pro: '1'};
         expect(await uDao1.getUserParams()).toStrictEqual(uParamsStr1);
         expect(await uDao2.getUserParams()).toStrictEqual(uParamsStr2);

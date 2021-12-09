@@ -20,6 +20,7 @@ Object {
   ],
   "userParams": Object {
     "added_at": 1234,
+    "customerId": "",
     "dmId": "",
     "dmToken": "",
     "dmTokenSecret": "",

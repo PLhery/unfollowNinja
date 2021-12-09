@@ -6,12 +6,9 @@ import type { NinjaSession } from '../api';
 import { UserCategory } from '../dao/dao';
 import { WebEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES_CONST } from '../utils/utils';
-import Stripe from 'stripe';
+import {generateProCheckoutUrl} from './stripe';
 
 export function createUserRouter(dao: Dao, queue: Queue) {
-  const stripe = process.env.STRIPE_SK ? new Stripe(process.env.STRIPE_SK, {
-    apiVersion: '2020-08-27',
-  }) : null;
 
   return new Router()
     .use(async (ctx, next) => {
@@ -88,62 +85,22 @@ export function createUserRouter(dao: Dao, queue: Queue) {
     })
     .get('/buy-pro', async ctx => {
       const session = ctx.session as NinjaSession;
-      if(!stripe) {
+      const checkoutUrl = await generateProCheckoutUrl('pro', session.userId, session.username)
+      if(!checkoutUrl) { // stripe disabled
         ctx.throw(404)
         return;
       }
 
-      const stripeSession = await stripe.checkout.sessions.create({
-        billing_address_collection: 'auto',
-        line_items: [
-          {
-            price:  'price_1K2j6qEwrjMfujSGZiTUPDH9', // pro 3$/y
-            quantity: 1,
-          },
-        ],
-        mode: 'subscription',
-        subscription_data: {
-          metadata: {
-            userId: session.userId,
-            username: session.username,
-            plan: 'pro'
-          }
-        },
-        allow_promotion_codes: false,
-        success_url: `${process.env.WEB_URL}`,
-        cancel_url: `${process.env.WEB_URL}`,
-      });
-
-      ctx.redirect(stripeSession.url);
+      ctx.redirect(checkoutUrl);
     })
     .get('/buy-friends', async ctx => {
       const session = ctx.session as NinjaSession;
-      if(!stripe) {
+      const checkoutUrl = await generateProCheckoutUrl('friends', session.userId, session.username)
+      if(!checkoutUrl) { // stripe disabled
         ctx.throw(404)
         return;
       }
 
-      const stripeSession = await stripe.checkout.sessions.create({
-        billing_address_collection: 'auto',
-        line_items: [
-          {
-            price:  'price_1K3pLUEwrjMfujSGjQxbfSOB', // friends 5$/y
-            quantity: 1,
-          },
-        ],
-        mode: 'subscription',
-        subscription_data: {
-          metadata: {
-            userId: session.userId,
-            username: session.username,
-            plan: 'friends'
-          },
-        },
-        allow_promotion_codes: false,
-        success_url: `${process.env.WEB_URL}`,
-        cancel_url: `${process.env.WEB_URL}`,
-      });
-
-      ctx.redirect(stripeSession.url);
+      ctx.redirect(checkoutUrl);
     });
 }

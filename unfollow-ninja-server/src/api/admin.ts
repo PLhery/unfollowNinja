@@ -35,6 +35,7 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
         dmId: params.dmId,
         dmUsername: await dao.getCachedUsername(params.dmId),
         pro: params.pro,
+        customerId: params.customerId,
         friendCodes: await userDao.getFriendCodes(),
         registeredFriendCode: await userDao.getRegisteredFriendCode(),
         notificationEvents: await dao.userEventDao.getNotificationEvents(userId),
