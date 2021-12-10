@@ -110,6 +110,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
           country: geoip.lookup(ctx.ip)?.country,
           isPro: Number(params.pro) > 0,
           friendCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
+          hasSubscription: Boolean(params.customerId),
       }));
 
       ctx.type = 'html';
@@ -191,6 +192,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
         country: geoip.lookup(ctx.ip)?.country,
         isPro: Number(params.pro) > 0,
         friendCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
+        hasSubscription: Boolean(params.customerId),
       }));
 
       ctx.type = 'html';
