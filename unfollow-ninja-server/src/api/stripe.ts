@@ -60,7 +60,9 @@ export const enablePro = async (dao: Dao, queue: Queue, userId: string, plan: 'f
     await userDao.setUserParams({pro: '1'});
     await disableFriendCodes(dao, userId, ip); // in case the update is a downgrade
   }
-  await userDao.setCategory(UserCategory.vip);
+  if (UserCategory.enabled === await userDao.getCategory()) {
+    await userDao.setCategory(UserCategory.vip);
+  }
 
   if (!wasPro) {
     await queue.add('sendWelcomeMessage', {

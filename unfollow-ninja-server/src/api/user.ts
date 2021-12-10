@@ -106,7 +106,7 @@ export function createUserRouter(dao: Dao, queue: Queue) {
     .get('/manage-subscription', async ctx => {
       const session = ctx.session as NinjaSession;
       const manageSubscriptionUrl = await getManageSubscriptionUrl(dao, session.userId);
-      if(!manageSubscriptionUrl) { // stripe disabled
+      if (!manageSubscriptionUrl) { // stripe disabled or no customerId
         ctx.body='No subscription could be found on this account.'
         ctx.status = 404;
         return;
