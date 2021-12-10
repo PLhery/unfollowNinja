@@ -59,6 +59,7 @@
     "hot-shots": "^9.0.0",
     "i18n": "^0.13.2",
     "ioredis": "^4.27.9",
+    "iso-country-currency": "^0.6.0",
     "koa": "^2.13.1",
     "koa-bodyparser": "^4.3.0",
     "koa-router": "^10.1.1",

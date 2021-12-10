@@ -77,8 +77,8 @@ function ProCard(props) {
 		  value={planValue}
 		  name='choosePlan'
 		  options={[
-			{ label: <><b>Pro</b>: 1 Twitter account - 3 dollars/year</>, value: 'pro' },
-			{ label: <><b>Friends</b>: 5 Twitter accounts - 5 dollars/year</>, value: 'friends' }
+			{ label: <><b>Pro</b>: 1 Twitter account - {user.priceTags.pro}/year</>, value: 'pro' },
+			{ label: <><b>Friends</b>: 5 Twitter accounts - {user.priceTags.friends}/year</>, value: 'friends' }
 		  ]}
 		  onChange={(e) => setPlanValue(e.target.value)}
 		/>

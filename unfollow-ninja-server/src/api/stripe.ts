@@ -1,10 +1,12 @@
 import type { Queue } from 'bull';
 import type { ParameterizedContext } from 'koa';
 import Stripe from 'stripe';
+import { getAllInfoByISO } from 'iso-country-currency';
 
 import {WebEvent} from '../dao/userEventDao';
 import {UserCategory} from '../dao/dao';
 import type Dao from '../dao/dao';
+import geoip from "geoip-country";
 
 const stripe = process.env.STRIPE_SK ? new Stripe(process.env.STRIPE_SK, {
   apiVersion: '2020-08-27',
@@ -102,15 +104,16 @@ const disableFriendCodes = async (dao: Dao, userId: string, ip: string) => {
   }
 }
 
-export const generateProCheckoutUrl = async (plan: 'pro' | 'friends', userId: string, username: string) => {
+export const generateProCheckoutUrl = async (countryCode: string, plan: 'pro' | 'friends', userId: string, username: string) => {
   if(!stripe) {
     return null;
   }
+  const price = getPrice(countryCode);
   const stripeSession = await stripe.checkout.sessions.create({
     billing_address_collection: 'auto',
     line_items: [
       {
-        price: plan === 'friends' ? 'price_1K3pLUEwrjMfujSGjQxbfSOB' : 'price_1K2j6qEwrjMfujSGZiTUPDH9',
+        price: plan === 'friends' ? price.friendsId : price.proId,
         quantity: 1,
       },
     ],
@@ -141,4 +144,76 @@ export const getManageSubscriptionUrl = async(dao: Dao, userId: string) => {
     return null;
   }
   return (await stripe.billingPortal.sessions.create({customer})).url;
+}
+
+
+interface Price {
+  pro: number | string;
+  proId: string;
+  friends: number | string;
+  friendsId: string;
+  name: string;
+}
+
+const PRICES: Record<string, Price> = {
+  USD: {
+    pro: 3,
+    proId: 'price_1K2j6qEwrjMfujSGZiTUPDH9',
+    friends: 5,
+    friendsId: 'price_1K3pLUEwrjMfujSGjQxbfSOB',
+    name: 'dollars'
+  },
+  EUR: {
+    pro: '2.50',
+    proId: 'price_1K58S6EwrjMfujSGdHu2h1k8',
+    friends: 4,
+    friendsId: 'price_1K58WaEwrjMfujSGPSu3Gain',
+    name: 'euros'
+  },
+  IDR: {
+    pro: '20 000',
+    proId: 'price_1K58ZHEwrjMfujSGramvgpCR',
+    friends: '35 000',
+    friendsId: 'price_1K58abEwrjMfujSGYGfEDyZS',
+    name: 'rupiah'
+  },
+  PHP: {
+    pro: 120,
+    proId: 'price_1K58ddEwrjMfujSGGoga3KB7',
+    friends: 190,
+    friendsId: 'price_1K58dsEwrjMfujSGyAXvzoMz',
+    name: 'pesos'
+  },
+  BRL: {
+    pro: 20,
+    proId: 'price_1K58fnEwrjMfujSG4BjZ0v5A',
+    friends: 30,
+    friendsId: 'price_1K58g2EwrjMfujSGDPKV7Fqj',
+    name: 'reais'
+  },
+  GBP: {
+    pro: 2,
+    proId: 'price_1K58isEwrjMfujSGhUcEq77E',
+    friends: '3.50',
+    friendsId: 'price_1K58jcEwrjMfujSG5qXVO8mB',
+    name: 'pounds'
+  },
+};
+
+const getPrice = (countryCode: string) => {
+  let currency;
+  try {
+    currency = getAllInfoByISO(countryCode).currency;
+  } catch {
+    currency = 'USD';
+  }
+  return PRICES[currency] || PRICES.USD;
+}
+
+export const getPriceTags = (countryCode: string) => {
+  const price = getPrice(countryCode);
+  return {
+    pro: price.pro + ' ' + price.name,
+    friends: price.friends + ' ' + price.name,
+  }
 }

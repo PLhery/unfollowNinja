@@ -7,6 +7,7 @@ import { UserCategory } from '../dao/dao';
 import { WebEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES_CONST } from '../utils/utils';
 import {generateProCheckoutUrl, getManageSubscriptionUrl} from './stripe';
+import geoip from "geoip-country";
 
 export function createUserRouter(dao: Dao, queue: Queue) {
 
@@ -85,7 +86,8 @@ export function createUserRouter(dao: Dao, queue: Queue) {
     })
     .get('/buy-pro', async ctx => {
       const session = ctx.session as NinjaSession;
-      const checkoutUrl = await generateProCheckoutUrl('pro', session.userId, session.username)
+      const country = geoip.lookup(ctx.ip)?.country;
+      const checkoutUrl = await generateProCheckoutUrl(country, 'pro', session.userId, session.username)
       if(!checkoutUrl) { // stripe disabled
         ctx.throw(404)
         return;
@@ -95,7 +97,8 @@ export function createUserRouter(dao: Dao, queue: Queue) {
     })
     .get('/buy-friends', async ctx => {
       const session = ctx.session as NinjaSession;
-      const checkoutUrl = await generateProCheckoutUrl('friends', session.userId, session.username)
+      const country = geoip.lookup(ctx.ip)?.country;
+      const checkoutUrl = await generateProCheckoutUrl(country, 'friends', session.userId, session.username)
       if(!checkoutUrl) { // stripe disabled
         ctx.throw(404)
         return;

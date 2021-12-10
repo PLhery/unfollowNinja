@@ -14,7 +14,7 @@ import logger, {setLoggerPrefix} from './utils/logger';
 import {createAuthRouter} from './api/auth';
 import {createAdminRouter} from './api/admin';
 import {createUserRouter} from './api/user';
-import { handleWebhook } from './api/stripe';
+import {getPriceTags, handleWebhook} from './api/stripe';
 
 function assertEnvVariable(name: string) {
   if (typeof process.env[name] === 'undefined') {
@@ -84,13 +84,15 @@ const router = new Router()
         dao.getUserDao(session.userId).getUserParams(),
         dao.getUserDao(session.userId).getCategory(),
       ])
+      const country = geoip.lookup(ctx.ip)?.country;
       ctx.body = {
         username: session.username,
         dmUsername: params.dmId && [UserCategory.enabled, UserCategory.vip].includes(category) ?
           await dao.getCachedUsername(params.dmId) : null,
         category,
         lang: params.lang,
-        country: geoip.lookup(ctx.ip)?.country,
+        country,
+        priceTags: getPriceTags(country),
         isPro: Number(params.pro) > 0,
         friendCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
         hasSubscription: Boolean(params.customerId),

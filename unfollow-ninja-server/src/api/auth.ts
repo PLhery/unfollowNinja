@@ -9,6 +9,7 @@ import {UserCategory} from '../dao/dao';
 import type {NinjaSession} from '../api';
 import {Lang} from '../utils/types';
 import { WebEvent } from '../dao/userEventDao';
+import {getPriceTags} from "./stripe";
 
 const authRouter = new Router();
 
@@ -100,14 +101,15 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
       session.username = loginResult.screenName;
 
       dao.userEventDao.logWebEvent(loginResult.userId, WebEvent.signIn, ctx.ip, loginResult.screenName);
-
+      const country = geoip.lookup(ctx.ip)?.country;
       const msgContent = encodeURI(JSON.stringify({
           username: loginResult.screenName,
           dmUsername: params.dmId && [UserCategory.enabled, UserCategory.vip].includes(category) ?
             await dao.getCachedUsername(params.dmId) : null,
           category,
           lang: params.lang,
-          country: geoip.lookup(ctx.ip)?.country,
+          country,
+          priceTags: getPriceTags(country),
           isPro: Number(params.pro) > 0,
           friendCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
           hasSubscription: Boolean(params.customerId),
@@ -183,13 +185,14 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
       }, {delay: 500}); // otherwise it looks like it weirdly may start before setUserParams finished :/
 
       const params = await dao.getUserDao(session.userId).getUserParams();
-
+      const country = geoip.lookup(ctx.ip)?.country;
       const msgContent = encodeURI(JSON.stringify({
         username: session.username,
         dmUsername: loginResult.screenName,
         category,
         lang: params.lang,
-        country: geoip.lookup(ctx.ip)?.country,
+        country,
+        priceTags: getPriceTags(country),
         isPro: Number(params.pro) > 0,
         friendCodes: params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
         hasSubscription: Boolean(params.customerId),
