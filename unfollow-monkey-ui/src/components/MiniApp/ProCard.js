@@ -4,6 +4,7 @@ import {Button, Card, Image, Paragraph, RadioButtonGroup, TextInput} from "gromm
 import Styles from './ProCard.module.scss';
 import {applePay, googlePay, mastercard} from "../../images";
 import { API_URL } from "../MiniApp";
+import Link from "../Link";
 
 function ProCard(props) {
   const { user, setUserInfo, setHasError } = props;
@@ -49,7 +50,7 @@ function ProCard(props) {
 	  <Paragraph>
 		Congratulations, you can now enjoy UMonkey <b className={Styles.pro}>pro</b><br/>
 		You will be notified in <b>30sec</b> instead of 30min 🚀<br/>
-		{/*<Link href='#' className={Styles.subscriptionLink}>Manage subscription</Link>*/}
+		<Link href={`${API_URL}/user/manage-subscription`} className={Styles.subscriptionLink}>Manage subscription</Link>
 	  </Paragraph>
 	  { user.friendCodes && <>
 		<Paragraph margin={{bottom: 'none'}}>You can also share these codes, thx to the <b className={Styles.pro}>friends</b> plan:</Paragraph>
