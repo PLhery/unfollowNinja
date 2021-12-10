@@ -3,7 +3,7 @@
     "{{username}} has left Twitter {{emoji}}.": "{{username}} opuścił Twittera {{emoji}}.",
     "{{username}} blocked you {{emoji}}.": "{{username}} cię zablokował {{emoji}}.",
     "and {{nbLeftovers}} more.": "oraz {{nbLeftovers}} innych.",
-    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Wszystko ustawione, witamy cię w @{{twitterAccount}} {{emoji}}!\nNiedługo, będziesz wiedział wszystko o osobach, które już cię nie obserwują!",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Wszystko ustawione, witamy w @{{twitterAccount}} {{emoji}}!\nNiedługo, będziesz wiedział wszystko o osobach, które już cię nie obserwują!",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} przestał cię obserwować {{emoji}}.",
     "one of you followers": "jeden z twoich obserwujących",
     "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} użytkowników przestało cię obserwować:",
