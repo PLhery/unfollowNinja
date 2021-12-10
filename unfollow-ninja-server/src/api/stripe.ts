@@ -6,7 +6,6 @@ import { getAllInfoByISO } from 'iso-country-currency';
 import {WebEvent} from '../dao/userEventDao';
 import {UserCategory} from '../dao/dao';
 import type Dao from '../dao/dao';
-import geoip from "geoip-country";
 
 const stripe = process.env.STRIPE_SK ? new Stripe(process.env.STRIPE_SK, {
   apiVersion: '2020-08-27',

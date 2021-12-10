@@ -9,7 +9,7 @@ import {UserCategory} from '../dao/dao';
 import type {NinjaSession} from '../api';
 import {Lang} from '../utils/types';
 import { WebEvent } from '../dao/userEventDao';
-import {getPriceTags} from "./stripe";
+import {getPriceTags} from './stripe';
 
 const authRouter = new Router();
 

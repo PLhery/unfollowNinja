@@ -1,5 +1,6 @@
 import Router from 'koa-router';
 import type { Queue } from 'bull';
+import geoip from 'geoip-country';
 
 import type Dao from '../dao/dao';
 import type { NinjaSession } from '../api';
@@ -7,7 +8,6 @@ import { UserCategory } from '../dao/dao';
 import { WebEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES_CONST } from '../utils/utils';
 import {generateProCheckoutUrl, getManageSubscriptionUrl} from './stripe';
-import geoip from "geoip-country";
 
 export function createUserRouter(dao: Dao, queue: Queue) {
 
