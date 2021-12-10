@@ -100,7 +100,7 @@ const disableFriendCodes = async (dao: Dao, userId: string, ip: string) => {
   }
 }
 
-export const generateProCheckoutUrl = async (plan: 'pro' | 'friends', userId, username) => {
+export const generateProCheckoutUrl = async (plan: 'pro' | 'friends', userId: string, username: string) => {
   if(!stripe) {
     return null;
   }
@@ -128,4 +128,15 @@ export const generateProCheckoutUrl = async (plan: 'pro' | 'friends', userId, us
     cancel_url: `${process.env.WEB_URL}`,
   });
   return stripeSession.url;
+}
+
+export const getManageSubscriptionUrl = async(dao: Dao, userId: string) => {
+  if (!stripe) {
+    return null;
+  }
+  const customer = (await dao.getUserDao(userId).getUserParams()).customerId;
+  if (!customer) {
+    return null;
+  }
+  return (await stripe.billingPortal.sessions.create({customer})).url;
 }

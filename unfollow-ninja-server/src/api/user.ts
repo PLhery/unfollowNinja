@@ -6,7 +6,7 @@ import type { NinjaSession } from '../api';
 import { UserCategory } from '../dao/dao';
 import { WebEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES_CONST } from '../utils/utils';
-import {generateProCheckoutUrl} from './stripe';
+import {generateProCheckoutUrl, getManageSubscriptionUrl} from './stripe';
 
 export function createUserRouter(dao: Dao, queue: Queue) {
 
@@ -102,5 +102,16 @@ export function createUserRouter(dao: Dao, queue: Queue) {
       }
 
       ctx.redirect(checkoutUrl);
+    })
+    .get('/manage-subscription', async ctx => {
+      const session = ctx.session as NinjaSession;
+      const manageSubscriptionUrl = await getManageSubscriptionUrl(dao, session.userId);
+      if(!manageSubscriptionUrl) { // stripe disabled
+        ctx.body='No subscription could be found on this account.'
+        ctx.status = 404;
+        return;
+      }
+
+      ctx.redirect(manageSubscriptionUrl);
     });
 }
