@@ -1,0 +1,111 @@
+PRIVACY POLICY - UNFOLLOW MONKEY - https://unfollow-monkey.com
+--------------------------------------------------------------
+Effective 12/12/2021
+
+At Unfollow Monkey, we take privacy and security seriously. This Privacy Policy outlines how Unfollow Monkey (collectively, Unfollow Monkey,” “we,” “our,” or “us”) process the information we collect about you through our website and other online services (collectively, the “Services”) and when you otherwise interact with us, such as through our customer service channels.
+
+If you are a California resident, please also see the "CCPA PRIVACY RIGHTS" section below.
+
+1. INFORMATION WE COLLECT AND HOW WE COLLECT IT
+
+Information You Provide
+-----------------------
+We collect information you provide when you use our Services or otherwise engage or communicate with us as described below.
+
+Identity Data, such as your name, when you buy a subscription
+Contact Data, such as your email address, and mailing address, when you buy a subscription
+Profile Data, such as your Twitter profile and authentication token
+Additional Data You Provide, such as via survey responses, contests/sweepstakes, customer support, or other means.
+
+Information We Collect Automatically
+-----------------------
+As is true of many digital platforms, we also collect certain information about you automatically when you use our Services, as described below.
+
+Usage Information. We collect information about your activity on our Services, which includes device identifiers (like IP address or mobile device identifiers), pages or features you use, time and date of access, and other similar usage information.
+
+Transactional Information.
+When you receive, submit, or complete a transaction via the Services, we collect information about the transaction, such as transaction amount, type and nature of the transaction, and time and date of the transaction.
+
+Information Collected Through Tracking Technologies.
+We and our service providers also use technologies, including cookies and web beacons, to automatically collect certain types of usage and device information when you use our Services or interact with our emails. The information collected through these technologies includes your IP address, browser type, Internet service provider, platform type, device type, operating system, date and time stamp, a unique device or account ID, usage information and other similar information. For information about how to disable cookies, please see the Your Controls section below.
+
+Information We Collect from Other Sources
+-----------------------
+We also obtain information about you from other sources as described below.
+
+Connected Services. When you connect your account to Twitter, Twitter may send us information such as your profile information from that service. This information varies and is controlled by that service or as authorized by you via your privacy settings at that service.
+
+2. HOW WE USE YOUR INFORMATION.
+We use the information we collect for purposes described below or as otherwise described to you at the point of collection:
+
+Maintain and provide the Services, including to process account applications, authenticate your identity, repair our Services, and handle billing and account management;
+Send you transactional or relationship information, including confirmations, invoices, technical notices, customer support responses, software updates, security alerts, support and administrative messages, and information about your transactions;
+Send you notifications about who stopped following you on Twitter
+Monitor and improve our Services, including analyzing usage, research and development;
+Help protect the safety and security of our Services, business, and users, such as to investigate and help prevent fraud or other unlawful activity;
+Protect or exercise our legal rights or defend against legal claims, including to enforce and carry out contracts and agreements; and
+Comply with applicable laws and legal obligations, such as compliance obligations associated with being a regulated broker-dealer.
+
+3. DISCLOSURES OF INFORMATION.
+We are committed to maintaining your trust, and we want you to understand when and with whom we share information about you. We share information about you in the instances described below.
+
+Authorized third-party vendors and service providers. We share information about you with third-party vendors and service providers who perform services for us, such as mailing services, tax and accounting services, web hosting, customer support, and analytics services. 
+
+Legal purposes. We disclose information about you if we believe that disclosure is in accordance with, or required by, any applicable law or legal process or to protect and defend the rights, interests, safety, and security of Unfollow Monkey, our users, or the public.
+
+With your consent. We share information about you for any other purposes disclosed to you with your consent.
+We share information with others in an aggregated or otherwise de-identified form that does not reasonably identify you.
+
+4. THIRD-PARTY TRACKING
+We use third-party analytics services to better understand your online activity and serve you targeted advertisements. For example, we use Google Analytics and you can review the “How Google uses information from sites or apps that use our services” linked here: http://www.google.com/policies/privacy/partners/ for information about how Google processes the information it collects. These companies collect information about your use of our Services and other websites and online services over time through cookies, device identifiers, or other tracking technologies. The information collected includes your IP address, web browser, mobile network information, pages viewed, time spent, links clicked, and conversion information. We and our third-party partners use this information to, among other things, analyze and track data, and determine the popularity of content.
+
+5. DO NOT TRACK.
+Some web browsers transmit “do-not-track” signals to websites. We currently don’t take action in response to these signals.
+
+6. YOUR CONTROLS.
+Account profile. You may update certain account profile information by logging into your account.
+
+How to control your communications preferences.
+You can stop receiving promotional emails from us by clicking the “unsubscribe” link in those emails. We may still send you service-related or other non-promotional communications, such as account notifications, receipts, security notices and other transactional or relationship messages.
+
+Cookie controls. Many web browsers are set to accept cookies and similar tracking technologies by default. If you prefer, you can set your browser to delete or reject these technologies. If you choose to delete or reject these technologies, this could affect certain features of our Services. Furthermore, if you use a different device, change browsers, or delete the opt-out cookies that contain your preferences, you may need to perform the opt-out task again.
+
+7. CCPA PRIVACY RIGHTS (Do Not Sell My Personal Information)
+Under the CCPA, among other rights, California consumers have the right to:
+
+Request that a business that collects a consumer's personal data disclose the categories and specific pieces of personal data that a business has collected about consumers.
+
+Request that a business delete any personal data about the consumer that a business has collected.
+
+Request that a business that sells a consumer's personal data, not sell the consumer's personal data.
+
+If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us.
+
+8. GDPR DATA PROTECTION RIGHTS
+We would like to make sure you are fully aware of all of your data protection rights. Every user is entitled to the following:
+
+The right to access – You have the right to request copies of your personal data. We may charge you a small fee for this service.
+
+The right to rectification – You have the right to request that we correct any information you believe is inaccurate. You also have the right to request that we complete the information you believe is incomplete.
+
+The right to erasure – You have the right to request that we erase your personal data, under certain conditions.
+
+The right to restrict processing – You have the right to request that we restrict the processing of your personal data, under certain conditions.
+
+The right to object to processing – You have the right to object to our processing of your personal data, under certain conditions.
+
+The right to data portability – You have the right to request that we transfer the data that we have collected to another organization, or directly to you, under certain conditions.
+
+If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us.
+
+8. CHILDREN.
+We do not knowingly collect or solicit any information from anyone under the age of 13 on these Services. In the event we learn that we have inadvertently collected personal information from a child under age 13, we will take reasonable steps to delete that information. If you believe that we might have any information from a child under 13, please contact us at help (at) unfollow-monkey.com.
+
+9. TRANSFER OF INFORMATION.
+Our Services are currently designed for use only in the United States. If you are using our Services from another jurisdiction, your information may be processed in the United States or other countries that may not provide levels of data protection that are equivalent to those of your home jurisdiction.
+
+10. CHANGES TO THIS POLICY.
+This Privacy Policy will evolve with time, and when we update it, we will revise the "Effective Date" above and post the new Policy and, in some cases, we provide additional notice (such as adding a statement to our website or sending you a notification). To stay informed of our privacy practices, we recommend you review the Policy on a regular basis as you continue to use our Services.
+
+11. HOW TO CONTACT US.
+If you have any questions about this Privacy Policy, please contact us at help (at) unfollow-monkey.com

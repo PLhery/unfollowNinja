@@ -78,7 +78,7 @@ function App() {
           <Box direction='row' align='center' alignSelf='center' gap='small'>
             <Image title='logo' height={30} src={Images.Logo}/>
             <Text size='small' textAlign='center' style={{fontFamily: 'quicksand'}}>
-              © 2020 UnfollowMonkey · <Link href='https://www.privacypolicies.com/live/9050f832-39c9-4bec-8eb4-3ddf5ee5cbaa'>TOS</Link> ·
+              © 2020 UnfollowMonkey · <Link href='/tos.txt'>TOS</Link> · <Link href='/privacy-policy.txt'>Privacy</Link> ·
               Discover also <Link href='https://unfollow.ninja/?utm_source=unfollowmonkey_footer'><Image title='unfollowNinja' height={21} src={Images.UnfollowNinja}/></Link> UnfollowNinja <Link href='https://uzzy.me/en?utm_source=unfollowmonkey'><Image title='uzzy' src={Images.Uzzy} height={18}/></Link> Uzzy and <Link href='https://affinitweet.com/?utm_source=unfollowmonkey'><Image title='affinitweet' src={Images.Affinitweet} height={18}/></Link> Affinitweet ·
               Made with ♥ by <Link href='https://twitter.com/plhery'>@plhery</Link> · Available on <Link href='https://github.com/PLhery/unfollowNinja'>GitHub</Link>
             </Text>
