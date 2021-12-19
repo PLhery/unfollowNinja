@@ -33,7 +33,7 @@ const LoggedInIntro = ({ user, logout, removeDMs, changeLang, setUserInfo, setHa
         <Paragraph>
             <Link href='#' onClick={e => {logout();e.preventDefault();}} source='disconnect'>Log out</Link>
             {user.dmUsername && <> — <Link href='#' onClick={e => {removeDMs();e.preventDefault();}} source='disable'>Disable the service</Link></>}
-		  	<> — <Link href='#' onClick={e => {window.$crisp?.push(["do", "chat:open"]);e.preventDefault();}} source='talktous'>Talk with us</Link></>
+		  	<> — <Link href='#' onClick={e => {window.$crisp?.push(["do", "chat:show"]);window.$crisp?.push(["do", "chat:open"]);e.preventDefault();}} source='talktous'>Talk with us</Link></>
         </Paragraph>
     </div>
 };
