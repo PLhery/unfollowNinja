@@ -91,6 +91,7 @@ function ProCard(props) {
 		  <Image height={26} src={mastercard} alt='Mastercard'/>
 		  <span>Pay with Stripe</span>
 		</>}/>
+	  <small>30-days refund policy, if you change your mind</small>
 		<div className={Styles.friendCodeLine + (isWrongCode ? ' ' + Styles.error : '')}>
 		  <Paragraph>Use a friend code:</Paragraph><TextInput maxLength={6} onChange={codeChanged}/>
 		</div>
