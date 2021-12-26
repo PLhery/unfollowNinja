@@ -6,3 +6,4 @@ export {default as id} from './id.svg';
 export {default as de} from './de.svg';
 export {default as th} from './th.svg';
 export {default as pl} from './pl.svg';
+export {default as zh_Hans} from './cn.svg';

@@ -18,6 +18,7 @@ function LanguageSelector(props) {
 	{label: 'German', code: 'de'},
 	{label: 'Thai', code: 'th'},
 	{label: 'Polish', code: 'pl'},
+    {label: 'Chinese', code: 'zh_Hans'},
   ];
 
   const addYours = <span><Link href='https://hosted.weblate.org/projects/unfollow-monkey/notifications/'><IconLink size='small'/> Add yours</Link></span>
