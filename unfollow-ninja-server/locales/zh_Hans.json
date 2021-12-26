@@ -1,0 +1,15 @@
+{
+    "one of you followers": "你的其中的一个关注者",
+    "{{username}} unfollowed you {{emoji}}.": "{{username}} 取消关注了你 {{emoji}}.",
+    "{{username}} blocked you {{emoji}}.": "{{username}} 屏蔽了你 {{emoji}}.",
+    "You blocked {{username}} {{emoji}}.": "你屏蔽了 {{username}} {{emoji}}.",
+    "{{username}} has been suspended {{emoji}}.": "{{username}} 已被冻结 {{emoji}}.",
+    "This account followed you before you signed up to @{{twitterAccount}}!": "这个用户在你注册@{{twitterAccount}} 之前就关注了你!",
+    "This account followed you for {{duration}} ({{{time}}}).": "这个用户已经关注你{{duration}} ({{{time}}})了.",
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "祝贺，你现在可以好好地使用了! @{{twitterAccount}} {{emoji}}!",
+    "{{username}} has left Twitter {{emoji}}.": "{{username}} 注销账号 {{emoji}}.",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "好了，欢迎@{{twitterAccount}} {{emoji}}!\n在这里，你可以知道谁取关了你！",
+    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} 个用户取消关注你:",
+    "{{username}}'s account has been locked {{emoji}}.": "{{username}} 已锁推 {{emoji}}.",
+    "and {{nbLeftovers}} more.": "和{{nbLeftovers}}等。"
+}
