@@ -189,7 +189,7 @@ describe('notifyUser task', () => {
 
     test('louan', async () => {
         const louanBenId = '941331337759346688';
-        unfollowersInfo.push({id: louanBenId, followTime: 100, followDetectedTime: 100, unfollowTime: 2000000, username: 'louanben'});
+        unfollowersInfo.push({id: louanBenId, followTime: 100, followDetectedTime: 100, unfollowTime: 5000000, username: 'louanben'});
         mockUsersLookupReply([louanBenId], ['louanben']);
         mockFriendshipShowReply();
         await task.run(job);
@@ -198,6 +198,6 @@ describe('notifyUser task', () => {
         expect(userDao.dmTwit.post).toHaveBeenCalledTimes(1);
         expect(userDao.dmTwit.post.mock.calls[0][1].event.message_create.message_data.text)
             .toBe('@louanben 👦🏽 unfollowed you \n👁👄👁.\n' +
-                'This account followed you for 33 minutes (01/01/1970).');
+                'This account followed you for an hour (01/01/1970).');
     });
 });
