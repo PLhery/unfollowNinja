@@ -13,7 +13,7 @@ const LoggedInIntro = ({ user, logout, removeDMs }) => {
 
     let message = <Paragraph>Plus qu'une étape pour activer le service :<br/> Choisissez un compte pour vous envoyer les notifications</Paragraph>;
     if (user.category === 2) { // revoked tokens
-        message = <Paragraph>Il semble que votre compte Twitter a été désactivé :<br/> Reconnectez vous à l'étape deux pour réactiver le service</Paragraph>;
+        message = <Paragraph>Il semble que votre compte Twitter a été désactivé :<br/> Cliquez sur "Activez les notifications par DM" pour réactiver le service</Paragraph>;
     }
     if (user.dmUsername) {
         message = <Paragraph>Tout est en ordre ! N'oubliez pas de suivre <Link href='https://twitter.com/unfollowninja' source='logged-in-intro'>@unfollowNinja</Link></Paragraph>;

@@ -15,7 +15,7 @@ const LoggedInIntro = ({ user, logout, removeDMs, changeLang, setUserInfo, setHa
 
     let message = <Paragraph>One more step to activate the service:<br/> Choose an account to send you notifications</Paragraph>;
 	if (user.category === 2) { // revoked tokens
-	  	message = <Paragraph>It seems that your Twitter account has been deactivated:<br/> Log in again to reactivate the service.</Paragraph>;
+	  	message = <Paragraph>It seems that your Twitter account has been deactivated:<br/> click on "Enable DM notifications" to reactivate the service.</Paragraph>;
 	}
     if (user.dmUsername) {
         message = <Paragraph>All clear! Don't forget to follow <Link href='https://twitter.com/unfollowmonkey' source='logged-in-intro'>@unfollowMonkey</Link></Paragraph>;
