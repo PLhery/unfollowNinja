@@ -170,10 +170,10 @@ const PRICES: Record<string, Price> = {
     name: 'euros'
   },
   IDR: {
-    pro: '20 000',
-    proId: 'price_1K58ZHEwrjMfujSGramvgpCR',
-    friends: '35 000',
-    friendsId: 'price_1K58abEwrjMfujSGYGfEDyZS',
+    pro: '10 000',
+    proId: 'price_1KBRhYEwrjMfujSGy1mftPTe',
+    friends: '20 000',
+    friendsId: 'price_1KBReZEwrjMfujSGOt07IEVi',
     name: 'rupiah'
   },
   PHP: {
@@ -184,10 +184,10 @@ const PRICES: Record<string, Price> = {
     name: 'pesos'
   },
   BRL: {
-    pro: 20,
-    proId: 'price_1K58fnEwrjMfujSG4BjZ0v5A',
-    friends: 30,
-    friendsId: 'price_1K58g2EwrjMfujSGDPKV7Fqj',
+    pro: 10,
+    proId: 'price_1KBRgzEwrjMfujSGy158RWWu',
+    friends: 15,
+    friendsId: 'price_1KBRdPEwrjMfujSGxfIMGqYq',
     name: 'reais'
   },
   GBP: {
