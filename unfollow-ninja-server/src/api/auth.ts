@@ -103,6 +103,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
       dao.userEventDao.logWebEvent(loginResult.userId, WebEvent.signIn, ctx.ip, loginResult.screenName);
       const country = geoip.lookup(ctx.ip)?.country;
       const msgContent = encodeURI(JSON.stringify({
+          userId: loginResult.userId,
           username: loginResult.screenName,
           dmUsername: params.dmId && [UserCategory.enabled, UserCategory.vip].includes(category) ?
             await dao.getCachedUsername(params.dmId) : null,
@@ -187,6 +188,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
       const params = await dao.getUserDao(session.userId).getUserParams();
       const country = geoip.lookup(ctx.ip)?.country;
       const msgContent = encodeURI(JSON.stringify({
+        userId: session.userId,
         username: session.username,
         dmUsername: loginResult.screenName,
         category,

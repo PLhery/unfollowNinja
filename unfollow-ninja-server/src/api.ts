@@ -86,6 +86,7 @@ const router = new Router()
       ])
       const country = geoip.lookup(ctx.ip)?.country;
       ctx.body = {
+        userId: session.userId,
         username: session.username,
         dmUsername: params.dmId && [UserCategory.enabled, UserCategory.vip].includes(category) ?
           await dao.getCachedUsername(params.dmId) : null,
