@@ -10,15 +10,17 @@ import { Link as IconLink } from 'grommet-icons';
 
 function LanguageSelector(props) {
   const LANGUAGES = [
+	{label: 'Chinese', code: 'zh_Hans'},
+	{label: 'Dutch', code: 'nl'},
 	{label: 'English', code: 'en'},
 	{label: 'French', code: 'fr'},
-	{label: 'Spanish', code: 'es'},
-	{label: 'Portuguese', code: 'pt'},
-	{label: 'Indonesian', code: 'id'},
 	{label: 'German', code: 'de'},
-	{label: 'Thai', code: 'th'},
+	{label: 'Indonesian', code: 'id'},
 	{label: 'Polish', code: 'pl'},
-    {label: 'Chinese', code: 'zh_Hans'},
+  	{label: 'Portuguese', code: 'pt'},
+	{label: 'Spanish', code: 'es'},
+	{label: 'Thai', code: 'th'},
+	{label: 'Turkish', code: 'tr'},
   ];
 
   const addYours = <span><Link href='https://hosted.weblate.org/projects/unfollow-monkey/notifications/'><IconLink size='small'/> Add yours</Link></span>
