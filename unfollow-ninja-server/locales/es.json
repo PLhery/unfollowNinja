@@ -10,5 +10,6 @@
     "This account followed you before you signed up to @{{twitterAccount}}!": "Esta cuenta te seguía antes de que te registrases en @{{twitterAccount}}!",
     "and {{nbLeftovers}} more.": "y {{nbLeftovers}} más.",
     "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Todo listo, bienvenido a @{{twitterAccount}} {{emoji}}!\nPronto conocerás todo sobre tus unfollowers!",
-    "{{username}}'s account has been locked {{emoji}}.": "La cuenta de {{username}} ha sido limitada {{emoji}}."
+    "{{username}}'s account has been locked {{emoji}}.": "La cuenta de {{username}} ha sido limitada {{emoji}}.",
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "Enhorabuena, ahora puedes disfrutar @{{twitterAccount}} pro {{emoji}}!"
 }

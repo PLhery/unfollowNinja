@@ -1,0 +1,15 @@
+{
+    "one of you followers": "takipçilerinden biri",
+    "{{username}} unfollowed you {{emoji}}.": "{{username}} seni takip etmeyi bıraktı {{emoji}}.",
+    "{{username}} has been suspended {{emoji}}.": "{{username}} isimli hesap askıya alındı {{emoji}}.",
+    "{{username}} has left Twitter {{emoji}}.": "{{username}} Twitter'dan ayrıldı {{emoji}}.",
+    "{{username}} blocked you {{emoji}}.": "{{username}} seni engelledi {{emoji}}.",
+    "You blocked {{username}} {{emoji}}.": "{{username}} kişisini engelledin {{emoji}}.",
+    "This account followed you for {{duration}} ({{{time}}}).": "Bu hesap seni {{duration}} boyunca takip etmişti ({{{time}}}).",
+    "This account followed you before you signed up to @{{twitterAccount}}!": "Bu hesap sen @{{twitterAccount}} hesabına giriş yapmadan takip etti!",
+    "and {{nbLeftovers}} more.": "ve {{nbLeftovers}} fazlası.",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Tamamdır! Hoş geldin @{{twitterAccount}} {{emoji}}!\nYakında burada seni takipten çıkaran herkesi öğreneceksin!",
+    "{{username}}'s account has been locked {{emoji}}.": "{{username}} kişisinin hesabı kilitlendi {{emoji}}.",
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "Tebrikler! Şimdi @{{twitterAccount}} pro ayrıcalıklarından faydalanabilirsin {{emoji}}!",
+    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} Twitter kullanıcısı seni takip etmeyi bıraktı:"
+}
