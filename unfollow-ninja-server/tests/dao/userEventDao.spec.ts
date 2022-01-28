@@ -43,15 +43,6 @@ describe('Test UserEventDAO', () => {
       expect(await userEventDao.getWebEvents('user0')).toEqual([]);
       expect(await userEventDao.getWebEvents('user1')).toEqual([
         expect.objectContaining({
-          id: 1,
-          userId: 'user1',
-          event: WebEvent.signIn,
-          eventName: 'signIn',
-          extraInfo: null,
-          ip: '127.0.0.1',
-          username: 'username1'
-        }),
-        expect.objectContaining({
           id: 2,
           userId: 'user1',
           event: WebEvent.addDmAccount,
@@ -59,6 +50,15 @@ describe('Test UserEventDAO', () => {
           extraInfo: 'user2',
           ip: '127.0.0.2',
           username: 'username2'
+        }),
+        expect.objectContaining({
+          id: 1,
+          userId: 'user1',
+          event: WebEvent.signIn,
+          eventName: 'signIn',
+          extraInfo: null,
+          ip: '127.0.0.1',
+          username: 'username1'
         })
       ]);
       expect(await userEventDao.getWebEvents('user2')).toHaveLength(1);
@@ -142,18 +142,18 @@ describe('Test UserEventDAO', () => {
     expect(await userEventDao.getCategoryEvents('user0')).toEqual([]);
     expect(await userEventDao.getCategoryEvents('user1')).toEqual([
       expect.objectContaining({
-        id: 1,
-        category: UserCategory.enabled,
-        categoryName: 'enabled',
-        formerCategory: UserCategory.disabled,
-        formerCategoryName: 'disabled',
-      }),
-      expect.objectContaining({
         id: 2,
         category: UserCategory.revoked,
         categoryName: 'revoked',
         formerCategory: UserCategory.enabled,
         formerCategoryName: 'enabled',
+      }),
+      expect.objectContaining({
+        id: 1,
+        category: UserCategory.enabled,
+        categoryName: 'enabled',
+        formerCategory: UserCategory.disabled,
+        formerCategoryName: 'disabled',
       })
     ]);
   });
