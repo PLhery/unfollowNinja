@@ -170,7 +170,7 @@ export default class UserEventDao {
 
     public async getWebEvents(userId: string) {
       return (await this.webEvent.findAll({
-        where: { userId }
+        where: { userId }, order: [['id', 'desc']]
       })).map((event) => ({
         eventName: WebEvent[event.event],
         ...event.get()
@@ -184,7 +184,7 @@ export default class UserEventDao {
 
     public async getFollowEvent(userId: string) {
       return (await this.followEvent.findAll({
-        where: { userId }
+        where: { userId }, order: [['id', 'desc']]
       })).map((event) => ({
         eventName: FollowEvent[event.event],
         ...event.get()
@@ -208,7 +208,7 @@ export default class UserEventDao {
 
     public async getUnfollowerEvents(userId: string) {
       return (await this.unfollowerEvent.findAll({
-        where: { userId }
+        where: { userId }, order: [['id', 'desc']]
       }));
     }
 
@@ -219,7 +219,7 @@ export default class UserEventDao {
 
     public async getNotificationEvents(userId: string) {
       return (await this.notificationEvent.findAll({
-        where: { userId }
+        where: { userId }, order: [['id', 'desc']]
       })).map((event) => ({
         eventName: NotificationEvent[event.event],
         ...event.get()
@@ -233,7 +233,7 @@ export default class UserEventDao {
 
     public async getCategoryEvents(userId: string) {
       return (await this.categoryEvent.findAll({
-        where: { userId }
+        where: { userId }, order: [['id', 'desc']]
       })).map((event) => ({
         categoryName: UserCategory[event.category],
         formerCategoryName: UserCategory[event.formerCategory],
