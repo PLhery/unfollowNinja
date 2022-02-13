@@ -1,0 +1,15 @@
+{
+    "one of you followers": "один з ваших підписників",
+    "{{username}} unfollowed you {{emoji}}.": "{{username}} відписався від вас {{emoji}}.",
+    "You blocked {{username}} {{emoji}}.": "Ви заблокували {{username}} {{emoji}}.",
+    "This account followed you for {{duration}} ({{{time}}}).": "Цей акавнт читав вас впродовж {{duration}} ({{{time}}}).",
+    "and {{nbLeftovers}} more.": "та {{nbLeftovers}} ще.",
+    "{{username}} blocked you {{emoji}}.": "{{username}} заблокував вас {{emoji}}.",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Все готово, вітаємо на @{{twitterAccount}} {{emoji}}!\nСкоро ви дізнаєтесь про всіх ваших відписників тут!",
+    "{{username}}'s account has been locked {{emoji}}.": "{{username}} було заблоковано {{emoji}}.",
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "Вітаю, тепер можете насолодитись @{{twitterAccount}} pro {{emoji}}!",
+    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} користувачів Твіттеру відписались від вас:",
+    "This account followed you before you signed up to @{{twitterAccount}}!": "Цей акавнт читав вас до того як ви підписались на @{{twitterAccount}}!",
+    "{{username}} has been suspended {{emoji}}.": "{{username}} призупинив дію свого акавнту {{emoji}}.",
+    "{{username}} has left Twitter {{emoji}}.": "{{username}} покинув Твіттер {{emoji}}."
+}
