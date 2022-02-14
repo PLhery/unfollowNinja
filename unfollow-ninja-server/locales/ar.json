@@ -1,1 +1,15 @@
-{}
+{
+    "This account followed you for {{duration}} ({{{time}}}).": "هذا الحساب قام بمتابعتك منذ {{duration}} ({{{time}}}).",
+    "and {{nbLeftovers}} more.": "و{{nbLeftovers}} أكثر.",
+    "{{nbUnfollows}} Twitter users unfollowed you:": "قام {{nbUnfollows}} مستخدمي تويتر بإلغاء متابعتك:",
+    "one of you followers": "واحد من متابعينك",
+    "{{username}} unfollowed you {{emoji}}.": "{{username}} ألغى مُتابعتك {{emoji}}.",
+    "You blocked {{username}} {{emoji}}.": "قمت بحظر {{username}} {{emoji}}.",
+    "This account followed you before you signed up to @{{twitterAccount}}!": "هذا الحساب قام بمتابعتك من قبل تسجيلك في @{{twitterAccount}}!",
+    "{{username}}'s account has been locked {{emoji}}.": "حساب {{username}} قد تم إغلاقه {{emoji}}.",
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "تهانينا، يُمكنك الآن الاستمتاع بـ @{{twitterAccount}} المميز {{emoji}}!",
+    "{{username}} has left Twitter {{emoji}}.": "قام {{username} بمُغادرة تويتر {{emoji}}.",
+    "{{username}} has been suspended {{emoji}}.": "{{username}} توقف حسابه {{emoji}}.",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "كل شيء جاهز، مرحبًا بك في @{{twitterAccount}} {{emoji}}!\nستعرف قريبًا كل شيء عن غير متابعينك هنا!",
+    "{{username}} blocked you {{emoji}}.": "قام {{username}} بحظرك {{emoji}}."
+}
