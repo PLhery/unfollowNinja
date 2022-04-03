@@ -10,5 +10,6 @@
     "and {{nbLeftovers}} more.": "dan {{nbLeftovers}} lainnya.",
     "{{username}}'s account has been locked {{emoji}}.": "{{username}} akunnya sudah dikunci {{emoji}}.",
     "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Selesai, selamat datang di @{{twitterAccount}} {{emoji}}!\nKamu akan segera tahu tentang semua pengikutmu di sini!",
-    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} pengguna twitter berhenti mengikuti kamu:"
+    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} pengguna twitter berhenti mengikuti kamu:",
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "Selamat, sekarang kamu bisa menggunakan @{{twitterAccount}} pro {{emoji}}!"
 }
