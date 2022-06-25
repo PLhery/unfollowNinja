@@ -111,11 +111,9 @@ Open an issue with your suggestions or assign yourself to an existing issue
 
 ### Translate the app to your language
 
-- Fork the project
-- copy unfollow-ninja-server/en.json to youLanguageCode.json
-- fill translations
-- change line 3 of unfollow-ninja-server/src/utils/types.ts and add your language code
-- commit and submit a pull request
+You can help to translate the app on https://hosted.weblate.org/projects/unfollow-monkey/notifications/
+
+Weblate will automatically open a PR to update or add the language in this repository.
 
 ## Motivation behind improving the legacy version
 
