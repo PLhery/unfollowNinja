@@ -1,0 +1,10 @@
+{
+    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} Twitter užívatelia/užívateľov ťa prestalo sledovať",
+    "one of you followers": "jeden z tvojich sledovateľov",
+    "{{username}} unfollowed you {{emoji}}.": "{{username}} ťa prestal sledovať {{emoji}}.",
+    "{{username}} has been suspended {{emoji}}.": "Účet {{username}} bol pozastavený {{emoji}}.",
+    "{{username}} has left Twitter {{emoji}}.": "{{username}} opustil Twitter {{emoji}}.",
+    "{{username}} blocked you {{emoji}}.": "{{username}} si ťa zablokoval {{emoji}}.",
+    "You blocked {{username}} {{emoji}}.": "Zablokoval si {{username}} {{emoji}}.",
+    "This account followed you for {{duration}} ({{{time}}}).": "Tento účet ťa sledoval {{duration}} ({{{time}}})."
+}
