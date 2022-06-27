@@ -29,37 +29,14 @@ const LoggedInIntro = ({ user, logout, removeDMs, changeLang, setUserInfo, setHa
         {message}
 	  {user.dmUsername && <LanguageSelector value={user.lang} onChange={changeLang}/> }
 	  {user.dmUsername && <ProCard user={user} setUserInfo={setUserInfo} setHasError={setHasError}/> }
+	  {user.dmUsername && <Paragraph>Any issue with your pro subscription? <br/> Email us: <i>love@unfollow-monkey.com</i></Paragraph> }
 
         <Paragraph>
             <Link href='#' onClick={e => {logout();e.preventDefault();}} source='disconnect'>Log out</Link>
             {user.dmUsername && <> — <Link href='#' onClick={e => {removeDMs();e.preventDefault();}} source='disable'>Disable the service</Link></>}
-		  	<> — <Link href='#' onClick={e => {talkWithUs(user);e.preventDefault();}} source='talkwithus'>Talk with us</Link></>
         </Paragraph>
     </div>
 };
-
-function talkWithUs(user) {
-	window.fcWidget?.init({
-		token: "05f4f9a5-431a-4fea-9c38-a7ca35ed2bcc",
-		host: "https://wchat.eu.freshchat.com",
-		externalId: user.userId,
-		firstName: user.username,
-		config: {
-			headerProperty: {
-				foregroundColor: '#FFFFDD'
-			},
-		}
-	});
-	window.fcWidget?.user.setProperties({
-		firstName: user.username,
-		externalId: user.userId,
-		...Object.fromEntries(
-			Object.entries(user)
-				.map(kv => ['string', 'number', 'boolean'].includes(typeof kv[1]) ? kv : [kv[0], JSON.stringify(kv[1])])
-		),
-	});
-	window.fcWidget?.open();
-}
 
 function MiniApp(props) {
   const [userInfo, setUserInfo] = useState(null);
@@ -67,16 +44,6 @@ function MiniApp(props) {
 
   // persist the userInfo in sessionStorage
   useEffect(() => { userInfo && sessionStorage.setItem('userInfo', JSON.stringify(userInfo)) }, [userInfo]);
-
-  // // send the user's username and info to the support chatbot
-  // useEffect(() => {
-	// if (userInfo?.username) {
-	//   // window.$crisp?.push(['set', 'session:data', [
-	// 	// Object.entries(userInfo)
-	// 	//   .map(kv => ['string', 'number', 'boolean'].includes(typeof kv[1]) ? kv : [kv[0], JSON.stringify(kv[1])]),
-	//   // ]]);
-	// }
-  // }, [userInfo]);
 
   useEffect(() => {
 	if (navigator.userAgent !== "ReactSnap") { // We don't want to risk hasError=true on ReactSnap
@@ -105,9 +72,6 @@ function MiniApp(props) {
 	    setUserInfo(userInfo);
 	    setHasError(true)
 	  })
-	  // window.$crisp?.push(['set', 'session:event', [[['logout']]]]);
-	  window.fcWidget?.track('logout');
-	  window.fcWidget?.destroy();
   };
   const removeDMs = () => {
 	setUserInfo({
@@ -121,8 +85,6 @@ function MiniApp(props) {
 		setUserInfo(userInfo);
 		setHasError(true)
 	  });
-	  window.fcWidget?.track('removeDms');
-	// window.crisp?.push(['set', 'session:event', [[['removeDms']]]]);
   };
   const changeLang = (newLang) => {
 	setUserInfo({
@@ -140,8 +102,6 @@ function MiniApp(props) {
 		setUserInfo(userInfo);
 		setHasError(true)
 	  });
-	  window.fcWidget?.track('changeLang', { old: userInfo.lang, new: newLang});
-	// window.$crisp?.push(['set', 'session:event', [[['changeLang', { old: userInfo.lang, new: newLang}]]]]);
   }
   // Listen and process postmessages from the API
   // (these are sent in the log in callback page)
@@ -152,7 +112,6 @@ function MiniApp(props) {
 	  }
       const content = JSON.parse(decodeURI(event.data.content));
 	  setUserInfo(content);
-	  // window.$crisp?.push(['set', 'session:event', [[[event.data.msg]]]]);
 	}
 
 	window.addEventListener('message', processMessage);
