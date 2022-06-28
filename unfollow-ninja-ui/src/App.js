@@ -34,6 +34,16 @@ const theme = {
       maxWidth: '800px',
     },
   },
+  accordion: {
+    panel: {
+      border: {
+        style: 'hidden'
+      }
+    },
+    border: {
+      color: 'white'
+    }
+  }
 };
 
 function App() {

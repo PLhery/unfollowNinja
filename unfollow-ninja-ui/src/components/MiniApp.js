@@ -1,5 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {Box, Button, Paragraph} from "grommet/es6";
+import {
+    Accordion,
+    AccordionPanel,
+    Box, Button, Paragraph, Spinner,
+    Table, TableBody,
+    TableCell,
+    TableHeader,
+    TableRow
+} from 'grommet';
 import {Alert, Twitter, ChatOption, UserExpert, Validate} from "grommet-icons";
 import Confetti from 'react-dom-confetti';
 
@@ -33,8 +41,62 @@ const LoggedInIntro = ({ user, logout, removeDMs }) => {
     </div>
 };
 
+/**
+ * Adds html newlines, and bold twitter usernames
+ */
+function formatMessage(message) {
+    const result = [];
+    const parts = message.split(/(@\w{1,15})/g);
+    for(let i = 0; i < parts.length; i+=2) {
+        result.push(parts[i].split('\n').map(line => <>{line}<br/></>));
+        result.push(<b>{parts[i+1]}</b>);
+    }
+    return result;
+}
+
+const MessagesAccordion = (latestMessages) => {
+    return <Accordion>
+        <AccordionPanel label="Derniers messages envoyés">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableCell scope="col" border="bottom">
+                            Date d'envoi
+                        </TableCell>
+                        <TableCell scope="col" border="bottom">
+                            Message
+                        </TableCell>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {latestMessages ? latestMessages.map((message) =>
+                        <TableRow>
+                            <TableCell>
+                                <i>{new Date(message.sentAt).toLocaleString()}</i>
+                            </TableCell>
+                            <TableCell>{formatMessage(message.message)}</TableCell>
+                        </TableRow>
+                    ) : <TableRow>
+                        <TableCell className={Styles.spinnerCell}>
+                            <Spinner />
+                        </TableCell>
+                        <TableCell><i>Chargement des messages...</i></TableCell>
+                    </TableRow>}
+                    {latestMessages?.length === 0 ?
+                        <TableRow>
+                            <TableCell>
+                            </TableCell>
+                            <TableCell><i>Aucune notification envoyée. Revenez plus tard!</i></TableCell>
+                        </TableRow> : null}
+                </TableBody>
+            </Table>
+        </AccordionPanel>
+    </Accordion>;
+}
+
 function MiniApp(props) {
   const [userInfo, setUserInfo] = useState(null);
+  const [latestMessages, setLatestMessages] = useState(null);
   const [hasError, setHasError] = useState(false);
 
   let notFrench =
@@ -54,16 +116,32 @@ function MiniApp(props) {
 		setUserInfo(storedUserInfo);
 	  }
 
-	  // second: load it more accurately from the server
-	  fetch(API_URL + '/get-status', {credentials: 'include'})
+      // second: load it more accurately from the server
+	 fetch(API_URL + '/get-status', {credentials: 'include'})
 		.then(response => response.ok ? response.json() : null)
 		.then(data => data || Promise.reject())
 		.then(data => setUserInfo(data.country ? data : null))
-		.catch(() => {
-		  // setHasError(true)
+		.catch((error) => {
+            setHasError(true);
+            console.error(error);
 		})
 	}
   }, []);
+
+
+  useEffect(() => {
+      if (userInfo?.username) {
+          fetch(API_URL + '/user/latest-notifications', {credentials: 'include'})
+              .then(response => response.ok ? response.json() : null)
+              .then(data => data || Promise.reject())
+              .then(data => setLatestMessages(data))
+              .catch((error) => {
+                  setLatestMessages(null)
+                  setHasError(true);
+                  console.error(error);
+              })
+      }
+  }, [userInfo?.username]);
 
   const logout = () => {
 	setUserInfo({});
@@ -123,6 +201,7 @@ function MiniApp(props) {
 		  <>
 			<Confetti active={step2 } className={Styles.confettis}/>
 			<LoggedInIntro user={userInfo} logout={logout} removeDMs={removeDMs}/>
+            {userInfo?.username ? MessagesAccordion(latestMessages) : null}
 		  </>
         }
         <Button
