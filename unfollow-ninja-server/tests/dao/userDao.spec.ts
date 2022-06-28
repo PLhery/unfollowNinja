@@ -5,7 +5,7 @@ import RedisMock from 'ioredis-mock';
 import Dao, {UserCategory} from '../../src/dao/dao';
 import {IUserEgg, IUserParams} from '../../src/utils/types';
 
-const redis: Redis.Redis = process.env.REDIS_TEST_URI ?
+const redis: Redis = process.env.REDIS_TEST_URI ?
     new Redis(process.env.REDIS_TEST_URI, { lazyConnect: true }) :
     new RedisMock({ lazyConnect: true });
 

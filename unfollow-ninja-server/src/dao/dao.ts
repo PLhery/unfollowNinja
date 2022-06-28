@@ -19,7 +19,7 @@ interface ICachedUsername extends Model {twitterId: string, username: string}
 export interface IFriendCode extends Model {code: string, userId: string, friendId?: string}
 
 export default class Dao {
-    public readonly redis: Redis.Redis;
+    public readonly redis: Redis;
     public readonly sequelize: Sequelize;
     public readonly sequelizeLogs: Sequelize;
     public readonly userEventDao: UserEventDao;

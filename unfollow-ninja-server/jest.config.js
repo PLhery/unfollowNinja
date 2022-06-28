@@ -22,13 +22,7 @@ module.exports = {
         'tsx',
     ],
     reporters: [
-        'default',
-        [
-            'jest-html-reporter',
-            {
-                outputPath: './test-results/tests/test-report.html',
-            },
-        ],
+        'default'
     ],
     testEnvironment: 'node',
     testMatch: [

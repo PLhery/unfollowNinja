@@ -10,7 +10,7 @@ import type { IUserParams, Lang } from '../utils/types';
 import { twitterCursorToTime } from '../utils/utils';
 
 export default class UserDao {
-    private readonly redis: Redis.Redis;
+    private readonly redis: Redis;
     private readonly dao: Dao;
     private readonly userId: string;
 
