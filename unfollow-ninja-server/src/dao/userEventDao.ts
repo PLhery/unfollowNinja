@@ -1,4 +1,4 @@
-import type { Sequelize } from 'sequelize';
+import type { InferAttributes, InferCreationAttributes, Sequelize } from 'sequelize';
 import { DataTypes, Model, ModelCtor } from 'sequelize';
 import * as Sentry from '@sentry/node';
 
@@ -23,8 +23,9 @@ export enum WebEvent {
     disableFriendRegistration,
 }
 
-interface IWebEvent extends Model {
+interface IWebEvent extends Model<InferAttributes<IWebEvent>, InferCreationAttributes<IWebEvent>> {
     userId: string;
+    username: string;
     event: WebEvent;
     ip: string;
     extraInfo?: string;
@@ -36,14 +37,14 @@ export enum FollowEvent {
     accountCreatedAndFollowersLoaded,
 }
 
-interface IFollowEvent extends Model {
+interface IFollowEvent extends Model<InferAttributes<IFollowEvent>, InferCreationAttributes<IFollowEvent>> {
     userId: string;
     event: FollowEvent;
     followerId: string;
     nbFollowers: number;
 }
 
-interface IUnfollowerEvent extends Model {
+interface IUnfollowerEvent extends Model<InferAttributes<IUnfollowerEvent>, InferCreationAttributes<IUnfollowerEvent>> {
     userId: string;
     followerId: string;
     followTime: number;
@@ -64,14 +65,16 @@ export enum NotificationEvent {
     unfollowersMessage,
 }
 
-interface INotificationEvent extends Model {
+interface INotificationEvent
+    extends Model<InferAttributes<INotificationEvent>, InferCreationAttributes<INotificationEvent>> {
     userId: string;
     event: NotificationEvent;
     fromId?: string;
     message: string;
+    createdAt?: string;
 }
 
-interface ICategoryEvent extends Model {
+interface ICategoryEvent extends Model<InferAttributes<ICategoryEvent>, InferCreationAttributes<ICategoryEvent>> {
     userId: string;
     category: UserCategory;
     formerCategory: UserCategory;
@@ -189,11 +192,13 @@ export default class UserEventDao {
             .catch((error) => Sentry.captureException(error));
     }
 
-    public async getWebEvents(userId: string) {
+    public async getWebEvents(userId: string, limit = 500, offset = 0) {
         return (
             await this.webEvent.findAll({
                 where: { userId },
                 order: [['id', 'desc']],
+                limit,
+                offset,
             })
         ).map((event) => ({
             eventName: WebEvent[event.event],
@@ -207,11 +212,13 @@ export default class UserEventDao {
             .catch((error) => Sentry.captureException(error));
     }
 
-    public async getFollowEvent(userId: string) {
+    public async getFollowEvent(userId: string, limit = 500, offset = 0) {
         return (
             await this.followEvent.findAll({
                 where: { userId },
                 order: [['id', 'desc']],
+                limit,
+                offset,
             })
         ).map((event) => ({
             eventName: FollowEvent[event.event],
@@ -252,10 +259,12 @@ export default class UserEventDao {
             .catch((error) => Sentry.captureException(error));
     }
 
-    public async getUnfollowerEvents(userId: string) {
+    public async getUnfollowerEvents(userId: string, limit = 500, offset = 0) {
         return await this.unfollowerEvent.findAll({
             where: { userId },
             order: [['id', 'desc']],
+            limit,
+            offset,
         });
     }
 
@@ -265,7 +274,7 @@ export default class UserEventDao {
             .catch((error) => Sentry.captureException(error));
     }
 
-    public async getNotificationEvents(userId: string, limit = 1000, offset = 0) {
+    public async getNotificationEvents(userId: string, limit = 500, offset = 0) {
         return (
             await this.notificationEvent.findAll({
                 where: { userId },
@@ -285,11 +294,13 @@ export default class UserEventDao {
             .catch((error) => Sentry.captureException(error));
     }
 
-    public async getCategoryEvents(userId: string) {
+    public async getCategoryEvents(userId: string, limit = 500, offset = 0) {
         return (
             await this.categoryEvent.findAll({
                 where: { userId },
                 order: [['id', 'desc']],
+                limit,
+                offset,
             })
         ).map((event) => ({
             categoryName: UserCategory[event.category],

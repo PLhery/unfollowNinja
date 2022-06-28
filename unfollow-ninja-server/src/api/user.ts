@@ -119,5 +119,14 @@ export function createUserRouter(dao: Dao, queue: Queue) {
             }
 
             ctx.redirect(manageSubscriptionUrl);
+        })
+        .get('/latest-notifications', async (ctx) => {
+            const session = ctx.session as NinjaSession;
+            const events = await dao.userEventDao.getNotificationEvents(session.userId, 30, 0);
+
+            ctx.body = events.map((event) => ({
+                sentAt: event.createdAt,
+                message: event.message,
+            }));
         });
 }
