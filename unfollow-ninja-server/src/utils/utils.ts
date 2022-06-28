@@ -8,5 +8,20 @@ export function twitterCursorToTime(cursor: string): number {
     return cursor ? bigInt(cursor).abs().shiftRight(20).valueOf() : null;
 }
 
-export const SUPPORTED_LANGUAGES_CONST = ['en', 'fr', 'es', 'pt', 'id', 'de', 'th', 'pl', 'zh_Hans', 'nl', 'tr', 'uk', 'pt_BR', 'ar'] as const;
-export const SUPPORTED_LANGUAGES = SUPPORTED_LANGUAGES_CONST as any as string[];
+export const SUPPORTED_LANGUAGES_CONST = [
+    'en',
+    'fr',
+    'es',
+    'pt',
+    'id',
+    'de',
+    'th',
+    'pl',
+    'zh_Hans',
+    'nl',
+    'tr',
+    'uk',
+    'pt_BR',
+    'ar',
+] as const;
+export const SUPPORTED_LANGUAGES = SUPPORTED_LANGUAGES_CONST as unknown as string[];

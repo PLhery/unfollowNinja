@@ -32,32 +32,26 @@ if (!process.env.DM_CONSUMER_KEY || !process.env.DM_CONSUMER_SECRET) {
 }
 
 const bullQueue = new Bull('ninja', process.env.REDIS_BULL_URI, {
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: 60000,
-    removeOnComplete: true,
-    removeOnFail: true
-  }
+    defaultJobOptions: {
+        attempts: 3,
+        backoff: 60000,
+        removeOnComplete: true,
+        removeOnFail: true,
+    },
 });
 bullQueue.on('error', (err) => {
-  logger.error('Bull error: ' + err.stack);
-  Sentry.captureException(err);
-})
+    logger.error('Bull error: ' + err.stack);
+    Sentry.captureException(err);
+});
 
 const dao = new Dao();
 if (cluster.isMaster) {
     logger.info('Unfollow ninja - Server');
-
-    function initFailed( err: Error ) {
-        logger.error('Please check that your redis server is launched');
-        process.exit(0);
-    }
-
     logger.info('Connecting to the databases..');
     dao.load()
         .then(async () => {
             logger.info('Launching the 2*%s workers...', CLUSTER_SIZE);
-            for (let i = 0; i < 2*CLUSTER_SIZE; i++) {
+            for (let i = 0; i < 2 * CLUSTER_SIZE; i++) {
                 cluster.fork();
             }
 
@@ -67,40 +61,35 @@ if (cluster.isMaster) {
             // update nbUsers metrics every minute
             await bullQueue.add('updateMetrics', {}, { repeat: { cron: '* * * * *' } });
         })
-        .catch(error => {
+        .catch((error) => {
             logger.error(error.stack);
-            Sentry.captureException(error)
+            Sentry.captureException(error);
         });
 } else {
     // if CLUSTER_SIZE=3, we'll create 6 workers
     // workers 1,2,3 will be used to check new unfollowers, workers 4,5,6 to process new bull tasks
     if (cluster.worker.id <= CLUSTER_SIZE) {
         // start checking the worker's followers
-        checkAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao, bullQueue)
-            .catch(err => Sentry.captureException(err));
-        checkAllVipFollowers(cluster.worker.id, CLUSTER_SIZE, dao, bullQueue)
-            .catch(err => Sentry.captureException(err));
+        checkAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao, bullQueue).catch((err) => Sentry.captureException(err));
+        checkAllVipFollowers(cluster.worker.id, CLUSTER_SIZE, dao, bullQueue).catch((err) =>
+            Sentry.captureException(err)
+        );
         // Also start caching its follower's username and follow time
-        cacheAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao)
-            .catch(err => Sentry.captureException(err));
+        cacheAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao).catch((err) => Sentry.captureException(err));
     } else {
         for (const taskName in tasks) {
             const task = new tasks[taskName](dao, bullQueue);
-            bullQueue.process(
-                taskName,
-                WORKER_RATE_LIMIT,
-                (job) =>
-                    task.run(job)
-                        .catch(async (err) => {
-                            const username = job.data.userId ? await dao.getCachedUsername(job.data.userId) : null;
-                            logger.error(`An error happened with ${taskName} / @${username || ''}: ${err.stack}`);
-                            Sentry.withScope(scope => {
-                                scope.setTag('task-name', taskName);
-                                scope.setUser({ username });
-                                Sentry.captureException(err);
-                            });
-                            throw err;
-                        })
+            bullQueue.process(taskName, WORKER_RATE_LIMIT, (job) =>
+                task.run(job).catch(async (err) => {
+                    const username = job.data.userId ? await dao.getCachedUsername(job.data.userId) : null;
+                    logger.error(`An error happened with ${taskName} / @${username || ''}: ${err.stack}`);
+                    Sentry.withScope((scope) => {
+                        scope.setTag('task-name', taskName);
+                        scope.setUser({ username });
+                        Sentry.captureException(err);
+                    });
+                    throw err;
+                })
             );
         }
     }
@@ -113,11 +102,11 @@ async function death() {
     logger.info('Queue closing..');
     await bullQueue.close();
     logger.info('Queue closed..');
-    dao.disconnect().catch(error => Sentry.captureException(error));
+    dao.disconnect().catch((error) => Sentry.captureException(error));
     Metrics.kill();
     if (cluster.isWorker) {
         process.exit(0);
     }
 }
-process.once( 'SIGTERM', death);
-process.once( 'SIGINT', death);
+process.once('SIGTERM', death);
+process.once('SIGINT', death);

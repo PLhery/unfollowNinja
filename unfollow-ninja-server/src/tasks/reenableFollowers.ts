@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/node';
 import type { Job } from 'bull';
 
-import {UserCategory} from '../dao/dao';
+import { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
 import metrics from '../utils/metrics';
 import Task from './task';
@@ -19,29 +19,33 @@ const CATEGORIES_TO_CHECK = [
 export default class extends Task {
     public async run(job: Job) {
         return Promise.all(
-            CATEGORIES_TO_CHECK.map(async category => {
+            CATEGORIES_TO_CHECK.map(async (category) => {
                 for (const userId of await this.dao.getUserIdsByCategory(category)) {
-                    await this.checkAccountValid(userId, category).catch((err) => {
+                    await this.checkAccountValid(userId).catch((err) => {
                         logger.error(err);
-                        Sentry.withScope(scope => {
+                        Sentry.withScope((scope) => {
                             scope.setTag('task-name', 'reenableFollowers');
-                            scope.setUser({id: userId});
+                            scope.setUser({ id: userId });
                             Sentry.captureException(err);
                         });
                     });
                 }
-            }),
+            })
         ).then(() => {
             metrics.gauge('reenableFollowers.duration', Date.now() - job.processedOn);
         });
     }
 
-    private async checkAccountValid(userId: string, category: UserCategory) {
+    private async checkAccountValid(userId: string) {
         const userDao = this.dao.getUserDao(userId);
-        const [ twit, twitDM, username ] =
-            await Promise.all([userDao.getTwit(), userDao.getDmTwit(), this.dao.getCachedUsername(userId)]);
+        const [twit, twitDM] = await Promise.all([
+            userDao.getTwit(),
+            userDao.getDmTwit(),
+            this.dao.getCachedUsername(userId),
+        ]);
 
-        await twit.get('followers/ids')
+        await twit
+            .get('followers/ids')
             .then(() => twitDM.get('followers/ids'))
             .then(() => {
                 metrics.increment('reenableFollowers.reenabled');

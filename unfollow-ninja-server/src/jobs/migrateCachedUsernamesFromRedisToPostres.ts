@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import {DataTypes, Sequelize} from 'sequelize';
+import { DataTypes, Sequelize } from 'sequelize';
 
 import Dao from '../dao/dao';
 import logger from '../utils/logger';
@@ -12,8 +12,12 @@ async function run() {
     await dao.load();
 
     const CachedUsername = sequelize.define('CachedUsername', {
-        twitterId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
-        username: { type: DataTypes.STRING(15), allowNull: false }
+        twitterId: {
+            type: DataTypes.STRING(30),
+            allowNull: false,
+            primaryKey: true,
+        },
+        username: { type: DataTypes.STRING(15), allowNull: false },
     });
 
     let cursor = '0';
@@ -25,15 +29,15 @@ async function run() {
         cursor = nextCursor;
 
         const usersToAdd = [];
-        for (let i=0;i<results.length;i+=2) {
-            const twitterId = results[i].slice(0,-9); // remove the trailing :username
-            const username = results[i+1];
-            usersToAdd.push({twitterId, username});
+        for (let i = 0; i < results.length; i += 2) {
+            const twitterId = results[i].slice(0, -9); // remove the trailing :username
+            const username = results[i + 1];
+            usersToAdd.push({ twitterId, username });
         }
         await CachedUsername.bulkCreate(usersToAdd, { ignoreDuplicates: true });
 
         progress += usersToAdd.length;
         logger.info(`${progress}/${total} twittos migrated`);
-    } while (cursor !== '0')
+    } while (cursor !== '0');
 }
 run().catch((error) => logger.error(error));

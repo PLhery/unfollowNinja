@@ -1,3 +1,7 @@
+import type { Queue } from 'bull';
+import type Dao from '../src/dao/dao';
+import type Twit from 'twit';
+
 export function userDaoMock() {
     const twit = twitMock();
     const dmTwit = twitMock();
@@ -26,14 +30,18 @@ export function userDaoMock() {
     };
 }
 
-export function daoMock() {
-    const userDao = { '01': userDaoMock(), '02': userDaoMock(), '03': userDaoMock() };
+function _daoMock() {
+    const userDao = {
+        '01': userDaoMock(),
+        '02': userDaoMock(),
+        '03': userDaoMock(),
+    };
     return {
         userDao,
-        getUserDao: jest.fn().mockImplementation((id: '01'|'02'|'03') => userDao[id]),
+        getUserDao: jest.fn().mockImplementation((id: '01' | '02' | '03') => userDao[id]),
         userEventDao: {
-          logNotificationEvent: jest.fn(),
-          logUnfollowerEvent: jest.fn(),
+            logNotificationEvent: jest.fn(),
+            logUnfollowerEvent: jest.fn(),
         },
         addTwittoToCache: jest.fn(),
         getUserIdsByCategory: jest.fn().mockResolvedValue(['01', '02', '03']),
@@ -42,15 +50,23 @@ export function daoMock() {
     };
 }
 
+export function daoMock() {
+    return _daoMock() as ReturnType<typeof _daoMock> & Dao;
+}
+
 export function queueMock() {
     return {
         add: jest.fn().mockResolvedValue({}),
-    };
+    } as object as Queue;
+}
+
+interface DmSendParams {
+    event: { message_create: { message_data: { text: string } } };
 }
 
 export function twitMock() {
     return {
         get: jest.fn(),
-        post: jest.fn(),
+        post: jest.fn<Promise<Partial<Twit.PromiseResponse>>, [string, Twit.Params & DmSendParams]>(),
     };
 }

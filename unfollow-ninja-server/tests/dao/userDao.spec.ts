@@ -1,32 +1,32 @@
 import Redis from 'ioredis';
-import {Sequelize} from 'sequelize';
+import { Sequelize } from 'sequelize';
 import RedisMock from 'ioredis-mock';
 
-import Dao, {UserCategory} from '../../src/dao/dao';
-import {IUserEgg, IUserParams} from '../../src/utils/types';
+import Dao, { UserCategory } from '../../src/dao/dao';
+import { IUserEgg, IUserParams } from '../../src/utils/types';
 
-const redis: Redis = process.env.REDIS_TEST_URI ?
-    new Redis(process.env.REDIS_TEST_URI, { lazyConnect: true }) :
-    new RedisMock({ lazyConnect: true });
+const redis: Redis = process.env.REDIS_TEST_URI
+    ? new Redis(process.env.REDIS_TEST_URI, { lazyConnect: true })
+    : new RedisMock({ lazyConnect: true });
 
-const sequelize = process.env.POSTGRES_TEST_URI ?
-  new Sequelize(process.env.POSTGRES_TEST_URI, { logging: false }) :
-  new Sequelize( { dialect: 'sqlite', storage: ':memory:', logging: false});
+const sequelize = process.env.POSTGRES_TEST_URI
+    ? new Sequelize(process.env.POSTGRES_TEST_URI, { logging: false })
+    : new Sequelize({ dialect: 'sqlite', storage: ':memory:', logging: false });
 
-const sequelizeLogs = process.env.POSTGRES_LOGS_TEST_URI ?
-  new Sequelize(process.env.POSTGRES_LOGS_TEST_URI, { logging: false }) :
-  new Sequelize( { dialect: 'sqlite', storage: ':memory:', logging: false });
+const sequelizeLogs = process.env.POSTGRES_LOGS_TEST_URI
+    ? new Sequelize(process.env.POSTGRES_LOGS_TEST_URI, { logging: false })
+    : new Sequelize({ dialect: 'sqlite', storage: ':memory:', logging: false });
 
 const dao = new Dao(redis, sequelize, sequelizeLogs);
 
-const uDao1 = dao.getUserDao( '1');
+const uDao1 = dao.getUserDao('1');
 const uDao2 = dao.getUserDao('2');
 
 const USER_PARAMS_1: IUserParams = {
     added_at: 1234,
     lang: 'fr',
     token: 't0k3n',
-    tokenSecret: 's3cr3t'
+    tokenSecret: 's3cr3t',
 };
 const USER_PARAMS_2: IUserParams = {
     added_at: 2345,
@@ -37,7 +37,7 @@ const USER_PARAMS_2: IUserParams = {
     dmToken: 'token',
     dmTokenSecret: 'secret',
     pro: '1',
-    customerId: 'cus_xXx1fff000999fY'
+    customerId: 'cus_xXx1fff000999fY',
 };
 
 describe('Test userDao', () => {
@@ -102,16 +102,31 @@ describe('Test userDao', () => {
     });
 
     test('should be able to fetch and edit user params', async () => {
-        const uParamsStr1 = {...USER_PARAMS_1,
-          added_at: 1234, dmId: '', dmToken: '', dmTokenSecret: '', customerId: '', pro: '0'};
-        const uParamsStr2 = {...USER_PARAMS_2, added_at: 2345, pro: '1'};
+        const uParamsStr1 = {
+            ...USER_PARAMS_1,
+            added_at: 1234,
+            dmId: '',
+            dmToken: '',
+            dmTokenSecret: '',
+            customerId: '',
+            pro: '0',
+        };
+        const uParamsStr2 = { ...USER_PARAMS_2, added_at: 2345, pro: '1' };
         expect(await uDao1.getUserParams()).toStrictEqual(uParamsStr1);
         expect(await uDao2.getUserParams()).toStrictEqual(uParamsStr2);
 
-        const newParams = {dmId: '3030', dmToken: 'token2', dmTokenSecret: 'secret2',
-            token: 't0k4n2', tokenSecret: 's2cr2t2'};
+        const newParams = {
+            dmId: '3030',
+            dmToken: 'token2',
+            dmTokenSecret: 'secret2',
+            token: 't0k4n2',
+            tokenSecret: 's2cr2t2',
+        };
         await uDao2.setUserParams(newParams);
-        expect(await uDao2.getUserParams()).toStrictEqual({...uParamsStr2, ...newParams});
+        expect(await uDao2.getUserParams()).toStrictEqual({
+            ...uParamsStr2,
+            ...newParams,
+        });
         await uDao2.setUserParams(USER_PARAMS_2);
         expect(await uDao2.getUserParams()).toStrictEqual(uParamsStr2);
     });
@@ -147,7 +162,7 @@ describe('Test userDao', () => {
             access_token: USER_PARAMS_2.dmToken,
             access_token_secret: USER_PARAMS_2.dmTokenSecret,
         });
-        await expect(uDao1.getDmTwit()).rejects.toThrow('the user didn\'t have any DM credentials stored');
+        await expect(uDao1.getDmTwit()).rejects.toThrow("the user didn't have any DM credentials stored");
     });
 
     test('should be able to get the language', async () => {
@@ -156,8 +171,8 @@ describe('Test userDao', () => {
     });
 
     test('isPro', async () => {
-      expect(await uDao1.isPro()).toBe(false);
-      expect(await uDao2.isPro()).toBe(true);
+        expect(await uDao1.isPro()).toBe(false);
+        expect(await uDao2.isPro()).toBe(true);
     });
 
     test('should store and retrieve a list of followers', async () => {
@@ -200,36 +215,36 @@ describe('Test userDao', () => {
     });
 
     test('should manage friend codes', async () => {
-      expect(await uDao1.getFriendCodes()).toHaveLength(0);
-      await uDao1.addFriendCodes();
-      await uDao2.addFriendCodes();
-      await uDao1.addFriendCodes(); // the second call should not do anything
-      const codes = await uDao1.getFriendCodes();
-      expect(codes).toHaveLength(5);
-      expect(codes[0].userId).toBe('1');
-      expect(codes[0].code).toHaveLength(6);
+        expect(await uDao1.getFriendCodes()).toHaveLength(0);
+        await uDao1.addFriendCodes();
+        await uDao2.addFriendCodes();
+        await uDao1.addFriendCodes(); // the second call should not do anything
+        const codes = await uDao1.getFriendCodes();
+        expect(codes).toHaveLength(5);
+        expect(codes[0].userId).toBe('1');
+        expect(codes[0].code).toHaveLength(6);
 
-      expect(await uDao2.registerFriendCode('AAAAAA')).toBe(false);
-      expect(await uDao2.registerFriendCode(codes[1].code)).toBe(true);
-      expect(await uDao2.registerFriendCode(codes[1].code)).toBe(false);
-      expect((await uDao2.getRegisteredFriendCode())?.userId).toBe('1');
+        expect(await uDao2.registerFriendCode('AAAAAA')).toBe(false);
+        expect(await uDao2.registerFriendCode(codes[1].code)).toBe(true);
+        expect(await uDao2.registerFriendCode(codes[1].code)).toBe(false);
+        expect((await uDao2.getRegisteredFriendCode())?.userId).toBe('1');
 
-      await uDao2.deleteFriendCodes(codes[1].code);
-      expect(await uDao1.getFriendCodes()).toHaveLength(5);
-      expect(await uDao2.getFriendCodes()).toHaveLength(5);
+        await uDao2.deleteFriendCodes(codes[1].code);
+        expect(await uDao1.getFriendCodes()).toHaveLength(5);
+        expect(await uDao2.getFriendCodes()).toHaveLength(5);
 
-      await uDao1.deleteFriendCodes(codes[1].code);
-      expect(await uDao1.getFriendCodes()).toHaveLength(4);
-      expect(await uDao2.getFriendCodes()).toHaveLength(5);
-      expect((await uDao2.getRegisteredFriendCode())).toBe(null);
+        await uDao1.deleteFriendCodes(codes[1].code);
+        expect(await uDao1.getFriendCodes()).toHaveLength(4);
+        expect(await uDao2.getFriendCodes()).toHaveLength(5);
+        expect(await uDao2.getRegisteredFriendCode()).toBe(null);
     });
 
     // depends heavily on other tests
     test('should get a stable getAllUserData', async () => {
-      const data = await uDao1.getAllUserData();
-      delete data.friendCodes; // not stable
-      delete data.registeredFriendCode; // not stable
-      expect(data).toMatchSnapshot();
+        const data = await uDao1.getAllUserData();
+        delete data.friendCodes; // not stable
+        delete data.registeredFriendCode; // not stable
+        expect(data).toMatchSnapshot();
     });
 
     test('should completely delete data about the user', async () => {

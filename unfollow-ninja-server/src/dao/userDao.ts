@@ -4,7 +4,7 @@ import Twit from 'twit';
 import { TwitterApi } from 'twitter-api-v2';
 import crypto from 'crypto';
 
-import type {default as Dao, IFriendCode} from './dao';
+import type { default as Dao, IFriendCode } from './dao';
 import { UserCategory } from './dao';
 import type { IUserParams, Lang } from '../utils/types';
 import { twitterCursorToTime } from '../utils/utils';
@@ -22,7 +22,7 @@ export default class UserDao {
     }
 
     public getUsername(): Promise<string> {
-        return this.dao.getCachedUsername(this.userId)
+        return this.dao.getCachedUsername(this.userId);
     }
 
     public async getCategory(): Promise<UserCategory> {
@@ -35,14 +35,14 @@ export default class UserDao {
     }
 
     public async enable(): Promise<UserCategory.enabled | UserCategory.vip> {
-      const proParam = await this.redis.hget(`user:${this.userId}`, 'pro');
-      if (Number(proParam) > 0) {
-        await this.setCategory(UserCategory.vip)
-        return UserCategory.vip;
-      } else {
-        await this.setCategory(UserCategory.enabled)
-        return UserCategory.enabled;
-      }
+        const proParam = await this.redis.hget(`user:${this.userId}`, 'pro');
+        if (Number(proParam) > 0) {
+            await this.setCategory(UserCategory.vip);
+            return UserCategory.vip;
+        } else {
+            await this.setCategory(UserCategory.enabled);
+            return UserCategory.enabled;
+        }
     }
 
     // get the minimum timestamp required to do the next followers check
@@ -50,17 +50,16 @@ export default class UserDao {
     // e.g if a check needs 4 requests, it's probably in 3min30 (twitter limit = 15/15min)
     // (default: 0)
     public async getNextCheckTime(): Promise<number> {
-        return this.redis.get(`nextCheckTime:${this.userId}`)
-            .then((nextCheckTime) => Number(nextCheckTime));
+        return this.redis.get(`nextCheckTime:${this.userId}`).then((nextCheckTime) => Number(nextCheckTime));
     }
 
     // see above
-    public async setNextCheckTime(nextCheckTime: number|string): Promise<void> {
+    public async setNextCheckTime(nextCheckTime: number | string): Promise<void> {
         await this.redis.set(`nextCheckTime:${this.userId}`, nextCheckTime.toString());
     }
 
     public async getUserParams(): Promise<IUserParams> {
-        const stringUserParams = await this.redis.hgetall(`user:${this.userId}`) as Record<keyof IUserParams, string>;
+        const stringUserParams = (await this.redis.hgetall(`user:${this.userId}`)) as Record<keyof IUserParams, string>;
         return {
             ...stringUserParams,
             added_at: parseInt(stringUserParams.added_at, 10),
@@ -74,35 +73,35 @@ export default class UserDao {
     }
 
     public async getTwit(): Promise<Twit> {
-        const [ token, tokenSecret ] = await this.redis.hmget(`user:${this.userId}`, 'token', 'tokenSecret');
+        const [token, tokenSecret] = await this.redis.hmget(`user:${this.userId}`, 'token', 'tokenSecret');
         if (!token || !tokenSecret) {
-            throw new Error('Tried to create a new Twit client but the user didn\'t have any credentials stored');
+            throw new Error("Tried to create a new Twit client but the user didn't have any credentials stored");
         }
         return new Twit({
-            access_token:         token,
-            access_token_secret:  tokenSecret,
-            consumer_key:         process.env.CONSUMER_KEY,
-            consumer_secret:      process.env.CONSUMER_SECRET,
+            access_token: token,
+            access_token_secret: tokenSecret,
+            consumer_key: process.env.CONSUMER_KEY,
+            consumer_secret: process.env.CONSUMER_SECRET,
         });
     }
 
     public async getTwitterApi(): Promise<TwitterApi> {
-      const [ token, tokenSecret ] = await this.redis.hmget(`user:${this.userId}`, 'token', 'tokenSecret');
-      if (!token || !tokenSecret) {
-        throw new Error('Tried to create a new twitter client but the user didn\'t have any credentials stored');
-      }
-      return new TwitterApi({
-        accessToken: token,
-        accessSecret: tokenSecret,
-        appKey: process.env.CONSUMER_KEY,
-        appSecret: process.env.CONSUMER_SECRET,
-      });
+        const [token, tokenSecret] = await this.redis.hmget(`user:${this.userId}`, 'token', 'tokenSecret');
+        if (!token || !tokenSecret) {
+            throw new Error("Tried to create a new twitter client but the user didn't have any credentials stored");
+        }
+        return new TwitterApi({
+            accessToken: token,
+            accessSecret: tokenSecret,
+            appKey: process.env.CONSUMER_KEY,
+            appSecret: process.env.CONSUMER_SECRET,
+        });
     }
 
     public async getDmTwit(): Promise<Twit> {
-        const [ dmToken, dmTokenSecret ] = await this.redis.hmget(`user:${this.userId}`, 'dmToken', 'dmTokenSecret');
+        const [dmToken, dmTokenSecret] = await this.redis.hmget(`user:${this.userId}`, 'dmToken', 'dmTokenSecret');
         if (!dmToken || !dmTokenSecret) {
-            throw new Error('Tried to create a new Twit DM client but the user didn\'t have any DM credentials stored');
+            throw new Error("Tried to create a new Twit DM client but the user didn't have any DM credentials stored");
         }
         return new Twit({
             access_token: dmToken,
@@ -113,28 +112,28 @@ export default class UserDao {
     }
 
     public async getDmTwitterApi(): Promise<TwitterApi> {
-      const [ dmToken, dmTokenSecret ] = await this.redis.hmget(`user:${this.userId}`, 'dmToken', 'dmTokenSecret');
-      if (!dmToken || !dmTokenSecret) {
-        throw new Error('Tried to create a new Twit DM client but the user didn\'t have any DM credentials stored');
-      }
-      return new TwitterApi({
-        accessToken: dmToken,
-        accessSecret: dmTokenSecret,
-        appKey: process.env.DM_CONSUMER_KEY,
-        appSecret: process.env.DM_CONSUMER_SECRET,
-      });
+        const [dmToken, dmTokenSecret] = await this.redis.hmget(`user:${this.userId}`, 'dmToken', 'dmTokenSecret');
+        if (!dmToken || !dmTokenSecret) {
+            throw new Error("Tried to create a new Twit DM client but the user didn't have any DM credentials stored");
+        }
+        return new TwitterApi({
+            accessToken: dmToken,
+            accessSecret: dmTokenSecret,
+            appKey: process.env.DM_CONSUMER_KEY,
+            appSecret: process.env.DM_CONSUMER_SECRET,
+        });
     }
 
     public async getLang(): Promise<Lang> {
-        return await this.redis.hget(`user:${this.userId}`, 'lang') as Lang;
+        return (await this.redis.hget(`user:${this.userId}`, 'lang')) as Lang;
     }
 
     public async isPro(): Promise<boolean> {
-      return Number(await this.redis.hget(`user:${this.userId}`, 'pro')) > 0;
+        return Number(await this.redis.hget(`user:${this.userId}`, 'pro')) > 0;
     }
 
     public getDmId(): Promise<string> {
-      return this.redis.hget(`user:${this.userId}`, 'dmId');
+        return this.redis.hget(`user:${this.userId}`, 'dmId');
     }
 
     // list of follower IDs stored during last checkFollowers (in Twitter's order)
@@ -147,9 +146,9 @@ export default class UserDao {
         followers: string[], // every follower, in Twitter's order
         newFollowers: string[], // followers to add
         unfollowers: string[], // followers to remove
-        addedTime: number, // timestamp in ms for new followers
+        addedTime: number // timestamp in ms for new followers
     ): Promise<void> {
-        const notCachedDict = fromPairs(newFollowers.map(followerId => [followerId, addedTime.toString()]));
+        const notCachedDict = fromPairs(newFollowers.map((followerId) => [followerId, addedTime.toString()]));
         await Promise.all([
             this.redis.set(`followers:${this.userId}`, JSON.stringify(followers)),
             this.redis.set(`followers:count:${this.userId}`, followers.length.toString()),
@@ -162,9 +161,7 @@ export default class UserDao {
     }
 
     public async setFollowerSnowflakeId(followerId: string, snowflakeId: string): Promise<void> {
-        await Promise.all([
-            this.redis.hset(`followers:snowflake-ids:${this.userId}`, followerId, snowflakeId),
-        ]);
+        await Promise.all([this.redis.hset(`followers:snowflake-ids:${this.userId}`, followerId, snowflakeId)]);
     }
 
     // get twitter cached snowflakeId (containing the follow timing information)
@@ -189,8 +186,9 @@ export default class UserDao {
     // get the timestamp (in ms) when the follower followed the user.
     // determined from the cached snowflakeId or from the time it was added in DB
     public async getFollowTime(followerId: string): Promise<number> {
-        return twitterCursorToTime(await this.getFollowerSnowflakeId(followerId)) ||
-            this.getFollowDetectedTime(followerId);
+        return (
+            twitterCursorToTime(await this.getFollowerSnowflakeId(followerId)) || this.getFollowDetectedTime(followerId)
+        );
     }
 
     // get the timestamp when the follower was added to the db (in ms)
@@ -211,58 +209,73 @@ export default class UserDao {
     }
 
     public async getFriendCodes(): Promise<IFriendCode[]> {
-      return await this.dao.FriendCode.findAll({where: {userId: this.userId}});
+        return await this.dao.FriendCode.findAll({
+            where: { userId: this.userId },
+        });
     }
 
-    public async getFriendCodesWithUsername(): Promise<{code: string, friendUsername: string}[]> {
-      return Promise.all(
-        (await this.dao.FriendCode.findAll({where: {userId: this.userId}}))
-          .map(async (code) => ({
-            code: code.code,
-            friendUsername: code.friendId && await this.dao.getCachedUsername(code.friendId),
-          }))
-      );
+    public async getFriendCodesWithUsername(): Promise<{ code: string; friendUsername: string }[]> {
+        return Promise.all(
+            (await this.dao.FriendCode.findAll({ where: { userId: this.userId } })).map(async (code) => ({
+                code: code.code,
+                friendUsername: code.friendId && (await this.dao.getCachedUsername(code.friendId)),
+            }))
+        );
     }
 
     // Add friend codes until there are 5 of them
     public async addFriendCodes(): Promise<void> {
-      const nbCodes = (await this.getFriendCodes()).length;
-      if (nbCodes > 5) {
-        throw new Error(this.userId +' has more than 5 friend codes - should not happen')
-      }
-      for (let i=0; i<5-nbCodes; ++i) {
-        const code = crypto.randomBytes(3).toString('hex').toUpperCase();
-        await this.dao.FriendCode.create({userId: this.userId, code});
-      }
+        const nbCodes = (await this.getFriendCodes()).length;
+        if (nbCodes > 5) {
+            throw new Error(this.userId + ' has more than 5 friend codes - should not happen');
+        }
+        for (let i = 0; i < 5 - nbCodes; ++i) {
+            const code = crypto.randomBytes(3).toString('hex').toUpperCase();
+            await this.dao.FriendCode.create({ userId: this.userId, code });
+        }
     }
 
     public async deleteFriendCodes(code: string): Promise<void> {
-      await this.dao.FriendCode.destroy({where: {userId: this.userId, code}});
+        await this.dao.FriendCode.destroy({ where: { userId: this.userId, code } });
     }
 
     public async registerFriendCode(code: string): Promise<boolean> {
-      const [nbUpdates] = await this.dao.FriendCode.update({friendId: this.userId}, {where: {code, friendId: null}});
-      return nbUpdates === 1;
+        const [nbUpdates] = await this.dao.FriendCode.update(
+            { friendId: this.userId },
+            { where: { code, friendId: null } }
+        );
+        return nbUpdates === 1;
     }
 
-  public async getRegisteredFriendCode(): Promise<IFriendCode> {
-      return await this.dao.FriendCode.findOne({where: {friendId: this.userId}});
-  }
+    public async getRegisteredFriendCode(): Promise<IFriendCode> {
+        return await this.dao.FriendCode.findOne({
+            where: { friendId: this.userId },
+        });
+    }
 
     public async getAllUserData() {
-        const [ username, category, nextCheckTime, userParams, followers, friendCodes,
-          registeredFriendCode, followTimes, uncachables, snowflakeIds] =
-            await Promise.all([
-                this.getUsername(),
-                this.getCategory(),
-                this.getNextCheckTime(),
-                this.getUserParams(),
-                this.getFollowers(),
-                this.getFriendCodes(),
-                this.getRegisteredFriendCode(),
-                this.redis.hgetall(`followers:follow-time:${this.userId}`),
-                this.redis.smembers(`followers:uncachable:${this.userId}`),
-                this.redis.hgetall(`followers:snowflake-ids:${this.userId}`),
+        const [
+            username,
+            category,
+            nextCheckTime,
+            userParams,
+            followers,
+            friendCodes,
+            registeredFriendCode,
+            followTimes,
+            uncachables,
+            snowflakeIds,
+        ] = await Promise.all([
+            this.getUsername(),
+            this.getCategory(),
+            this.getNextCheckTime(),
+            this.getUserParams(),
+            this.getFollowers(),
+            this.getFriendCodes(),
+            this.getRegisteredFriendCode(),
+            this.redis.hgetall(`followers:follow-time:${this.userId}`),
+            this.redis.smembers(`followers:uncachable:${this.userId}`),
+            this.redis.hgetall(`followers:snowflake-ids:${this.userId}`),
         ]);
 
         return {
@@ -279,18 +292,18 @@ export default class UserDao {
         };
     }
 
-  // delete follower data about revoked users
-  // to save some RAM space
-  public async cleanUser(): Promise<void> {
-      await this.redis.del(
-        `nextCheckTime:${this.userId}`,
-        `followers:${this.userId}`,
-        `followers:count:${this.userId}`,
-        `followers:follow-time:${this.userId}`,
-        `followers:uncachable:${this.userId}`,
-        `followers:snowflake-ids:${this.userId}`,
-      );
-  }
+    // delete follower data about revoked users
+    // to save some RAM space
+    public async cleanUser(): Promise<void> {
+        await this.redis.del(
+            `nextCheckTime:${this.userId}`,
+            `followers:${this.userId}`,
+            `followers:count:${this.userId}`,
+            `followers:follow-time:${this.userId}`,
+            `followers:uncachable:${this.userId}`,
+            `followers:snowflake-ids:${this.userId}`
+        );
+    }
 
     // Not safe (some tasks for that user may still exist)
     // But can be used for disabled account
@@ -304,9 +317,9 @@ export default class UserDao {
                 `followers:count:${this.userId}`,
                 `followers:follow-time:${this.userId}`,
                 `followers:uncachable:${this.userId}`,
-                `followers:snowflake-ids:${this.userId}`,
+                `followers:snowflake-ids:${this.userId}`
             ),
         ]);
-        await this.dao.FriendCode.destroy({where: {userId: this.userId}});
+        await this.dao.FriendCode.destroy({ where: { userId: this.userId } });
     }
 }

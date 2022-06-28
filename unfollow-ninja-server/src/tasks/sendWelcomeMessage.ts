@@ -1,7 +1,7 @@
 import * as i18n from 'i18n';
 import type { Job } from 'bull';
-import {Params, Twitter} from 'twit';
-import {UserCategory} from '../dao/dao';
+import { Params, Twitter } from 'twit';
+import { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
 import Task from './task';
 import { NotificationEvent } from '../dao/userEventDao';
@@ -23,34 +23,43 @@ export default class extends Task {
 
         let message;
         if (isPro) {
-          message = i18n.__('Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!',
-            { twitterAccount: TWITTER_ACCOUNT, emoji: '🚀' }
-          );
+            message = i18n.__('Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!', {
+                twitterAccount: TWITTER_ACCOUNT,
+                emoji: '🚀',
+            });
         } else {
-          message = i18n.__('All set, welcome to @{{twitterAccount}} {{emoji}}!\n' +
-              'You will soon know all about your unfollowers here!',
-            { twitterAccount: TWITTER_ACCOUNT, emoji: '🙌' }
-          );
+            message = i18n.__(
+                'All set, welcome to @{{twitterAccount}} {{emoji}}!\n' +
+                    'You will soon know all about your unfollowers here!',
+                { twitterAccount: TWITTER_ACCOUNT, emoji: '🙌' }
+            );
         }
 
-      this.dao.userEventDao
-        .logNotificationEvent(userId, NotificationEvent.welcomeMessage, await userDao.getDmId(), message);
+        this.dao.userEventDao.logNotificationEvent(
+            userId,
+            NotificationEvent.welcomeMessage,
+            await userDao.getDmId(),
+            message
+        );
 
-        await dmTwit.post('direct_messages/events/new', {
-            event: {
-                type: 'message_create',
-                message_create: {target: {recipient_id: userId}, message_data: {text: message}},
-            },
-        } as Params)
+        await dmTwit
+            .post('direct_messages/events/new', {
+                event: {
+                    type: 'message_create',
+                    message_create: {
+                        target: { recipient_id: userId },
+                        message_data: { text: message },
+                    },
+                },
+            } as Params)
             .catch((err) => this.manageTwitterErrors(err, username, userId));
     }
 
-    private async manageTwitterErrors(err: any, username: string, userId: string): Promise<void> {
-
-        if (!err.twitterReply) {
+    private async manageTwitterErrors(err: unknown, username: string, userId: string): Promise<void> {
+        if (!err['twitterReply']) {
             throw err;
         }
-        const twitterReply: Twitter.Errors = err.twitterReply;
+        const twitterReply: Twitter.Errors = err['twitterReply'];
 
         const userDao = this.dao.getUserDao(userId);
 
@@ -58,8 +67,9 @@ export default class extends Task {
             switch (code) {
                 // app-related
                 case 32:
-                    throw new Error('Authentication problems.' +
-                        'Please check that your consumer key & secret are correct.');
+                    throw new Error(
+                        'Authentication problems.' + 'Please check that your consumer key & secret are correct.'
+                    );
                 case 416:
                     throw new Error('Oops, it looks like the application has been suspended :/...');
                 // user-related
@@ -74,15 +84,18 @@ export default class extends Task {
                     break;
                 // twitter errors
                 case 130: // over capacity
-                case 130: // over capacity
                 case 131: // internal error`
                 case 88: // rate limit
                     // retry in 15 minutes
-                    await this.queue.add('sendWelcomeMessage', {
-                        id: Date.now(), // otherwise some seem stuck??
-                        userId,
-                        username,
-                    }, {delay: 15 * 60 * 1000});
+                    await this.queue.add(
+                        'sendWelcomeMessage',
+                        {
+                            id: Date.now(), // otherwise some seem stuck??
+                            userId,
+                            username,
+                        },
+                        { delay: 15 * 60 * 1000 }
+                    );
                     break;
                 default:
                     throw new Error(`An unexpected twitter error occured: ${code} ${message}`);

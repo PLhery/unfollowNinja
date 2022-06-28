@@ -1,13 +1,10 @@
 {
-  "include": [
-    "src/**/*.ts",
-    "tests/**/*.ts"
-  ],
-  "compilerOptions": {
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "target": "es2019",
-    "outDir": "dist",
-    "incremental": true
-  }
+    "include": ["src/**/*.ts", "tests/**/*.ts"],
+    "compilerOptions": {
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "target": "es2019",
+        "outDir": "dist",
+        "incremental": true
+    }
 }

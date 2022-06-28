@@ -1,32 +1,32 @@
 version: '3'
 
 services:
-  tests:
-    build: ..
-    command: "npm run specs"
-    volumes:
-      - ..:/usr/app/
-      - /usr/app/node_modules
-    depends_on:
-      - postgres
-      - postgres-logs
-      - redis
-    environment:
-      REDIS_TEST_URI: redis://redis
-      POSTGRES_TEST_URI: postgres://postgres:unfollowninja@postgres/postgres
-      POSTGRES_LOGS_TEST_URI: postgres://postgres:unfollowninja@postgres-logs/postgres
-  postgres:
-    image: postgres:13
-    command: postgres -c 'max_connections=200'
-    environment:
-      POSTGRES_PASSWORD: "unfollowninja"
-  postgres-logs:
-    restart: always
-    image: postgres:14
-    command: postgres -c 'max_connections=200'
-    environment:
-      POSTGRES_PASSWORD: "unfollowninja"
-    volumes:
-      - /data/postgres-logs:/var/lib/postgresql/data
-  redis:
-    image: redis:6
+    tests:
+        build: ..
+        command: 'npm run specs'
+        volumes:
+            - ..:/usr/app/
+            - /usr/app/node_modules
+        depends_on:
+            - postgres
+            - postgres-logs
+            - redis
+        environment:
+            REDIS_TEST_URI: redis://redis
+            POSTGRES_TEST_URI: postgres://postgres:unfollowninja@postgres/postgres
+            POSTGRES_LOGS_TEST_URI: postgres://postgres:unfollowninja@postgres-logs/postgres
+    postgres:
+        image: postgres:13
+        command: postgres -c 'max_connections=200'
+        environment:
+            POSTGRES_PASSWORD: 'unfollowninja'
+    postgres-logs:
+        restart: always
+        image: postgres:14
+        command: postgres -c 'max_connections=200'
+        environment:
+            POSTGRES_PASSWORD: 'unfollowninja'
+        volumes:
+            - /data/postgres-logs:/var/lib/postgresql/data
+    redis:
+        image: redis:6

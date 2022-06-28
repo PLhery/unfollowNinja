@@ -1,62 +1,62 @@
 version: '3'
 
 services:
-  workers:
-    restart: always
-    build: .
-    depends_on:
-      - postgres
-      - postgres-logs
-      - redis-bull
-      - redis
-    volumes:
-      - /data/workers-logs:/usr/src/app/logs
-    environment:
-      POSTGRES_URI: postgres://postgres:unfollowninja@postgres/postgres
-      POSTGRES_LOGS_URI: postgres://postgres:unfollowninja@postgres-logs/postgres
-      REDIS_URI: redis://redis
-      REDIS_BULL_URI: redis://redis-bull
-  api:
-    restart: always
-    build: .
-    command: ["node", "./dist/api.js"]
-    ports:
-      - "127.0.0.1:4000:4000"
-    depends_on:
-      - postgres
-      - postgres-logs
-      - redis-bull
-      - redis
-    environment:
-      POSTGRES_URI: postgres://postgres:unfollowninja@postgres/postgres
-      POSTGRES_LOGS_URI: postgres://postgres:unfollowninja@postgres-logs/postgres
-      REDIS_URI: redis://redis
-      REDIS_BULL_URI: redis://redis-bull
-  postgres:
-    restart: always
-    image: postgres:13
-    command: postgres -c 'max_connections=200'
-    environment:
-      POSTGRES_PASSWORD: "unfollowninja"
-    volumes:
-      - /data/postgres:/var/lib/postgresql/data
-  postgres-logs:
-    restart: always
-    image: postgres:14
-    command: postgres -c 'max_connections=200'
-    environment:
-      POSTGRES_PASSWORD: "unfollowninja"
-    volumes:
-      - /data/postgres-logs:/var/lib/postgresql/data
-  redis-bull:
-    restart: always
-    image: redis:6
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - /data/redis-bull:/data
-  redis:
-    restart: always
-    image: redis:6
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - /data/redis:/data
+    workers:
+        restart: always
+        build: .
+        depends_on:
+            - postgres
+            - postgres-logs
+            - redis-bull
+            - redis
+        volumes:
+            - /data/workers-logs:/usr/src/app/logs
+        environment:
+            POSTGRES_URI: postgres://postgres:unfollowninja@postgres/postgres
+            POSTGRES_LOGS_URI: postgres://postgres:unfollowninja@postgres-logs/postgres
+            REDIS_URI: redis://redis
+            REDIS_BULL_URI: redis://redis-bull
+    api:
+        restart: always
+        build: .
+        command: ['node', './dist/api.js']
+        ports:
+            - '127.0.0.1:4000:4000'
+        depends_on:
+            - postgres
+            - postgres-logs
+            - redis-bull
+            - redis
+        environment:
+            POSTGRES_URI: postgres://postgres:unfollowninja@postgres/postgres
+            POSTGRES_LOGS_URI: postgres://postgres:unfollowninja@postgres-logs/postgres
+            REDIS_URI: redis://redis
+            REDIS_BULL_URI: redis://redis-bull
+    postgres:
+        restart: always
+        image: postgres:13
+        command: postgres -c 'max_connections=200'
+        environment:
+            POSTGRES_PASSWORD: 'unfollowninja'
+        volumes:
+            - /data/postgres:/var/lib/postgresql/data
+    postgres-logs:
+        restart: always
+        image: postgres:14
+        command: postgres -c 'max_connections=200'
+        environment:
+            POSTGRES_PASSWORD: 'unfollowninja'
+        volumes:
+            - /data/postgres-logs:/var/lib/postgresql/data
+    redis-bull:
+        restart: always
+        image: redis:6
+        command: ['redis-server', '--appendonly', 'yes']
+        volumes:
+            - /data/redis-bull:/data
+    redis:
+        restart: always
+        image: redis:6
+        command: ['redis-server', '--appendonly', 'yes']
+        volumes:
+            - /data/redis:/data

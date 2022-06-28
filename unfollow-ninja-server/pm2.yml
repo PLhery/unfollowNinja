@@ -1,8 +1,8 @@
 apps:
-- script: ./dist/workers.js
-  name: ninja-workers
-  kill_timeout: 10000
-- script: ./dist/api.js
-  name: ninja-api
-  exec_mode: cluster
-  instances: 2
+    - script: ./dist/workers.js
+      name: ninja-workers
+      kill_timeout: 10000
+    - script: ./dist/api.js
+      name: ninja-api
+      exec_mode: cluster
+      instances: 2

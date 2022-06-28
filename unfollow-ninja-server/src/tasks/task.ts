@@ -1,4 +1,4 @@
-import type {Job, Queue} from 'bull';
+import type { Job, Queue } from 'bull';
 import Dao from '../dao/dao';
 
 export default abstract class Task {
@@ -10,7 +10,7 @@ export default abstract class Task {
         this.queue = queue;
     }
 
-    public abstract run(job: Job): Promise<Error|void>;
+    public abstract run(job: Job): Promise<Error | void>;
 }
 
-export type TaskClass = new(dao: Dao, queue: Queue) => Task
+export type TaskClass = new (dao: Dao, queue: Queue) => Task;

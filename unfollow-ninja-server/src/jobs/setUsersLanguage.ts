@@ -12,8 +12,8 @@ async function runJob() {
         const userDao = dao.getUserDao(userId);
         const lang = await userDao.getLang();
         if (lang !== 'en') {
-          logger.info('overriding lang for user ' + userId);
-          await userDao.setUserParams({lang: 'en'});
+            logger.info('overriding lang for user ' + userId);
+            await userDao.setUserParams({ lang: 'en' });
         }
     }
     dao.disconnect();

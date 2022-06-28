@@ -7,27 +7,26 @@ const METRICS_PREFIX = process.env.METRICS_PREFIX || 'uninja';
 export default class Metrics {
     private static statsDClients: StatsD[] = [];
 
-    public static addStatsdHost(host: string, port: number = 8125) {
-        this.statsDClients.push(new StatsD({host, port}))
+    public static addStatsdHost(host: string, port = 8125) {
+        this.statsDClients.push(new StatsD({ host, port }));
     }
 
     public static gauge(metric: string, value: number) {
-        this.statsDClients
-            .forEach(client => client.gauge(METRICS_PREFIX + '.' + metric, value));
+        this.statsDClients.forEach((client) => client.gauge(METRICS_PREFIX + '.' + metric, value));
     }
 
-    public static increment(metric: string, value: number = 1) {
-        this.statsDClients
-            .forEach(client => client.increment(METRICS_PREFIX + '.' + metric, value));
+    public static increment(metric: string, value = 1) {
+        this.statsDClients.forEach((client) => client.increment(METRICS_PREFIX + '.' + metric, value));
     }
 
     public static kill() {
-        this.statsDClients.forEach(client => client.close(null))
+        this.statsDClients.forEach((client) => client.close(null));
     }
 }
 if (STATSD_HOST) {
     Metrics.addStatsdHost(STATSD_HOST);
 }
-if (DD_AGENT_HOST) { // datadog
+if (DD_AGENT_HOST) {
+    // datadog
     Metrics.addStatsdHost(DD_AGENT_HOST, Number(process.env.DD_DOGSTATSD_PORT || 8125));
 }
