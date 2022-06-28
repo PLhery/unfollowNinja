@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [14.x, 16.x]
+        node-version: [18.x]
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -33,11 +33,6 @@ jobs:
       - name: test
         working-directory: unfollow-ninja-server
         run: npm run specs
-      - name: Archive test results
-        uses: actions/upload-artifact@v1
-        with:
-          name: test-results
-          path: unfollow-ninja-server/test-results
 
   docker:
     runs-on: ubuntu-latest
