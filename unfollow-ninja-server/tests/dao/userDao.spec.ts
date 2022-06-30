@@ -214,6 +214,16 @@ describe('Test userDao', () => {
         expect(await uDao1.getUncachableFollowers()).toStrictEqual(['1']);
     });
 
+    test('should be able to store scrapped followers', async () => {
+        expect(await uDao1.getScrappedFollowers()).toBe(null);
+
+        await uDao1.setScrappedFollowers({ cursor: '1', followers: ['2', '3'] });
+        expect(await uDao1.getScrappedFollowers()).toStrictEqual({ cursor: '1', followers: ['2', '3'] });
+
+        await uDao1.resetScrappedFollowers();
+        expect(await uDao1.getScrappedFollowers()).toBe(null);
+    });
+
     test('should manage friend codes', async () => {
         expect(await uDao1.getFriendCodes()).toHaveLength(0);
         await uDao1.addFriendCodes();
