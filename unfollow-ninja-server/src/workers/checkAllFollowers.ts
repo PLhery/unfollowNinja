@@ -121,7 +121,14 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
 
     let requests = 0;
     let cursor = '-1';
-    const followers: string[] = [];
+    let followers: string[] = [];
+
+    // For big account (>150k), maybe we got the 150k first accounts previously, we'll continue the scrapping
+    const scrappedFollowers = await userDao.getScrappedFollowers();
+    if (scrappedFollowers) {
+        followers = scrappedFollowers.followers;
+        cursor = scrappedFollowers.cursor;
+    }
     try {
         let remainingRequests: number;
         let resetTime: number;
@@ -129,9 +136,10 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
             if (remainingRequests === 0) {
                 if (useDmTwit) {
                     // this may happen for 150 000+ followers
-                    await userDao.setNextCheckTime(Math.max(resetTime, twitResetTime));
-                    // noinspection ExceptionCaughtLocallyJS
-                    throw new Error('No twitter requests remaining to pursue the job.');
+                    // We'll save what we scrapped and will continue in 15min (or sooner if we can)
+                    await userDao.setNextCheckTime(Math.max(resetTime, twitResetTime)); // main and DM app reset times
+                    await userDao.setScrappedFollowers({ cursor, followers });
+                    return;
                 } else {
                     // this may happen for 75 000+ followers
                     useDmTwit = true;
@@ -154,6 +162,9 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
             remainingRequests = Number(result.resp.headers['x-rate-limit-remaining']);
             resetTime = Number(result.resp.headers['x-rate-limit-reset']) * 1000;
             followers.push(...result.data['ids']);
+        }
+        if (scrappedFollowers) {
+            await userDao.resetScrappedFollowers();
         }
         // Compute next time we can do the X requests
         const remainingChecks = Math.floor(remainingRequests / requests);

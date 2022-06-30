@@ -58,6 +58,23 @@ export default class UserDao {
         await this.redis.set(`nextCheckTime:${this.userId}`, nextCheckTime.toString());
     }
 
+    // for big accounts (>150k), we need to scrap the followers in multiple chunks every 15min
+    public async getScrappedFollowers(): Promise<{ cursor: string; followers: string[] }> {
+        return this.redis
+            .get(`scrappedFollowers:${this.userId}`)
+            .then((scrappedFollowers) => scrappedFollowers && JSON.parse(scrappedFollowers));
+    }
+
+    // see above
+    public async setScrappedFollowers(scrappedFollowers: { cursor: string; followers: string[] }): Promise<void> {
+        await this.redis.set(`scrappedFollowers:${this.userId}`, JSON.stringify(scrappedFollowers));
+    }
+
+    // see above
+    public async resetScrappedFollowers(): Promise<void> {
+        await this.redis.del(`scrappedFollowers:${this.userId}`);
+    }
+
     public async getUserParams(): Promise<IUserParams> {
         const stringUserParams = (await this.redis.hgetall(`user:${this.userId}`)) as Record<keyof IUserParams, string>;
         return {
