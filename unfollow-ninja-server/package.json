@@ -46,6 +46,7 @@
     "dependencies": {
         "@koa/cors": "^3.1.0",
         "@sentry/node": "^7.3.0",
+        "@sentry/tracing": "^7.3.1",
         "@types/bull": "^3.15.5",
         "@types/geoip-country": "^4.0.0",
         "@types/i18n": "^0.13.3",

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 import * as Sentry from '@sentry/node';
+import '@sentry/tracing';
 import Koa from 'koa';
 import Router from 'koa-router';
 import koaSession from 'koa-session';
@@ -30,7 +31,7 @@ setLoggerPrefix('api');
 
 const SENTRY_DSN = process.env.SENTRY_DSN_API || undefined;
 if (SENTRY_DSN) {
-    Sentry.init({ dsn: SENTRY_DSN });
+    Sentry.init({ dsn: SENTRY_DSN, tracesSampleRate: 0.1 });
 }
 
 assertEnvVariable('REDIS_URI');

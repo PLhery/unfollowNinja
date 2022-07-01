@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 import * as Sentry from '@sentry/node';
+import '@sentry/tracing';
 import cluster from 'cluster';
 import { cpus } from 'os';
 import Bull from 'bull';
@@ -17,7 +18,7 @@ const WORKER_RATE_LIMIT = Number(process.env.WORKER_RATE_LIMIT) || 15;
 const SENTRY_DSN = process.env.SENTRY_DSN || undefined;
 
 if (SENTRY_DSN) {
-    Sentry.init({ dsn: SENTRY_DSN });
+    Sentry.init({ dsn: SENTRY_DSN, tracesSampleRate: 0.1 });
 }
 
 if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET) {
