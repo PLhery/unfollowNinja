@@ -136,8 +136,7 @@ function MiniApp(props) {
               .then(data => data || Promise.reject())
               .then(data => setLatestMessages(data))
               .catch((error) => {
-                  setLatestMessages(null)
-                  setHasError(true);
+                  setLatestMessages(null);
                   console.error(error);
               })
       }
