@@ -87,8 +87,8 @@ export default class Dao {
             await this.sequelize.authenticate(),
             await this.sequelizeLogs.authenticate(),
         ]);
-        await this.CachedUsername.sync({ alter: true }); // create the missing postgresql tables
-        await this.FriendCode.sync({ alter: true });
+        await this.CachedUsername.sync(); // create the missing postgresql tables
+        await this.FriendCode.sync();
         await this.userEventDao.createTables();
         await this.redis.connect(); // wait for redis to load its data
         return this;

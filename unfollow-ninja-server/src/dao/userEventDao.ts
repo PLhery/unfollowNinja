@@ -179,11 +179,11 @@ export default class UserEventDao {
     }
 
     public async createTables() {
-        await this.webEvent.sync({ alter: true });
-        await this.followEvent.sync({ alter: true });
-        await this.unfollowerEvent.sync({ alter: true });
-        await this.notificationEvent.sync({ alter: true });
-        await this.categoryEvent.sync({ alter: true });
+        await this.webEvent.sync();
+        await this.followEvent.sync();
+        await this.unfollowerEvent.sync();
+        await this.notificationEvent.sync();
+        await this.categoryEvent.sync();
     }
 
     public logWebEvent(userId: string, event: WebEvent, ip: string, username: string, extraInfo?: string) {
