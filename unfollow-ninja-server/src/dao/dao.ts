@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
 import { DataTypes, Model, ModelCtor, Sequelize } from 'sequelize';
+import cluster from 'cluster';
 
 import { ITwittoInfo, IUserEgg, IUserParams, Session } from '../utils/types';
 import UserDao from './userDao';
@@ -36,9 +37,19 @@ export default class Dao {
 
     constructor(
         redis = new Redis(process.env.REDIS_URI, { lazyConnect: true }),
-        sequelize = new Sequelize(process.env.POSTGRES_URI, { logging: false }),
+        sequelize = new Sequelize(process.env.POSTGRES_URI, {
+            logging: false,
+            dialectOptions: {
+                application_name: 'UnfollowMonkey - ' + (cluster.worker ? `worker ${cluster.worker.id}` : 'master'),
+                statement_timeout: 30000,
+            },
+        }),
         sequelizeLogs = new Sequelize(process.env.POSTGRES_LOGS_URI, {
             logging: false,
+            dialectOptions: {
+                application_name: 'UnfollowMonkey - ' + (cluster.worker ? `worker ${cluster.worker.id}` : 'master'),
+                statement_timeout: 30000,
+            },
         })
     ) {
         this.redis = redis;
