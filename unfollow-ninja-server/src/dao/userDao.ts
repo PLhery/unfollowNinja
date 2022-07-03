@@ -20,7 +20,6 @@ interface ITemporaryFollowerList
 
 export default class UserDao {
     private readonly redis: Redis;
-    public readonly sequelize: Sequelize;
     private readonly dao: Dao;
     private readonly userId: string;
 
@@ -29,16 +28,14 @@ export default class UserDao {
     constructor(userId: string, dao: Dao) {
         this.userId = userId;
         this.dao = dao;
-
         this.redis = dao.redis;
-        this.sequelize = dao.sequelize;
 
-        this.temporaryFollowerList = dao.sequelizeLogs.define(
+        this.temporaryFollowerList = dao.sequelize.define(
             'temporaryFollowerList',
             {
                 userId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
                 nextCursor: { type: DataTypes.STRING(20), allowNull: false },
-                followers: { type: DataTypes.STRING, allowNull: false },
+                followers: { type: DataTypes.TEXT, allowNull: false },
             },
             {
                 timestamps: true,
