@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
-import { DataTypes, Model, ModelCtor, Sequelize } from 'sequelize';
+import { DataTypes, Model, Sequelize } from 'sequelize';
+import type { ModelStatic } from 'sequelize/types/model';
 import cluster from 'cluster';
 
 import { ITwittoInfo, IUserEgg, IUserParams, Session } from '../utils/types';
@@ -32,8 +33,8 @@ export default class Dao {
     public readonly sequelizeLogs: Sequelize;
     public readonly userEventDao: UserEventDao;
 
-    private readonly CachedUsername: ModelCtor<ICachedUsername>;
-    public readonly FriendCode: ModelCtor<IFriendCode>;
+    private readonly CachedUsername: ModelStatic<ICachedUsername>;
+    public readonly FriendCode: ModelStatic<IFriendCode>;
 
     constructor(
         redis = new Redis(process.env.REDIS_URI, { lazyConnect: true }),
@@ -90,6 +91,7 @@ export default class Dao {
         await this.CachedUsername.sync(); // create the missing postgresql tables
         await this.FriendCode.sync();
         await this.userEventDao.createTables();
+        await this.getUserDao('').createTables();
         await this.redis.connect(); // wait for redis to load its data
         return this;
     }
@@ -153,11 +155,13 @@ export default class Dao {
     }
 
     public async getCachedUsername(userId: string): Promise<string> {
-        return (await this.CachedUsername.findByPk(userId))?.username || null;
+        return (await this.CachedUsername.findByPk(userId, { attributes: ['username'] }))?.username || null;
     }
 
     public async getCachedUserId(username: string): Promise<string> {
-        return (await this.CachedUsername.findOne({ where: { username } }))?.twitterId || null;
+        return (
+            (await this.CachedUsername.findOne({ where: { username }, attributes: ['twitterId'] }))?.twitterId || null
+        );
     }
 
     public async addTwittoToCache(twittoInfo: ITwittoInfo): Promise<void> {
@@ -165,7 +169,7 @@ export default class Dao {
         if (username.length > 20 && username.startsWith('erased_')) {
             return; // these are weird deleted users 'erased_{userid}'
         }
-        await this.CachedUsername.upsert({ twitterId: id, username });
+        await this.CachedUsername.upsert({ twitterId: id, username }, { returning: false });
     }
 
     public async getSession(uid: string): Promise<Session> {

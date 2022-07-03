@@ -1,5 +1,6 @@
 import type { InferAttributes, InferCreationAttributes, Sequelize } from 'sequelize';
-import { DataTypes, Model, ModelCtor } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
+import type { ModelStatic } from 'sequelize/types/model';
 import * as Sentry from '@sentry/node';
 
 import type { default as Dao } from './dao';
@@ -83,11 +84,11 @@ interface ICategoryEvent extends Model<InferAttributes<ICategoryEvent>, InferCre
 export default class UserEventDao {
     public readonly sequelizeLogs: Sequelize;
     private readonly dao: Dao;
-    private webEvent: ModelCtor<IWebEvent>;
-    private followEvent: ModelCtor<IFollowEvent>;
-    private unfollowerEvent: ModelCtor<IUnfollowerEvent>;
-    private notificationEvent: ModelCtor<INotificationEvent>;
-    private categoryEvent: ModelCtor<ICategoryEvent>;
+    private webEvent: ModelStatic<IWebEvent>;
+    private followEvent: ModelStatic<IFollowEvent>;
+    private unfollowerEvent: ModelStatic<IUnfollowerEvent>;
+    private notificationEvent: ModelStatic<INotificationEvent>;
+    private categoryEvent: ModelStatic<ICategoryEvent>;
 
     constructor(dao: Dao) {
         this.dao = dao;

@@ -3,22 +3,52 @@ import { fromPairs } from 'lodash';
 import Twit from 'twit';
 import { TwitterApi } from 'twitter-api-v2';
 import crypto from 'crypto';
+import { DataTypes, InferAttributes, InferCreationAttributes, Model, Sequelize } from 'sequelize';
+import type { ModelStatic } from 'sequelize/types/model';
 
 import type { default as Dao, IFriendCode } from './dao';
 import { UserCategory } from './dao';
 import type { IUserParams, Lang } from '../utils/types';
 import { twitterCursorToTime } from '../utils/utils';
 
+interface ITemporaryFollowerList
+    extends Model<InferAttributes<ITemporaryFollowerList>, InferCreationAttributes<ITemporaryFollowerList>> {
+    userId: string;
+    nextCursor: string;
+    followers: string;
+}
+
 export default class UserDao {
     private readonly redis: Redis;
+    public readonly sequelize: Sequelize;
     private readonly dao: Dao;
     private readonly userId: string;
+
+    private readonly temporaryFollowerList: ModelStatic<ITemporaryFollowerList>;
 
     constructor(userId: string, dao: Dao) {
         this.userId = userId;
         this.dao = dao;
 
         this.redis = dao.redis;
+        this.sequelize = dao.sequelize;
+
+        this.temporaryFollowerList = dao.sequelizeLogs.define(
+            'temporaryFollowerList',
+            {
+                userId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
+                nextCursor: { type: DataTypes.STRING(20), allowNull: false },
+                followers: { type: DataTypes.STRING, allowNull: false },
+            },
+            {
+                timestamps: true,
+                indexes: [{ fields: ['userId'] }],
+            }
+        );
+    }
+
+    public async createTables() {
+        await this.temporaryFollowerList.sync();
     }
 
     public getUsername(): Promise<string> {
@@ -59,20 +89,25 @@ export default class UserDao {
     }
 
     // for big accounts (>150k), we need to scrap the followers in multiple chunks every 15min
-    public async getScrappedFollowers(): Promise<{ cursor: string; followers: string[] }> {
-        return this.redis
-            .get(`scrappedFollowers:${this.userId}`)
-            .then((scrappedFollowers) => scrappedFollowers && JSON.parse(scrappedFollowers));
+    public async getTemporaryFollowerList(): Promise<{ nextCursor: string; followers: string[] } | null> {
+        this.redis.del(`scrappedFollowers:${this.userId}`); // TODO remove
+        const followerList = await this.temporaryFollowerList.findByPk(this.userId, {
+            attributes: ['nextCursor', 'followers'],
+        });
+        return followerList && { nextCursor: followerList.nextCursor, followers: followerList.followers.split(',') };
     }
 
     // see above
-    public async setScrappedFollowers(scrappedFollowers: { cursor: string; followers: string[] }): Promise<void> {
-        await this.redis.set(`scrappedFollowers:${this.userId}`, JSON.stringify(scrappedFollowers));
+    public async setTemporaryFollowerList(nextCursor: string, followers: string[]): Promise<void> {
+        await this.temporaryFollowerList.upsert(
+            { userId: this.userId, nextCursor, followers: followers.join(',') },
+            { returning: false }
+        );
     }
 
     // see above
-    public async resetScrappedFollowers(): Promise<void> {
-        await this.redis.del(`scrappedFollowers:${this.userId}`);
+    public async deleteTemporaryFollowerList(): Promise<void> {
+        await this.temporaryFollowerList.destroy({ where: { userId: this.userId } });
     }
 
     public async getUserParams(): Promise<IUserParams> {

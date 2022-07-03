@@ -215,13 +215,13 @@ describe('Test userDao', () => {
     });
 
     test('should be able to store scrapped followers', async () => {
-        expect(await uDao1.getScrappedFollowers()).toBe(null);
+        expect(await uDao1.getTemporaryFollowerList()).toBe(null);
 
-        await uDao1.setScrappedFollowers({ cursor: '1', followers: ['2', '3'] });
-        expect(await uDao1.getScrappedFollowers()).toStrictEqual({ cursor: '1', followers: ['2', '3'] });
+        await uDao1.setTemporaryFollowerList('1', ['2', '3']);
+        expect(await uDao1.getTemporaryFollowerList()).toStrictEqual({ nextCursor: '1', followers: ['2', '3'] });
 
-        await uDao1.resetScrappedFollowers();
-        expect(await uDao1.getScrappedFollowers()).toBe(null);
+        await uDao1.deleteTemporaryFollowerList();
+        expect(await uDao1.getTemporaryFollowerList()).toBe(null);
     });
 
     test('should manage friend codes', async () => {

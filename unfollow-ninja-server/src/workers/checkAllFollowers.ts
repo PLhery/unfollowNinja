@@ -124,10 +124,10 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
     let followers: string[] = [];
 
     // For big account (>150k), maybe we got the 150k first accounts previously, we'll continue the scrapping
-    const scrappedFollowers = await userDao.getScrappedFollowers();
+    const scrappedFollowers = await userDao.getTemporaryFollowerList();
     if (scrappedFollowers) {
         followers = scrappedFollowers.followers;
-        cursor = scrappedFollowers.cursor;
+        cursor = scrappedFollowers.nextCursor;
     }
     try {
         let remainingRequests: number;
@@ -138,7 +138,7 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
                     // this may happen for 150 000+ followers
                     // We'll save what we scrapped and will continue in 15min (or sooner if we can)
                     await userDao.setNextCheckTime(Math.max(resetTime, twitResetTime)); // main and DM app reset times
-                    await userDao.setScrappedFollowers({ cursor, followers });
+                    await userDao.setTemporaryFollowerList(cursor, followers);
                     return;
                 } else {
                     // this may happen for 75 000+ followers
@@ -164,7 +164,7 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
             followers.push(...result.data['ids']);
         }
         if (scrappedFollowers) {
-            await userDao.resetScrappedFollowers();
+            await userDao.deleteTemporaryFollowerList();
         }
         // Compute next time we can do the X requests
         const remainingChecks = Math.floor(remainingRequests / requests);
