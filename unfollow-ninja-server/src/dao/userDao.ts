@@ -87,7 +87,6 @@ export default class UserDao {
 
     // for big accounts (>150k), we need to scrap the followers in multiple chunks every 15min
     public async getTemporaryFollowerList(): Promise<{ nextCursor: string; followers: string[] } | null> {
-        this.redis.del(`scrappedFollowers:${this.userId}`); // TODO remove
         const followerList = await this.temporaryFollowerList.findByPk(this.userId, {
             attributes: ['nextCursor', 'followers'],
         });
