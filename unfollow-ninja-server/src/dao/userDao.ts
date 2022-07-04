@@ -3,7 +3,7 @@ import { fromPairs } from 'lodash';
 import Twit from 'twit';
 import { TwitterApi } from 'twitter-api-v2';
 import crypto from 'crypto';
-import { DataTypes, InferAttributes, InferCreationAttributes, Model, Sequelize } from 'sequelize';
+import { DataTypes, InferAttributes, InferCreationAttributes, Model } from 'sequelize';
 import type { ModelStatic } from 'sequelize/types/model';
 
 import type { default as Dao, IFriendCode } from './dao';
