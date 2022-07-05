@@ -1,7 +1,6 @@
 import type { Queue } from 'bull';
 import pLimit from 'p-limit';
 import * as Sentry from '@sentry/node';
-import { difference } from 'lodash';
 import * as Twit from 'twit';
 
 import Dao, { UserCategory } from '../dao/dao';
@@ -201,8 +200,12 @@ async function detectUnfollows(userId: string, followers: string[], dao: Dao, qu
         newUser = true;
         formerFollowers = [];
     }
-    const newFollowers = difference(followers, formerFollowers);
-    const unfollowers = difference(formerFollowers, followers);
+
+    const followersSet = new Set(followers);
+    const formerFollowersSet = new Set(formerFollowers);
+
+    const newFollowers = followers.filter((value) => !formerFollowersSet.has(value));
+    const unfollowers = formerFollowers.filter((value) => !followersSet.has(value));
 
     if (!newUser) {
         newFollowers.forEach((fid) =>

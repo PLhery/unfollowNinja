@@ -1,6 +1,5 @@
 import pLimit from 'p-limit';
 import * as Sentry from '@sentry/node';
-import { difference } from 'lodash';
 import { Twitter } from 'twit';
 
 import Dao, { UserCategory } from '../dao/dao';
@@ -74,8 +73,11 @@ async function cacheFollowers(userId: string, dao: Dao) {
         userDao.getUncachableFollowers(),
     ]);
 
-    const cachableFollowers = difference(followers, uncachables);
-    const targetId: string = difference(cachableFollowers, cachedFollowers)[0]; // most recent not cached follower
+    const uncachablesSet = new Set(uncachables);
+    const cachedFollowersSet = new Set(cachedFollowers);
+
+    const cachableFollowers = followers.filter((value) => !uncachablesSet.has(value));
+    const targetId = cachableFollowers.find((value) => !cachedFollowersSet.has(value)); // most recent not cached follower
 
     if (typeof targetId !== 'string') {
         // no cached follower
@@ -140,8 +142,8 @@ async function cacheFollowers(userId: string, dao: Dao) {
         }
 
         // clean cached followers that are not followers anymore
-        const refreshedFollowers = await userDao.getFollowers();
-        const uselessCachedFollowers = difference(cachedFollowers, refreshedFollowers);
+        const refreshedFollowersSet = new Set(await userDao.getFollowers());
+        const uselessCachedFollowers = cachedFollowers.filter((value) => !refreshedFollowersSet.has(value));
         if (uselessCachedFollowers.length > 0) {
             await userDao.removeFollowerSnowflakeIds(uselessCachedFollowers);
         }

@@ -1,6 +1,5 @@
 import i18n from 'i18n';
 import type { Job } from 'bull';
-import { defaults, difference, get, keyBy } from 'lodash';
 import moment from 'moment-timezone';
 import { Params, Twitter } from 'twit';
 import { UserCategory } from '../dao/dao';
@@ -38,13 +37,12 @@ export default class extends Task {
         const leftovers = unfollowersInfo.splice(MAX_UNFOLLOWERS);
 
         unfollowersInfo.forEach((u) => (u.suspended = true));
-        const unfollowersIds = unfollowersInfo.map((u) => u.id);
-        const unfollowersMap = keyBy(unfollowersInfo, 'id');
+        const unfollowersMap = new Map(unfollowersInfo.map((info) => [info.id, info]));
 
         // cache twittos and know who's suspended
         const usersLookup = (await twit
             .post('users/lookup', {
-                user_id: unfollowersIds.join(','),
+                user_id: unfollowersInfo.map((u) => u.id).join(','),
                 include_entities: false,
             })
             .catch((err) =>
@@ -57,16 +55,20 @@ export default class extends Task {
             return;
         }
 
+        usersLookup.data.forEach((user) => {
+            const unfollowerInfo = unfollowersMap.get(user.id_str);
+            unfollowerInfo.suspended = false;
+            unfollowerInfo.locked = user.friends_count === 0;
+            unfollowerInfo.username = user.screen_name;
+        });
+
         await Promise.all(
-            usersLookup.data.map((user) => {
-                unfollowersMap[user.id_str].suspended = false;
-                unfollowersMap[user.id_str].locked = user.friends_count === 0;
-                unfollowersMap[user.id_str].username = user.screen_name;
-                return this.dao.addTwittoToCache({
+            usersLookup.data.map((user) =>
+                this.dao.addTwittoToCache({
                     id: user.id_str,
                     username: user.screen_name,
-                });
-            })
+                })
+            )
         );
 
         // know who you're blocking or blocked you
@@ -81,7 +83,7 @@ export default class extends Task {
                     } as object as Params);
                 } catch (err) {
                     await this.manageTwitterErrors(err, username, userId);
-                    const errorCode = get(err, 'twitterReply.errors[0].code', null);
+                    const errorCode = err?.twitterReply?.errors?.[0]?.code;
                     unfollower.friendship_error_code = errorCode;
                     if (errorCode === 50) {
                         unfollower.suspended = false;
@@ -99,12 +101,10 @@ export default class extends Task {
                         });
                     }
                     const { blocking, blocked_by, following, followed_by } = friendship.data.relationship.source;
-                    defaults(unfollower, {
-                        blocking,
-                        blocked_by,
-                        following,
-                        followed_by,
-                    });
+                    unfollower.blocking = blocking;
+                    unfollower.blocked_by = blocked_by;
+                    unfollower.following = following;
+                    unfollower.followed_by = followed_by;
                 }
             })
         );
@@ -153,7 +153,9 @@ export default class extends Task {
                     },
                     { delay: 15 * 60 * 1000 }
                 );
-                realUnfollowersInfo = difference(realUnfollowersInfo, potentialGlitches);
+
+                const potentialGlitchesSet = new Set(potentialGlitches);
+                realUnfollowersInfo = realUnfollowersInfo.filter((value) => !potentialGlitchesSet.has(value));
             }
             metrics.increment('notifyUser.nbFirstTry');
         }

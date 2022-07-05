@@ -1,5 +1,4 @@
 import Redis from 'ioredis';
-import { fromPairs } from 'lodash';
 import Twit from 'twit';
 import { TwitterApi } from 'twitter-api-v2';
 import crypto from 'crypto';
@@ -196,7 +195,7 @@ export default class UserDao {
         unfollowers: string[], // followers to remove
         addedTime: number // timestamp in ms for new followers
     ): Promise<void> {
-        const notCachedDict = fromPairs(newFollowers.map((followerId) => [followerId, addedTime.toString()]));
+        const notCachedDict = Object.fromEntries(newFollowers.map((followerId) => [followerId, addedTime.toString()]));
         await Promise.all([
             this.redis.set(`followers:${this.userId}`, JSON.stringify(followers)),
             this.redis.set(`followers:count:${this.userId}`, followers.length.toString()),
