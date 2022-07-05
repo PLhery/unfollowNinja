@@ -107,7 +107,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                     ...params,
                 });
 
-                dao.userEventDao.logWebEvent(
+                void dao.userEventDao.logWebEvent(
                     loginResult.userId,
                     WebEvent.createAccount,
                     ctx.ip,
@@ -127,7 +127,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
             session.userId = loginResult.userId;
             session.username = loginResult.screenName;
 
-            dao.userEventDao.logWebEvent(loginResult.userId, WebEvent.signIn, ctx.ip, loginResult.screenName);
+            void dao.userEventDao.logWebEvent(loginResult.userId, WebEvent.signIn, ctx.ip, loginResult.screenName);
             const country = geoip.lookup(ctx.ip)?.country;
             const msgContent = encodeURI(
                 JSON.stringify({
@@ -214,7 +214,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
             ]);
             const category = await dao.getUserDao(userId).enable();
 
-            dao.userEventDao.logWebEvent(
+            void dao.userEventDao.logWebEvent(
                 userId,
                 WebEvent.addDmAccount,
                 ctx.ip,
@@ -222,7 +222,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                 loginResult.userId
             );
             if (userId !== loginResult.userId) {
-                dao.userEventDao.logWebEvent(
+                void dao.userEventDao.logWebEvent(
                     loginResult.userId,
                     WebEvent.addedAsSomeonesDmAccount,
                     ctx.ip,

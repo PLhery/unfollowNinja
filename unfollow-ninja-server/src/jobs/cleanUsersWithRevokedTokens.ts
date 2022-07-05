@@ -13,7 +13,7 @@ async function runJob() {
         const userDao = dao.getUserDao(userId);
         await userDao.cleanUser();
     }
-    dao.disconnect();
+    await dao.disconnect();
 }
 
-runJob();
+runJob().catch((err) => console.error(err));

@@ -27,12 +27,12 @@ export function createUserRouter(dao: Dao, queue: Queue) {
                 dmToken: null,
                 dmTokenSecret: null,
             });
-            dao.userEventDao.logWebEvent(session.userId, WebEvent.disable, ctx.ip, session.username);
+            void dao.userEventDao.logWebEvent(session.userId, WebEvent.disable, ctx.ip, session.username);
             ctx.status = 204;
         })
         .post('/logout', async (ctx) => {
             const session = ctx.session as NinjaSession;
-            dao.userEventDao.logWebEvent(session.userId, WebEvent.logout, ctx.ip, session.username);
+            void dao.userEventDao.logWebEvent(session.userId, WebEvent.logout, ctx.ip, session.username);
             session.userId = null;
             session.username = null;
             ctx.status = 204;
@@ -45,7 +45,7 @@ export function createUserRouter(dao: Dao, queue: Queue) {
                 return;
             }
             await dao.getUserDao(session.userId).setUserParams({ lang });
-            dao.userEventDao.logWebEvent(session.userId, WebEvent.setLang, ctx.ip, session.username, lang);
+            void dao.userEventDao.logWebEvent(session.userId, WebEvent.setLang, ctx.ip, session.username, lang);
 
             await queue.add('sendWelcomeMessage', {
                 id: Date.now(), // otherwise some seem stuck??
@@ -60,7 +60,7 @@ export function createUserRouter(dao: Dao, queue: Queue) {
             const session = ctx.session as NinjaSession;
             const code = ctx.request['body']?.['code'];
 
-            dao.userEventDao.logWebEvent(session.userId, WebEvent.tryFriendCode, ctx.ip, session.username, code);
+            void dao.userEventDao.logWebEvent(session.userId, WebEvent.tryFriendCode, ctx.ip, session.username, code);
             if (code.length !== 6) {
                 ctx.throw(400);
                 return;
@@ -71,7 +71,13 @@ export function createUserRouter(dao: Dao, queue: Queue) {
                 return;
             }
 
-            dao.userEventDao.logWebEvent(session.userId, WebEvent.registeredAsFriend, ctx.ip, session.username, code);
+            void dao.userEventDao.logWebEvent(
+                session.userId,
+                WebEvent.registeredAsFriend,
+                ctx.ip,
+                session.username,
+                code
+            );
             await dao.getUserDao(session.userId).setUserParams({ pro: '3' });
             await dao.getUserDao(session.userId).setCategory(UserCategory.vip);
 

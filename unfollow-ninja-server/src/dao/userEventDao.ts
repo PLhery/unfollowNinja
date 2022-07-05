@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/node';
 import type { default as Dao } from './dao';
 import type { IUnfollowerInfo } from '../utils/types';
 import { UserCategory } from './dao';
+import Logger from '../utils/logger';
 
 export enum WebEvent {
     createAccount,
@@ -187,10 +188,11 @@ export default class UserEventDao {
         await this.categoryEvent.sync();
     }
 
-    public logWebEvent(userId: string, event: WebEvent, ip: string, username: string, extraInfo?: string) {
-        this.webEvent
-            .create({ userId, event, ip, username, extraInfo })
-            .catch((error) => Sentry.captureException(error));
+    public async logWebEvent(userId: string, event: WebEvent, ip: string, username: string, extraInfo?: string) {
+        await this.webEvent.create({ userId, event, ip, username, extraInfo }).catch((error) => {
+            Logger.error(error);
+            Sentry.captureException(error);
+        });
     }
 
     public async getWebEvents(userId: string, limit = 500, offset = 0) {
@@ -207,10 +209,11 @@ export default class UserEventDao {
         }));
     }
 
-    public logFollowEvent(userId: string, event: FollowEvent, followerId: string, nbFollowers: number) {
-        this.followEvent
-            .create({ userId, event, followerId, nbFollowers })
-            .catch((error) => Sentry.captureException(error));
+    public async logFollowEvent(userId: string, event: FollowEvent, followerId: string, nbFollowers: number) {
+        await this.followEvent.create({ userId, event, followerId, nbFollowers }).catch((error) => {
+            Logger.error(error);
+            Sentry.captureException(error);
+        });
     }
 
     public async getFollowEvent(userId: string, limit = 500, offset = 0) {
@@ -227,7 +230,7 @@ export default class UserEventDao {
         }));
     }
 
-    public logUnfollowerEvent(userId: string, isSecondCheck: boolean, info: IUnfollowerInfo) {
+    public async logUnfollowerEvent(userId: string, isSecondCheck: boolean, info: IUnfollowerInfo) {
         const {
             followTime,
             followDetectedTime,
@@ -241,7 +244,7 @@ export default class UserEventDao {
             skippedBecauseGlitchy,
         } = info;
 
-        this.unfollowerEvent
+        await this.unfollowerEvent
             .create({
                 userId,
                 followerId: info.id,
@@ -257,7 +260,10 @@ export default class UserEventDao {
                 skippedBecauseGlitchy,
                 isSecondCheck,
             })
-            .catch((error) => Sentry.captureException(error));
+            .catch((error) => {
+                Logger.error(error);
+                Sentry.captureException(error);
+            });
     }
 
     public async getUnfollowerEvents(userId: string, limit = 500, offset = 0) {
@@ -269,10 +275,11 @@ export default class UserEventDao {
         });
     }
 
-    public logNotificationEvent(userId: string, event: NotificationEvent, fromId: string, message: string) {
-        this.notificationEvent
-            .create({ userId, event, fromId, message })
-            .catch((error) => Sentry.captureException(error));
+    public async logNotificationEvent(userId: string, event: NotificationEvent, fromId: string, message: string) {
+        await this.notificationEvent.create({ userId, event, fromId, message }).catch((error) => {
+            Logger.error(error);
+            Sentry.captureException(error);
+        });
     }
 
     public async getNotificationEvents(userId: string, limit = 500, offset = 0) {
@@ -289,10 +296,11 @@ export default class UserEventDao {
         }));
     }
 
-    public logCategoryEvent(userId: string, category: UserCategory, formerCategory: UserCategory) {
-        this.categoryEvent
-            .create({ userId, category, formerCategory })
-            .catch((error) => Sentry.captureException(error));
+    public async logCategoryEvent(userId: string, category: UserCategory, formerCategory: UserCategory) {
+        await this.categoryEvent.create({ userId, category, formerCategory }).catch((error) => {
+            Logger.error(error);
+            Sentry.captureException(error);
+        });
     }
 
     public async getCategoryEvents(userId: string, limit = 500, offset = 0) {

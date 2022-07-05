@@ -56,8 +56,10 @@ export default class UserDao {
     }
 
     public async setCategory(category: UserCategory): Promise<void> {
-        this.dao.userEventDao.logCategoryEvent(this.userId, category, await this.getCategory());
-        await this.redis.zadd('users', category.toString(), this.userId);
+        await Promise.all([
+            this.dao.userEventDao.logCategoryEvent(this.userId, category, await this.getCategory()),
+            this.redis.zadd('users', category.toString(), this.userId),
+        ]);
     }
 
     public async enable(): Promise<UserCategory.enabled | UserCategory.vip> {

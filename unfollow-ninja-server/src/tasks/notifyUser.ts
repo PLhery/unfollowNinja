@@ -164,7 +164,7 @@ export default class extends Task {
         if (realUnfollowersInfo.length > 0) {
             const message = this.generateMessage(realUnfollowersInfo, await userDao.getLang(), leftovers.length);
 
-            this.dao.userEventDao.logNotificationEvent(
+            await this.dao.userEventDao.logNotificationEvent(
                 userId,
                 NotificationEvent.unfollowersMessage,
                 await userDao.getDmId(),

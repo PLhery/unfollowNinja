@@ -215,7 +215,12 @@ async function detectUnfollows(userId: string, followers: string[], dao: Dao, qu
             dao.userEventDao.logFollowEvent(userId, FollowEvent.unfollowDetected, fid, followers.length)
         );
     } else {
-        dao.userEventDao.logFollowEvent(userId, FollowEvent.accountCreatedAndFollowersLoaded, '', followers.length);
+        await dao.userEventDao.logFollowEvent(
+            userId,
+            FollowEvent.accountCreatedAndFollowersLoaded,
+            '',
+            followers.length
+        );
     }
 
     if (unfollowers.length > 0) {

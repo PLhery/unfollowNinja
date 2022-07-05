@@ -16,7 +16,7 @@ async function runJob() {
             await userDao.setUserParams({ lang: 'en' });
         }
     }
-    dao.disconnect();
+    await dao.disconnect();
 }
 
-runJob();
+runJob().catch((err) => console.error(err));

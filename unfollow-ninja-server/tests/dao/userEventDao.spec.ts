@@ -35,9 +35,9 @@ describe('Test UserEventDAO', () => {
     jest.retryTimes(5);
 
     test('should log webEvents', async () => {
-        userEventDao.logWebEvent('user1', WebEvent.signIn, '127.0.0.1', 'username1');
-        userEventDao.logWebEvent('user1', WebEvent.addDmAccount, '127.0.0.2', 'username2', 'user2');
-        userEventDao.logWebEvent('user2', WebEvent.signIn, '127.0.0.3', 'username2');
+        await userEventDao.logWebEvent('user1', WebEvent.signIn, '127.0.0.1', 'username1');
+        await userEventDao.logWebEvent('user1', WebEvent.addDmAccount, '127.0.0.2', 'username2', 'user2');
+        await userEventDao.logWebEvent('user2', WebEvent.signIn, '127.0.0.3', 'username2');
 
         expect(await userEventDao.getWebEvents('user0')).toEqual([]);
         expect(await userEventDao.getWebEvents('user1')).toEqual([
@@ -64,7 +64,7 @@ describe('Test UserEventDAO', () => {
     });
 
     test('should log followEvent', async () => {
-        userEventDao.logFollowEvent('user1', FollowEvent.followDetected, 'user2', 20);
+        await userEventDao.logFollowEvent('user1', FollowEvent.followDetected, 'user2', 20);
 
         expect(await userEventDao.getFollowEvent('user0')).toEqual([]);
         expect(await userEventDao.getFollowEvent('user1')).toEqual([
@@ -80,7 +80,7 @@ describe('Test UserEventDAO', () => {
     });
 
     test('should log unfollowerEvent', async () => {
-        userEventDao.logUnfollowerEvent('user1', false, {
+        await userEventDao.logUnfollowerEvent('user1', false, {
             id: 'user2',
             followTime: 3000,
             unfollowTime: 0,
@@ -117,7 +117,7 @@ describe('Test UserEventDAO', () => {
     });
 
     test('should log notificationEvent', async () => {
-        userEventDao.logNotificationEvent(
+        await userEventDao.logNotificationEvent(
             'user1',
             NotificationEvent.unfollowersMessage,
             'user2',

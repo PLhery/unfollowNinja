@@ -12,4 +12,4 @@ async function run() {
     }
     redis.disconnect();
 }
-run();
+run().catch((err) => console.error(err));

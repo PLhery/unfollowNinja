@@ -146,7 +146,12 @@ app.use(async (ctx, next) => {
     });
 
 logger.info('Connecting to the databases...');
-dao.load().then(() => {
-    app.listen(4000);
-    logger.info(`🚀 Server ready at http://localhost:4000`);
-});
+dao.load()
+    .then(() => {
+        app.listen(4000);
+        logger.info(`🚀 Server ready at http://localhost:4000`);
+    })
+    .catch((err) => {
+        Sentry.captureException(err);
+        logger.error(err);
+    });

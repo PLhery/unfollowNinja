@@ -17,7 +17,7 @@ const CATEGORIES_TO_CHECK = [
 
 // reenable followers disabled because they were suspended or had a token issue
 export default class extends Task {
-    public async run(job: Job) {
+    public run(job: Job) {
         return Promise.all(
             CATEGORIES_TO_CHECK.map(async (category) => {
                 for (const userId of await this.dao.getUserIdsByCategory(category)) {

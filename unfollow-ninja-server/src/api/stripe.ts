@@ -61,11 +61,11 @@ export const enablePro = async (
 
     const wasPro = userDao.isPro();
     if (plan === 'friends') {
-        dao.userEventDao.logWebEvent(userId, WebEvent.enableFriends, ip, username, subscriptionId);
+        void dao.userEventDao.logWebEvent(userId, WebEvent.enableFriends, ip, username, subscriptionId);
         await userDao.setUserParams({ pro: '2' });
         await userDao.addFriendCodes();
     } else {
-        dao.userEventDao.logWebEvent(userId, WebEvent.enablePro, ip, username, subscriptionId);
+        void dao.userEventDao.logWebEvent(userId, WebEvent.enablePro, ip, username, subscriptionId);
         await userDao.setUserParams({ pro: '1' });
         await disableFriendCodes(dao, userId, ip); // in case the update is a downgrade
     }
@@ -87,7 +87,7 @@ export const disablePro = async (dao: Dao, userId: string, ip: string, subscript
     const userDao = dao.getUserDao(userId);
     const username = await dao.getCachedUsername(userId);
 
-    dao.userEventDao.logWebEvent(userId, WebEvent.disablePro, ip, username, subscriptionId);
+    await dao.userEventDao.logWebEvent(userId, WebEvent.disablePro, ip, username, subscriptionId);
     await userDao.setUserParams({ pro: '0' });
     await disableFriendCodes(dao, userId, ip);
     if (UserCategory.vip === (await userDao.getCategory())) {
@@ -101,8 +101,14 @@ const disableFriendCodes = async (dao: Dao, userId: string, ip: string) => {
         if (code.friendId) {
             // disable pro for friends too
             const friendUsername = await dao.getCachedUsername(code.friendId);
-            dao.userEventDao.logWebEvent(userId, WebEvent.disableFriendRegistration, ip, friendUsername, code.friendId);
-            dao.userEventDao.logWebEvent(
+            void dao.userEventDao.logWebEvent(
+                userId,
+                WebEvent.disableFriendRegistration,
+                ip,
+                friendUsername,
+                code.friendId
+            );
+            void dao.userEventDao.logWebEvent(
                 code.friendId,
                 WebEvent.disableFriendRegistration,
                 ip,

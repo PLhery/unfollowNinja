@@ -35,7 +35,7 @@ export default class extends Task {
             );
         }
 
-        this.dao.userEventDao.logNotificationEvent(
+        await this.dao.userEventDao.logNotificationEvent(
             userId,
             NotificationEvent.welcomeMessage,
             await userDao.getDmId(),

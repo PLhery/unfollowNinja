@@ -262,7 +262,7 @@ describe('Test userDao', () => {
         await uDao1.deleteUser();
         await uDao2.deleteUser();
         expect(await redis.zcard('users')).toBe(0);
-        redis.del('users'); // empty users appears as a key on ioredis-mock but not on actual redis 6
+        await redis.del('users'); // empty users appears as a key on ioredis-mock but not on actual redis 6
         expect((await redis.keys('*')).sort()).toEqual(['total-unfollowers']);
     });
 });

@@ -80,18 +80,20 @@ if (cluster.isMaster) {
     } else {
         for (const taskName in tasks) {
             const task = new tasks[taskName](dao, bullQueue);
-            bullQueue.process(taskName, WORKER_RATE_LIMIT, (job) =>
-                task.run(job).catch(async (err) => {
-                    const username = job.data.userId ? await dao.getCachedUsername(job.data.userId) : null;
-                    logger.error(`An error happened with ${taskName} / @${username || ''}: ${err.stack}`);
-                    Sentry.withScope((scope) => {
-                        scope.setTag('task-name', taskName);
-                        scope.setUser({ username });
-                        Sentry.captureException(err);
-                    });
-                    throw err;
-                })
-            );
+            bullQueue
+                .process(taskName, WORKER_RATE_LIMIT, (job) =>
+                    task.run(job).catch(async (err) => {
+                        const username = job.data.userId ? await dao.getCachedUsername(job.data.userId) : null;
+                        logger.error(`An error happened with ${taskName} / @${username || ''}: ${err.stack}`);
+                        Sentry.withScope((scope) => {
+                            scope.setTag('task-name', taskName);
+                            scope.setUser({ username });
+                            Sentry.captureException(err);
+                        });
+                        throw err;
+                    })
+                )
+                .catch((err) => Sentry.captureException(err));
         }
     }
 
