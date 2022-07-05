@@ -11,6 +11,7 @@ import UserDao from '../dao/userDao';
 import { FollowEvent } from '../dao/userEventDao';
 
 const WORKER_RATE_LIMIT = Number(process.env.WORKER_RATE_LIMIT) || 15;
+const VIP_WORKER_RATE_LIMIT = Number(process.env.VIP_WORKER_RATE_LIMIT) || 1;
 
 /**
  * Check 1/nbWorkers users for unfollowers
@@ -44,22 +45,22 @@ export async function checkAllFollowers(workerId: number, nbWorkers: number, dao
 }
 
 export async function checkAllVipFollowers(workerId: number, nbWorkers: number, dao: Dao, queue: Queue) {
+    const limit = pLimit(VIP_WORKER_RATE_LIMIT);
     const startedAt = Date.now();
 
     try {
-        const userIds = (await dao.getUserIdsByCategory(UserCategory.vip)).filter(
-            (userId) => hashCode(userId) % nbWorkers === workerId - 1
-        ); // we process 1/x users
+        const promises = (await dao.getUserIdsByCategory(UserCategory.vip))
+            .filter((userId) => hashCode(userId) % nbWorkers === workerId - 1) // we process 1/x users
+            .map((userId) => limit(() => checkFollowersWithTimeout(userId, dao, queue)));
 
-        for (const userId of userIds) {
-            await checkFollowersWithTimeout(userId, dao, queue);
-        }
+        await Promise.all(promises);
 
         metrics.gauge(`check-vip-duration.worker.${workerId}`, Date.now() - startedAt);
     } catch (error) {
         logger.error(error);
         Sentry.captureException(error);
     }
+
     // check every minute minimum (Twitter's limit for the followers/ids API requests)
     setTimeout(
         () => checkAllVipFollowers(workerId, nbWorkers, dao, queue),
