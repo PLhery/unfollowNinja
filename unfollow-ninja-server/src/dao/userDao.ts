@@ -57,7 +57,7 @@ export default class UserDao {
                 followerId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
                 followDetected: { type: DataTypes.INTEGER, allowNull: true },
                 snowflakeId: { type: DataTypes.STRING(30), allowNull: true },
-                uncachable: { type: DataTypes.BOOLEAN, allowNull: false },
+                uncachable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
             },
             {
                 timestamps: false,
