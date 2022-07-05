@@ -17,12 +17,21 @@ interface ITemporaryFollowerList
     followers: string;
 }
 
+interface IFollowersDetail extends Model<InferAttributes<IFollowersDetail>, InferCreationAttributes<IFollowersDetail>> {
+    userId: string;
+    followerId: string;
+    followDetected: number;
+    snowflakeId: string;
+    uncachable: boolean;
+}
+
 export default class UserDao {
     private readonly redis: Redis;
     private readonly dao: Dao;
     private readonly userId: string;
 
     private readonly temporaryFollowerList: ModelStatic<ITemporaryFollowerList>;
+    private readonly followersDetail: ModelStatic<IFollowersDetail>;
 
     constructor(userId: string, dao: Dao) {
         this.userId = userId;
@@ -38,6 +47,20 @@ export default class UserDao {
             },
             {
                 timestamps: true,
+            }
+        );
+
+        this.followersDetail = dao.sequelize.define(
+            'followersDetail',
+            {
+                userId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
+                followerId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
+                followDetected: { type: DataTypes.INTEGER, allowNull: true },
+                snowflakeId: { type: DataTypes.STRING(30), allowNull: true },
+                uncachable: { type: DataTypes.BOOLEAN, allowNull: false },
+            },
+            {
+                timestamps: false,
                 indexes: [{ fields: ['userId'] }],
             }
         );
@@ -45,6 +68,7 @@ export default class UserDao {
 
     public async createTables() {
         await this.temporaryFollowerList.sync();
+        await this.followersDetail.sync();
     }
 
     public getUsername(): Promise<string> {
@@ -206,11 +230,28 @@ export default class UserDao {
             unfollowers.length > 0 && this.removeFollowerSnowflakeIds(unfollowers),
             unfollowers.length > 0 && this.redis.srem(`followers:uncachable:${this.userId}`, ...unfollowers),
             unfollowers.length > 0 && this.redis.incrby('total-unfollowers', unfollowers.length),
+            newFollowers.length > 0 &&
+                this.followersDetail.bulkCreate(
+                    newFollowers.map((followerId) => ({
+                        userId: this.userId,
+                        followerId,
+                        followDetected: addedTime || null,
+                    })),
+                    { returning: false }
+                ),
+            unfollowers.length > 0 &&
+                this.followersDetail.destroy({ where: { userId: this.userId, followerId: unfollowers } }),
         ]);
     }
 
     public async setFollowerSnowflakeId(followerId: string, snowflakeId: string): Promise<void> {
-        await Promise.all([this.redis.hset(`followers:snowflake-ids:${this.userId}`, followerId, snowflakeId)]);
+        await Promise.all([
+            this.redis.hset(`followers:snowflake-ids:${this.userId}`, followerId, snowflakeId),
+            this.followersDetail.update(
+                { snowflakeId },
+                { where: { userId: this.userId, followerId }, returning: false }
+            ),
+        ]);
     }
 
     // get twitter cached snowflakeId (containing the follow timing information)
@@ -229,7 +270,13 @@ export default class UserDao {
     }
 
     public async addUncachableFollower(followerId: string): Promise<void> {
-        await this.redis.sadd(`followers:uncachable:${this.userId}`, followerId);
+        await Promise.all([
+            this.redis.sadd(`followers:uncachable:${this.userId}`, followerId),
+            this.followersDetail.update(
+                { uncachable: true },
+                { where: { userId: this.userId, followerId }, returning: false }
+            ),
+        ]);
     }
 
     // get the timestamp (in ms) when the follower followed the user.
