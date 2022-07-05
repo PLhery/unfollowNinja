@@ -235,7 +235,7 @@ export default class UserDao {
                     newFollowers.map((followerId) => ({
                         userId: this.userId,
                         followerId,
-                        followDetected: addedTime || null,
+                        followDetected: addedTime / 1000 || null,
                     })),
                     { returning: false }
                 ),
