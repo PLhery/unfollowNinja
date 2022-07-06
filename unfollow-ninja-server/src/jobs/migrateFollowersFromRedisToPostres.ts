@@ -38,7 +38,7 @@ async function run() {
     const userIds = await dao.getUserIds();
 
     // handle 10 userIds at a time
-    const limit = pLimit(10);
+    const limit = pLimit(15);
     const limitPromises = userIds.map((userId, progress) =>
         limit(async () => {
             const userDao = dao.getUserDao(userId);
@@ -50,7 +50,7 @@ async function run() {
                         userId,
                         followerId,
                         followDetected: (await userDao.getFollowDetectedTime(followerId)) / 1000 || null,
-                        snowflakeId: await redis.hget(`followers:snowflake-ids:${this.userId}`, followerId),
+                        snowflakeId: await redis.hget(`followers:snowflake-ids:${userId}`, followerId),
                         uncachable: false,
                     };
                 })
