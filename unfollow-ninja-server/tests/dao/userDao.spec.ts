@@ -261,7 +261,7 @@ describe('Test userDao', () => {
     });
 
     test('should completely delete data about the user', async () => {
-        expect(await redis.dbsize()).toBe(11);
+        expect(await redis.dbsize()).toBe(8);
         await uDao1.deleteUser();
         await uDao2.deleteUser();
         expect(await redis.zcard('users')).toBe(0);
