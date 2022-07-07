@@ -309,10 +309,11 @@ export default class UserDao {
 
     // return true if some followers were never cached by cacheFollowers
     public async getHasNotCachedFollowers(): Promise<boolean> {
-        return (
-            (await this.followersDetail.count({
+        return Boolean(
+            await this.followersDetail.findOne({
                 where: { userId: this.userId, snowflakeId: { [Op.is]: null }, uncachable: false },
-            })) > 0
+                attributes: ['userId'],
+            })
         );
     }
 
