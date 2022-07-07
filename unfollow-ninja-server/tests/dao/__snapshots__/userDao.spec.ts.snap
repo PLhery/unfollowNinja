@@ -3,21 +3,10 @@
 exports[`Test userDao should get a stable getAllUserData 1`] = `
 Object {
   "category": 0,
-  "followTimes": Object {
-    "1": "123",
-    "4": "456",
-  },
-  "followers": Array [
-    "1",
-    "4",
-  ],
-  "nextCheckTime": 123,
-  "snowflakeIds": Object {
-    "4": "1654482657084000",
-  },
-  "uncachables": Array [
-    "1",
-  ],
+  "followers": null,
+  "followersDetail": Array [],
+  "nextCheckTime": 0,
+  "temporaryFollowerList": null,
   "userParams": Object {
     "added_at": 1234,
     "customerId": "",

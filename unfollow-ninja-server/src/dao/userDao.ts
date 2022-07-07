@@ -2,7 +2,7 @@ import Redis from 'ioredis';
 import Twit from 'twit';
 import { TwitterApi } from 'twitter-api-v2';
 import crypto from 'crypto';
-import { DataTypes, InferAttributes, InferCreationAttributes, Model } from 'sequelize';
+import { DataTypes, InferAttributes, InferCreationAttributes, Model, Op } from 'sequelize';
 import type { ModelStatic } from 'sequelize/types/model';
 
 import type { default as Dao, IFriendCode } from './dao';
@@ -227,7 +227,9 @@ export default class UserDao {
             this.redis.set(`followers:count:${this.userId}`, followers.length.toString()),
             newFollowers.length > 0 && this.redis.hmset(`followers:follow-time:${this.userId}`, notCachedDict),
             unfollowers.length > 0 && this.redis.hdel(`followers:follow-time:${this.userId}`, ...unfollowers),
-            unfollowers.length > 0 && this.removeFollowerSnowflakeIds(unfollowers),
+            unfollowers.length > 0 && this.redis.hdel(`followers:snowflake-ids:${this.userId}`, ...unfollowers),
+            unfollowers.length > 0 &&
+                this.followersDetail.destroy({ where: { userId: this.userId, followerId: unfollowers } }),
             unfollowers.length > 0 && this.redis.srem(`followers:uncachable:${this.userId}`, ...unfollowers),
             unfollowers.length > 0 && this.redis.incrby('total-unfollowers', unfollowers.length),
             newFollowers.length > 0 &&
@@ -239,8 +241,6 @@ export default class UserDao {
                     })),
                     { returning: false }
                 ),
-            unfollowers.length > 0 &&
-                this.followersDetail.destroy({ where: { userId: this.userId, followerId: unfollowers } }),
         ]);
     }
 
@@ -256,17 +256,25 @@ export default class UserDao {
 
     // get twitter cached snowflakeId (containing the follow timing information)
     // returns null if not cached yet
-    public async getFollowerSnowflakeId(followerId: string): Promise<string> {
-        return this.redis.hget(`followers:snowflake-ids:${this.userId}`, followerId);
-    }
-
-    public async removeFollowerSnowflakeIds(followerIds: string[]): Promise<void> {
-        await this.redis.hdel(`followers:snowflake-ids:${this.userId}`, ...followerIds);
+    public async getFollowerSnowflakeId(followerId: string): Promise<string | null> {
+        return (
+            (
+                await this.followersDetail.findOne({
+                    where: { userId: this.userId, followerId },
+                    attributes: ['snowflakeId'],
+                })
+            )?.snowflakeId || null
+        );
     }
 
     // Some followers ids weirdly can't be cached (disabled?)
     public async getUncachableFollowers(): Promise<string[]> {
-        return this.redis.smembers(`followers:uncachable:${this.userId}`);
+        return (
+            await this.followersDetail.findAll({
+                where: { userId: this.userId, uncachable: true },
+                attributes: ['followerId'],
+            })
+        ).map((row) => row.followerId);
     }
 
     public async addUncachableFollower(followerId: string): Promise<void> {
@@ -288,20 +296,33 @@ export default class UserDao {
     }
 
     // get the timestamp when the follower was added to the db (in ms)
-    public async getFollowDetectedTime(followerId: string): Promise<number> {
-        return Number(await this.redis.hget(`followers:follow-time:${this.userId}`, followerId));
+    public async getFollowDetectedTime(followerId: string): Promise<number | null> {
+        return (
+            (
+                await this.followersDetail.findOne({
+                    where: { userId: this.userId, followerId },
+                    attributes: ['followDetected'],
+                })
+            )?.followDetected * 1000 || null
+        );
     }
 
     // return true if some followers were never cached by cacheFollowers
     public async getHasNotCachedFollowers(): Promise<boolean> {
-        const nbCached = Number(await this.redis.hlen(`followers:snowflake-ids:${this.userId}`));
-        const nbUncachable = Number(await this.redis.scard(`followers:uncachable:${this.userId}`));
-        const nbFollowers = Number(await this.redis.get(`followers:count:${this.userId}`));
-        return nbCached + nbUncachable < nbFollowers;
+        return (
+            (await this.followersDetail.count({
+                where: { userId: this.userId, snowflakeId: { [Op.is]: null }, uncachable: false },
+            })) > 0
+        );
     }
 
     public async getCachedFollowers(): Promise<string[]> {
-        return this.redis.hkeys(`followers:snowflake-ids:${this.userId}`);
+        return (
+            await this.followersDetail.findAll({
+                where: { userId: this.userId, snowflakeId: { [Op.not]: null } },
+                attributes: ['followerId'],
+            })
+        ).map((row) => row.followerId);
     }
 
     public async getFriendCodes(): Promise<IFriendCode[]> {
@@ -358,9 +379,8 @@ export default class UserDao {
             followers,
             friendCodes,
             registeredFriendCode,
-            followTimes,
-            uncachables,
-            snowflakeIds,
+            temporaryFollowerList,
+            followersDetail,
         ] = await Promise.all([
             this.getUsername(),
             this.getCategory(),
@@ -369,9 +389,8 @@ export default class UserDao {
             this.getFollowers(),
             this.getFriendCodes(),
             this.getRegisteredFriendCode(),
-            this.redis.hgetall(`followers:follow-time:${this.userId}`),
-            this.redis.smembers(`followers:uncachable:${this.userId}`),
-            this.redis.hgetall(`followers:snowflake-ids:${this.userId}`),
+            this.getTemporaryFollowerList(),
+            this.followersDetail.findAll({ where: { userId: this.userId }, raw: true }),
         ]);
 
         return {
@@ -382,9 +401,8 @@ export default class UserDao {
             followers,
             friendCodes,
             registeredFriendCode,
-            followTimes,
-            uncachables,
-            snowflakeIds,
+            temporaryFollowerList,
+            followersDetail,
         };
     }
 
@@ -415,7 +433,9 @@ export default class UserDao {
                 `followers:uncachable:${this.userId}`,
                 `followers:snowflake-ids:${this.userId}`
             ),
+            this.dao.FriendCode.destroy({ where: { userId: this.userId } }),
+            this.followersDetail.destroy({ where: { userId: this.userId } }),
+            this.deleteTemporaryFollowerList(),
         ]);
-        await this.dao.FriendCode.destroy({ where: { userId: this.userId } });
     }
 }

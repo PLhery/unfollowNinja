@@ -184,8 +184,8 @@ describe('Test userDao', () => {
         expect(await uDao1.getFollowers()).toStrictEqual(['1', '4']);
         expect(await redis.get('followers:count:1')).toBe('2');
         expect(await uDao1.getFollowDetectedTime('1')).toBe(123);
-        expect(await uDao1.getFollowDetectedTime('2')).toBe(0);
-        expect(await uDao1.getFollowDetectedTime('3')).toBe(0);
+        expect(await uDao1.getFollowDetectedTime('2')).toBeNull();
+        expect(await uDao1.getFollowDetectedTime('3')).toBeNull();
         expect(await uDao1.getFollowDetectedTime('4')).toBe(456);
         expect(await uDao1.getFollowTime('4')).toBe(456);
         expect(await redis.get('total-unfollowers')).toBe('2');
@@ -195,23 +195,26 @@ describe('Test userDao', () => {
         await uDao1.setFollowerSnowflakeId('1', '1654482657084000');
         await uDao1.setFollowerSnowflakeId('4', '1654482657084000');
         expect(await uDao1.getFollowerSnowflakeId('1')).toBe('1654482657084000');
-        expect(await uDao1.getCachedFollowers()).toStrictEqual(['1', '4']);
+        expect(await uDao1.getCachedFollowers()).toEqual(['1', '4']);
         expect(await uDao1.getFollowTime('1')).toBe(1577837617); // uses snowflake this time
 
-        await uDao1.removeFollowerSnowflakeIds(['1']);
-        expect(await uDao1.getFollowerSnowflakeId('1')).toBeNull();
-        expect(await uDao1.getCachedFollowers()).toStrictEqual(['4']);
+        await uDao1.updateFollowers(['1'], [], ['4'], 456);
+        expect(await uDao1.getCachedFollowers()).toEqual(['1']);
+        expect(await uDao1.getFollowerSnowflakeId('4')).toBeNull();
+        await uDao1.updateFollowers(['1', '4'], ['4'], [], 456);
+        expect(await uDao1.getCachedFollowers()).toEqual(['1']);
+        expect(await uDao1.getFollowerSnowflakeId('4')).toBeNull();
     });
 
     test('should manage cached/uncached followers', async () => {
         expect(await uDao1.getHasNotCachedFollowers()).toBe(true);
 
-        await uDao1.setFollowerSnowflakeId('4', '1654482657084000');
+        await uDao1.setFollowerSnowflakeId('1', '1654482657084000');
         expect(await uDao1.getHasNotCachedFollowers()).toBe(true);
 
-        await uDao1.addUncachableFollower('1');
+        await uDao1.addUncachableFollower('4');
         expect(await uDao1.getHasNotCachedFollowers()).toBe(false);
-        expect(await uDao1.getUncachableFollowers()).toStrictEqual(['1']);
+        expect(await uDao1.getUncachableFollowers()).toEqual(['4']);
     });
 
     test('should be able to store scrapped followers', async () => {

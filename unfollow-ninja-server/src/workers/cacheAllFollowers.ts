@@ -77,14 +77,14 @@ async function cacheFollowers(userId: string, dao: Dao) {
     const cachedFollowersSet = new Set(cachedFollowers);
 
     const cachableFollowers = followers.filter((value) => !uncachablesSet.has(value));
-    const targetId = cachableFollowers.find((value) => !cachedFollowersSet.has(value)); // most recent not cached follower
+    const targetIndex = cachableFollowers.findIndex((value) => !cachedFollowersSet.has(value)); // most recent not cached follower
+    const targetId = cachableFollowers[targetIndex];
 
     if (typeof targetId !== 'string') {
         // no cached follower
         return;
     }
 
-    const targetIndex = cachableFollowers.indexOf(targetId);
     const cursor = targetIndex > 0 ? await userDao.getFollowerSnowflakeId(cachableFollowers[targetIndex - 1]) : '-1';
 
     if (cursor === '0' || typeof cursor !== 'string') {
@@ -139,13 +139,6 @@ async function cacheFollowers(userId: string, dao: Dao) {
             // some IDs weirdly can't be reached / disabled account?
             // we add them to uncachable set to avoid infinite caching loop
             await userDao.addUncachableFollower(targetId);
-        }
-
-        // clean cached followers that are not followers anymore
-        const refreshedFollowersSet = new Set(await userDao.getFollowers());
-        const uselessCachedFollowers = cachedFollowers.filter((value) => !refreshedFollowersSet.has(value));
-        if (uselessCachedFollowers.length > 0) {
-            await userDao.removeFollowerSnowflakeIds(uselessCachedFollowers);
         }
     } catch (err) {
         // ignore twitter errors, already managed by checkFollowers

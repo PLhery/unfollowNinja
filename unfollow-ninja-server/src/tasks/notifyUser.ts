@@ -123,7 +123,7 @@ export default class extends Task {
 
         // we remove unfollowers that followed the user < 24h and that "left twitter" (glitches very probably)
         let realUnfollowersInfo = unfollowersInfo.filter((unfollowerInfo) => {
-            const followDuration = unfollowerInfo.unfollowTime - unfollowerInfo.followDetectedTime;
+            const followDuration = unfollowerInfo.unfollowTime - (unfollowerInfo.followDetectedTime || 0);
             unfollowerInfo.skippedBecauseGlitchy = !(
                 unfollowerInfo.followed_by !== true &&
                 !(unfollowerInfo.deleted && followDuration < 24 * 60 * 60 * 1000) &&

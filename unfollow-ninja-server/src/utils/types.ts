@@ -10,7 +10,7 @@ export interface IFollowerInfo {
 
 export interface IUnfollowerInfo extends IFollowerInfo {
     unfollowTime: number;
-    followDetectedTime: number; // first time the system saw the follower
+    followDetectedTime: number | null; // first time the system saw the follower
     blocking?: boolean;
     blocked_by?: boolean;
     suspended?: boolean;
