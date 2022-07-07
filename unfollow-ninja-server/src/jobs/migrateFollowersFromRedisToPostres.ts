@@ -37,25 +37,35 @@ async function run() {
 
     const userIds = await dao.getUserIds();
 
-    // handle 10 userIds at a time
+    // handle 15 userIds at a time
     const limit = pLimit(15);
     const limitPromises = userIds.map((userId, progress) =>
         limit(async () => {
+            if (progress < 0) {
+                return;
+            }
             const userDao = dao.getUserDao(userId);
             const followers = await userDao.getFollowers();
 
-            const rows = await Promise.all(
-                followers.map(async (followerId) => {
-                    return {
-                        userId,
-                        followerId,
-                        followDetected: (await userDao.getFollowDetectedTime(followerId)) / 1000 || null,
-                        snowflakeId: await redis.hget(`followers:snowflake-ids:${userId}`, followerId),
-                        uncachable: false,
-                    };
-                })
+            // insert by chunk of 50 followers
+            const chunks = Array.from({ length: Math.ceil(followers.length / 100) }, (v, i) =>
+                followers.slice(i * 100, i * 100 + 100)
             );
-            await followersDetail.bulkCreate(rows, { returning: false });
+
+            for (const chunk of chunks) {
+                const rows = await Promise.all(
+                    chunk.map(async (followerId) => {
+                        return {
+                            userId,
+                            followerId,
+                            followDetected: (await userDao.getFollowDetectedTime(followerId)) / 1000 || null,
+                            snowflakeId: await redis.hget(`followers:snowflake-ids:${userId}`, followerId),
+                            uncachable: false,
+                        };
+                    })
+                );
+                await followersDetail.bulkCreate(rows, { returning: false, ignoreDuplicates: true });
+            }
 
             logger.info(`${progress}/${userIds.length} twittos migrated`);
         })
