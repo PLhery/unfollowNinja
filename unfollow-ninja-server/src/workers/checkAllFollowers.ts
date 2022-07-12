@@ -208,12 +208,20 @@ async function detectUnfollows(userId: string, followers: string[], dao: Dao, qu
     const newFollowers = followers.filter((value) => !formerFollowersSet.has(value));
     const unfollowers = formerFollowers.filter((value) => !followersSet.has(value));
 
+    const limit = pLimit(5); // make no more than 5 userDao calls at a time
+
     if (!newUser) {
-        newFollowers.forEach((fid) =>
-            dao.userEventDao.logFollowEvent(userId, FollowEvent.followDetected, fid, followers.length)
+        await Promise.all(
+            newFollowers.map((fid) =>
+                limit(() => dao.userEventDao.logFollowEvent(userId, FollowEvent.followDetected, fid, followers.length))
+            )
         );
-        unfollowers.forEach((fid) =>
-            dao.userEventDao.logFollowEvent(userId, FollowEvent.unfollowDetected, fid, followers.length)
+        await Promise.all(
+            unfollowers.map((fid) =>
+                limit(() =>
+                    dao.userEventDao.logFollowEvent(userId, FollowEvent.unfollowDetected, fid, followers.length)
+                )
+            )
         );
     } else {
         await dao.userEventDao.logFollowEvent(
@@ -225,15 +233,19 @@ async function detectUnfollows(userId: string, followers: string[], dao: Dao, qu
     }
 
     if (unfollowers.length > 0) {
+        const limit = pLimit(5); // make no more than 5 userDao calls at a time
+
         // remove unfollowers
         const unfollowersInfo = await Promise.all(
             unfollowers.map(async (unfollowerId): Promise<IUnfollowerInfo> => {
-                return {
-                    id: unfollowerId,
-                    followTime: await userDao.getFollowTime(unfollowerId),
-                    unfollowTime: Date.now(),
-                    followDetectedTime: await userDao.getFollowDetectedTime(unfollowerId),
-                };
+                return limit(async () => {
+                    return {
+                        id: unfollowerId,
+                        followTime: await userDao.getFollowTime(unfollowerId),
+                        unfollowTime: Date.now(),
+                        followDetectedTime: await userDao.getFollowDetectedTime(unfollowerId),
+                    };
+                });
             })
         );
 

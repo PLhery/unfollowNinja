@@ -6,7 +6,8 @@ import Dao, { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
 import metrics from '../utils/metrics';
 
-const WORKER_RATE_LIMIT = Number(process.env.WORKER_RATE_LIMIT) || 15;
+const CACHE_WORKER_RATE_LIMIT =
+    Number(process.env.CACHE_WORKER_RATE_LIMIT) || Number(process.env.WORKER_RATE_LIMIT) || 15;
 
 /**
  * Check 1/nbWorkers users for uncached follower's username and follow date
@@ -15,7 +16,7 @@ const WORKER_RATE_LIMIT = Number(process.env.WORKER_RATE_LIMIT) || 15;
  * @param dao
  */
 export async function cacheAllFollowers(workerId: number, nbWorkers: number, dao: Dao) {
-    const limit = pLimit(WORKER_RATE_LIMIT);
+    const limit = pLimit(CACHE_WORKER_RATE_LIMIT);
     const startedAt = Date.now();
 
     try {

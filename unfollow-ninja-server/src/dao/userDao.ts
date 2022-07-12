@@ -221,21 +221,33 @@ export default class UserDao {
         unfollowers: string[], // followers to remove
         addedTime: number // timestamp in ms for new followers
     ): Promise<void> {
+        // insert chunks of 100 new followers
+        const newFollowersChunks = Array.from({ length: Math.ceil(newFollowers.length / 100) }, (v, i) =>
+            newFollowers.slice(i * 100, i * 100 + 100)
+        );
+        for (const chunk of newFollowersChunks) {
+            await this.followersDetail.bulkCreate(
+                chunk.map((followerId) => ({
+                    userId: this.userId,
+                    followerId,
+                    followDetected: addedTime / 1000 || null,
+                })),
+                { returning: false }
+            );
+        }
+
+        // remove chunks of 100 unfollowers
+        const unfollowersChunks = Array.from({ length: Math.ceil(unfollowers.length / 100) }, (v, i) =>
+            unfollowers.slice(i * 100, i * 100 + 100)
+        );
+        for (const chunk of unfollowersChunks) {
+            await this.followersDetail.destroy({ where: { userId: this.userId, followerId: chunk } });
+        }
+
         await Promise.all([
             this.redis.set(`followers:${this.userId}`, JSON.stringify(followers)),
             this.redis.set(`followers:count:${this.userId}`, followers.length.toString()),
-            unfollowers.length > 0 &&
-                this.followersDetail.destroy({ where: { userId: this.userId, followerId: unfollowers } }),
             unfollowers.length > 0 && this.redis.incrby('total-unfollowers', unfollowers.length),
-            newFollowers.length > 0 &&
-                this.followersDetail.bulkCreate(
-                    newFollowers.map((followerId) => ({
-                        userId: this.userId,
-                        followerId,
-                        followDetected: addedTime / 1000 || null,
-                    })),
-                    { returning: false }
-                ),
         ]);
     }
 
@@ -298,11 +310,14 @@ export default class UserDao {
 
     // return true if some followers were never cached by cacheFollowers
     public async getHasNotCachedFollowers(): Promise<boolean> {
-        return Boolean(
-            await this.followersDetail.findOne({
-                where: { userId: this.userId, snowflakeId: { [Op.is]: null }, uncachable: false },
-                attributes: ['userId'],
-            })
+        return (
+            Number(await this.redis.get(`followers:count:${this.userId}`)) < 50000 &&
+            Boolean(
+                await this.followersDetail.findOne({
+                    where: { userId: this.userId, snowflakeId: { [Op.is]: null }, uncachable: false },
+                    attributes: ['userId'],
+                })
+            )
         );
     }
 
