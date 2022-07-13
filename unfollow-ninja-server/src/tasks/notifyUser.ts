@@ -194,7 +194,7 @@ export default class extends Task {
     private generateMessage(unfollowersInfo: IUnfollowerInfo[], lang: Lang, nbLeftovers: number): string {
         i18n.setLocale(lang);
         const messages: string[] = unfollowersInfo.map((unfollower) => {
-            let username = unfollower.username ? '@' + unfollower.username : i18n.__('one of you followers');
+            let username = unfollower.username ? '@' + unfollower.username : i18n.__('one of your followers');
 
             let customEmoji = '';
             if (unfollower.username === 'louanben') {

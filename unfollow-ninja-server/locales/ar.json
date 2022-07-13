@@ -2,7 +2,7 @@
     "This account followed you for {{duration}} ({{{time}}}).": "هذا الحساب قام بمتابعتك منذ {{duration}} ({{{time}}}).",
     "and {{nbLeftovers}} more.": "و{{nbLeftovers}} أكثر.",
     "{{nbUnfollows}} Twitter users unfollowed you:": "قام {{nbUnfollows}} مستخدمي تويتر بإلغاء متابعتك:",
-    "one of you followers": "واحد من متابعينك",
+    "one of your followers": "واحد من متابعينك",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} ألغى مُتابعتك {{emoji}}.",
     "You blocked {{username}} {{emoji}}.": "قمت بحظر {{username}} {{emoji}}.",
     "This account followed you before you signed up to @{{twitterAccount}}!": "هذا الحساب قام بمتابعتك من قبل تسجيلك في @{{twitterAccount}}!",

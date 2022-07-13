@@ -1,7 +1,7 @@
 {
     "This account followed you before you signed up to @{{twitterAccount}}!": "Akun ini sudah mengikuti kamu sebelum kamu mendaftar ke @{{twitterAccount}}!",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} berhenti mengikuti kamu {{emoji}}.",
-    "one of you followers": "salah satu pengikut kamu",
+    "one of your followers": "salah satu pengikut kamu",
     "{{username}} blocked you {{emoji}}.": "{{username}} memblokir kamu {{emoji}}.",
     "You blocked {{username}} {{emoji}}.": "Kamu memblokir {{username}} {{emoji}}.",
     "{{username}} has been suspended {{emoji}}.": "{{username}} sudah ditangguhkan {{emoji}}.",

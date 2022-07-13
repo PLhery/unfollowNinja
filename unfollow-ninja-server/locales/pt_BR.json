@@ -9,7 +9,7 @@
     "and {{nbLeftovers}} more.": "e {{nbLeftovers}} mais.",
     "{{username}}'s account has been locked {{emoji}}.": "A conta {{username}} foi temporariamente trancada {{emoji}}.",
     "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "Parabéns, agora você pode aproveitar @{{twitterAccount}} pro {{emoji}}!",
-    "one of you followers": "Um dos seus seguidores",
+    "one of your followers": "Um dos seus seguidores",
     "You blocked {{username}} {{emoji}}.": "Você bloqueou {{username}} {{emoji}}.",
     "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Tudo pronto, bem vindo ao @{{twitterAccount}} {{emoji}}!\nEm breve você saberá quem deixou de te seguir aqui!"
 }

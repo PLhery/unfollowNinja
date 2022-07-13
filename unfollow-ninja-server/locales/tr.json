@@ -1,5 +1,5 @@
 {
-    "one of you followers": "takipçilerinden biri",
+    "one of your followers": "takipçilerinden biri",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} seni takip etmeyi bıraktı {{emoji}}.",
     "{{username}} has been suspended {{emoji}}.": "{{username}} isimli hesap askıya alındı {{emoji}}.",
     "{{username}} has left Twitter {{emoji}}.": "{{username}} Twitter'dan ayrıldı {{emoji}}.",

@@ -1,5 +1,5 @@
 {
-    "one of you followers": "你的其中的一个关注者",
+    "one of your followers": "你的其中的一个关注者",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} 取消关注你 {{emoji}}.",
     "{{username}} blocked you {{emoji}}.": "{{username}} 屏蔽了你 {{emoji}}.",
     "You blocked {{username}} {{emoji}}.": "你屏蔽了 {{username}} {{emoji}}.",

@@ -4,7 +4,7 @@
     "You blocked {{username}} {{emoji}}.": "คุณได้บล็อค {{username}} {{emoji}}.",
     "This account followed you before you signed up to @{{twitterAccount}}!": "บัญชีผู้ใช้นี้ติดตามคุณ ก่อนที่คุณจะลงชื่อสมัครใช้ @{{twitterAccount}}!",
     "{{username}}'s account has been locked {{emoji}}.": "{{username}}'s บัญชีผู้ใช้นี้ได้ทำการล็อคบัญชี {{emoji}}.",
-    "one of you followers": "หนึ่งในผู้ติดตามของคุณ",
+    "one of your followers": "หนึ่งในผู้ติดตามของคุณ",
     "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} บัญชีผู้ใช้ทวิตเตอร์นี้ได้เลิกติดตามคุณ:",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} เลิกติดตามคุณ {{emoji}}.",
     "{{username}} has left Twitter {{emoji}}.": "{{username}} ได้ปิดบัญชีทวิตเตอร์ {{emoji}}.",

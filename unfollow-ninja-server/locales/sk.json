@@ -1,6 +1,6 @@
 {
     "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} Twitter užívatelia/užívateľov ťa prestalo sledovať",
-    "one of you followers": "jeden z tvojich sledovateľov",
+    "one of your followers": "jeden z tvojich sledovateľov",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} ťa prestal sledovať {{emoji}}.",
     "{{username}} has been suspended {{emoji}}.": "Účet {{username}} bol pozastavený {{emoji}}.",
     "{{username}} has left Twitter {{emoji}}.": "{{username}} opustil Twitter {{emoji}}.",

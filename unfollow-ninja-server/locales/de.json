@@ -3,7 +3,7 @@
     "{{username}} has left Twitter {{emoji}}.": "{{username}} hat Twitter verlassen {{emoji}}.",
     "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} Twitter-Nutzer haben dir entfolgt:",
     "{{username}} blocked you {{emoji}}.": "{{username}} hat dich blockiert {{emoji}}.",
-    "one of you followers": "einer deiner Follower",
+    "one of your followers": "einer deiner Follower",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} hat dich entfolgt {{emoji}}.",
     "This account followed you for {{duration}} ({{{time}}}).": "Dieses Konto ist dir seit {{duration}} ({{{time}}}) gefolgt.",
     "and {{nbLeftovers}} more.": "und {{nbLeftovers}} mehr.",
