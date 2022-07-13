@@ -9,17 +9,17 @@ Object {
   ],
   "followersDetail": Array [
     Object {
-      "followDetected": 0.123,
+      "followDetected": 123,
       "followerId": "1",
       "snowflakeId": "1654482657084000",
-      "uncachable": 0,
+      "uncachable": false,
       "userId": "1",
     },
     Object {
-      "followDetected": 0.456,
+      "followDetected": 456,
       "followerId": "4",
       "snowflakeId": null,
-      "uncachable": 1,
+      "uncachable": true,
       "userId": "1",
     },
   ],

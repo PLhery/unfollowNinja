@@ -2,7 +2,7 @@ import Redis from 'ioredis';
 import Twit from 'twit';
 import { TwitterApi } from 'twitter-api-v2';
 import crypto from 'crypto';
-import { DataTypes, InferAttributes, InferCreationAttributes, Model, Op } from 'sequelize';
+import { BOOLEAN, DataTypes, InferAttributes, InferCreationAttributes, Model, Op } from 'sequelize';
 import type { ModelStatic } from 'sequelize/types/model';
 
 import type { default as Dao, IFriendCode } from './dao';
@@ -397,6 +397,9 @@ export default class UserDao {
             this.getTemporaryFollowerList(),
             this.followersDetail.findAll({ where: { userId: this.userId }, raw: true }),
         ]);
+
+        // while running unit tests, with sqlite, booleans are numbers.
+        followersDetail.forEach((detail) => (detail.uncachable = Boolean(detail.uncachable)));
 
         return {
             username,

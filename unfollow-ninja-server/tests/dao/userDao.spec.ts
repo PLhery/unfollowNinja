@@ -178,16 +178,16 @@ describe('Test userDao', () => {
     test('should store and retrieve a list of followers', async () => {
         expect(await uDao1.getFollowers()).toBeNull();
 
-        await uDao1.updateFollowers(['1', '2', '3'], ['1', '2', '3'], [], 123);
-        await uDao1.updateFollowers(['1', '4'], ['4'], ['2', '3'], 456);
+        await uDao1.updateFollowers(['1', '2', '3'], ['1', '2', '3'], [], 123000);
+        await uDao1.updateFollowers(['1', '4'], ['4'], ['2', '3'], 456000);
 
         expect(await uDao1.getFollowers()).toStrictEqual(['1', '4']);
         expect(await redis.get('followers:count:1')).toBe('2');
-        expect(await uDao1.getFollowDetectedTime('1')).toBe(123);
+        expect(await uDao1.getFollowDetectedTime('1')).toBe(123000);
         expect(await uDao1.getFollowDetectedTime('2')).toBeNull();
         expect(await uDao1.getFollowDetectedTime('3')).toBeNull();
-        expect(await uDao1.getFollowDetectedTime('4')).toBe(456);
-        expect(await uDao1.getFollowTime('4')).toBe(456);
+        expect(await uDao1.getFollowDetectedTime('4')).toBe(456000);
+        expect(await uDao1.getFollowTime('4')).toBe(456000);
         expect(await redis.get('total-unfollowers')).toBe('2');
     });
 
@@ -198,10 +198,10 @@ describe('Test userDao', () => {
         expect(await uDao1.getCachedFollowers()).toEqual(['1', '4']);
         expect(await uDao1.getFollowTime('1')).toBe(1577837617); // uses snowflake this time
 
-        await uDao1.updateFollowers(['1'], [], ['4'], 456);
+        await uDao1.updateFollowers(['1'], [], ['4'], 456000);
         expect(await uDao1.getCachedFollowers()).toEqual(['1']);
         expect(await uDao1.getFollowerSnowflakeId('4')).toBeNull();
-        await uDao1.updateFollowers(['1', '4'], ['4'], [], 456);
+        await uDao1.updateFollowers(['1', '4'], ['4'], [], 456000);
         expect(await uDao1.getCachedFollowers()).toEqual(['1']);
         expect(await uDao1.getFollowerSnowflakeId('4')).toBeNull();
     });
