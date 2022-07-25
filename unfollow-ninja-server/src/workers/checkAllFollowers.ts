@@ -98,7 +98,7 @@ async function checkFollowersWithTimeout(userId: string, dao: Dao, queue: Queue)
         ]);
         clearTimeout(watchdogTimeout);
     } catch (error) {
-        const username: string = (await dao.getCachedUsername(userId)) || userId;
+        const username: string = (await dao.getCachedUsername(userId).catch(() => userId)) || userId;
         logger.error(`An error happened with checkFollowers / @${username}: ${error.stack}`);
         Sentry.withScope((scope) => {
             scope.setTag('task-name', 'checkFollowers');

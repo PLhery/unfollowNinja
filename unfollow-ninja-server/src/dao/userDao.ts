@@ -316,6 +316,7 @@ export default class UserDao {
                 await this.followersDetail.findOne({
                     where: { userId: this.userId, snowflakeId: { [Op.is]: null }, uncachable: false },
                     attributes: ['userId'],
+                    limit: 1,
                 })
             )
         );

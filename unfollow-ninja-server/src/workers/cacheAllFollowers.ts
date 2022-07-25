@@ -25,12 +25,12 @@ export async function cacheAllFollowers(workerId: number, nbWorkers: number, dao
             .filter((userId) => hashCode(userId) % nbWorkers === workerId - 1) // we process 1/x users
             .map((userId) =>
                 limit(async () => {
-                    const username: string = (await dao.getCachedUsername(userId)) || userId;
                     try {
                         if (await dao.getUserDao(userId).getHasNotCachedFollowers()) {
                             await cacheFollowers(userId, dao);
                         }
                     } catch (error) {
+                        const username: string = (await dao.getCachedUsername(userId).catch(() => userId)) || userId;
                         logger.error(`An error happened with checkFollowers / @${username}: ${error.stack}`);
                         Sentry.withScope((scope) => {
                             scope.setTag('task-name', 'cacheFollowers');
