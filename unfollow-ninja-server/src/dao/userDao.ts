@@ -311,7 +311,7 @@ export default class UserDao {
     // return true if some followers were never cached by cacheFollowers
     public async getHasNotCachedFollowers(): Promise<boolean> {
         return (
-            Number(await this.redis.get(`followers:count:${this.userId}`)) < 50000 &&
+            Number(await this.redis.get(`followers:count:${this.userId}`)) < 30000 &&
             Boolean(
                 await this.followersDetail.findOne({
                     where: { userId: this.userId, snowflakeId: { [Op.is]: null }, uncachable: false },
@@ -323,12 +323,33 @@ export default class UserDao {
     }
 
     public async getCachedFollowers(): Promise<string[]> {
-        return (
+        const cachedFollowers = (
             await this.followersDetail.findAll({
                 where: { userId: this.userId, snowflakeId: { [Op.not]: null } },
+                order: ['followerId'],
+                offset: 0,
+                limit: 5000,
                 attributes: ['followerId'],
             })
         ).map((row) => row.followerId);
+
+        // iterate if > 5000 followers (to avoid long queries)
+        let nextCachedFollowers = cachedFollowers;
+        let offset = 5000;
+        while (nextCachedFollowers.length === 5000) {
+            nextCachedFollowers = (
+                await this.followersDetail.findAll({
+                    where: { userId: this.userId, snowflakeId: { [Op.not]: null } },
+                    order: ['followerId'],
+                    offset,
+                    limit: 5000,
+                    attributes: ['followerId'],
+                })
+            ).map((row) => row.followerId);
+            cachedFollowers.push(...nextCachedFollowers);
+            offset += 5000;
+        }
+        return cachedFollowers;
     }
 
     public async getFriendCodes(): Promise<IFriendCode[]> {
