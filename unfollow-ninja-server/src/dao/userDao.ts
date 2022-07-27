@@ -232,7 +232,7 @@ export default class UserDao {
                     followerId,
                     followDetected: addedTime / 1000 || null,
                 })),
-                { returning: false }
+                { returning: false, ignoreDuplicates: true }
             );
         }
 
