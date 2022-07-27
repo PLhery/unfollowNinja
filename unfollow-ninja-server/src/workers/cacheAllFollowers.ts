@@ -74,6 +74,11 @@ async function cacheFollowers(userId: string, dao: Dao) {
         userDao.getUncachableFollowers(),
     ]);
 
+    if (typeof followers !== 'object') {
+        // followers have not been fetched yet
+        return;
+    }
+
     const uncachablesSet = new Set(uncachables);
     const cachedFollowersSet = new Set(cachedFollowers);
 
@@ -82,7 +87,7 @@ async function cacheFollowers(userId: string, dao: Dao) {
     const targetId = cachableFollowers[targetIndex];
 
     if (typeof targetId !== 'string') {
-        // no cached follower
+        // no uncached follower
         return;
     }
 
