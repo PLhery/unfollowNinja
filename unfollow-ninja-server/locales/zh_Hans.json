@@ -10,6 +10,6 @@
     "{{username}} has left Twitter {{emoji}}.": "{{username}} 注销账号 {{emoji}}.",
     "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "好了，欢迎@{{twitterAccount}} {{emoji}}!\n在这里，你可以知道谁取关了你！",
     "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} 个用户取消关注你:",
-    "{{username}}'s account has been locked {{emoji}}.": "{{username}} 已锁推 {{emoji}}.",
+    "{{username}}'s account has been locked {{emoji}}.": "{{username}} 账号受限 {{emoji}}.",
     "and {{nbLeftovers}} more.": "和{{nbLeftovers}}等。"
 }
