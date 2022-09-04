@@ -61,12 +61,12 @@ function App() {
             </Box>
             <Box basis='medium' flex={true} pad='medium' >
               <Heading level={2} color='dark'>Unfollow Monkey is free for everyone</Heading>
-              <Paragraph>Unfollow Monkey is based on the <Link href='https://github.com/PLhery/unfollowNinja'>open-source</Link> project <Link href='https://unfollow.ninja'>unfollowNinja</Link>, hosted by <Link href='https://pulseheberg.com/'>PulseHeberg</Link> and maintained by <Link href='https://twitter.com/plhery'>@plhery</Link>.</Paragraph>
-              <Paragraph>Thanks to PulseHeberg for helping the project to remain substainable, efficient, free, supporting 100 000+ users. They also provide <Link href='https://pulseheberg.com/'>great and affordable servers and web hosting solutions</Link>, if you'd like to have a look!</Paragraph>
+              <Paragraph>Unfollow Monkey is based on the <Link href='https://github.com/PLhery/unfollowNinja'>open-source</Link> project <Link href='https://unfollow.ninja'>unfollowNinja</Link>, hosted by <Link href='https://pulseheberg.com/'>PulseHeberg</Link> & <Link href='https://startup.ovhcloud.com/fr/'>OVHCloud startup program</Link> and maintained by <Link href='https://twitter.com/plhery'>@plhery</Link>.</Paragraph>
+              <Paragraph>Thanks to PulseHeberg for helping the project to remain substainable, efficient, free, supporting 300 000+ users. They also provide <Link href='https://pulseheberg.com/'>great and affordable servers and web hosting solutions</Link>, if you'd like to have a look!</Paragraph>
 			  <Paragraph>UnfollowMonkey is powered by the <i>twitter-api-v2</i> node library, by the same author.</Paragraph>
 			  <Box gap='small' alignSelf='center' direction='row'>
-				<Repo title='unfollowNinja' description='Get notified when your Twitter account loses a follower.' stars={175} forks={18}/>
-				<Repo title='node-twitter-api-v2' description='Strongly typed, full-featured, light, versatile yet powerful Twitter API v1.1 and v2 client for Node.js.' stars={603} forks={75}/>
+				<Repo title='unfollowNinja' description='Get notified when your Twitter account loses a follower.' stars={186} forks={22}/>
+				<Repo title='node-twitter-api-v2' description='Strongly typed, full-featured, light, versatile yet powerful Twitter API v1.1 and v2 client for Node.js.' stars={723} forks={88}/>
               </Box>
             </Box>
           </Box>

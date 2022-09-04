@@ -2,7 +2,7 @@ import Redis from 'ioredis';
 import Twit from 'twit';
 import { TwitterApi } from 'twitter-api-v2';
 import crypto from 'crypto';
-import { BOOLEAN, DataTypes, InferAttributes, InferCreationAttributes, Model, Op } from 'sequelize';
+import { DataTypes, InferAttributes, InferCreationAttributes, Model, Op } from 'sequelize';
 import type { ModelStatic } from 'sequelize/types/model';
 
 import type { default as Dao, IFriendCode } from './dao';
@@ -55,6 +55,21 @@ export default class UserDao {
             {
                 userId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
                 followerId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
+                followDetected: { type: DataTypes.INTEGER, allowNull: true },
+                snowflakeId: { type: DataTypes.STRING(30), allowNull: true },
+                uncachable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+            },
+            {
+                timestamps: false,
+                indexes: [{ fields: ['userId'] }],
+            }
+        );
+
+        this.user = dao.sequelize.define(
+            'user',
+            {
+                userId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
+                category: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
                 followDetected: { type: DataTypes.INTEGER, allowNull: true },
                 snowflakeId: { type: DataTypes.STRING(30), allowNull: true },
                 uncachable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
