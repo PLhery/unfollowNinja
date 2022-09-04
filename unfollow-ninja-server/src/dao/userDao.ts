@@ -64,21 +64,6 @@ export default class UserDao {
                 indexes: [{ fields: ['userId'] }],
             }
         );
-
-        this.user = dao.sequelize.define(
-            'user',
-            {
-                userId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
-                category: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },
-                followDetected: { type: DataTypes.INTEGER, allowNull: true },
-                snowflakeId: { type: DataTypes.STRING(30), allowNull: true },
-                uncachable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-            },
-            {
-                timestamps: false,
-                indexes: [{ fields: ['userId'] }],
-            }
-        );
     }
 
     public async createTables() {
