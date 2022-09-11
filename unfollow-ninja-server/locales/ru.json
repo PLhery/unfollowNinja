@@ -2,5 +2,14 @@
     "one of your followers": "один из ваших подписчиков",
     "{{username}} blocked you {{emoji}}.": "{{username}} заблокировал вас {{emoji}}.",
     "and {{nbLeftovers}} more.": "и {{nbLeftovers}} многое другое.",
-    "You blocked {{username}} {{emoji}}.": "Вы заблокировали {{username}} {{emoji}}."
+    "You blocked {{username}} {{emoji}}.": "Вы заблокировали {{username}} {{emoji}}.",
+    "This account followed you for {{duration}} ({{{time}}}).": "Этот аккаунт читал вас с {{duration}} ({{{time}}}).",
+    "{{username}} unfollowed you {{emoji}}.": "{{username}} отписался от вас {{emoji}}.",
+    "This account followed you before you signed up to @{{twitterAccount}}!": "Этот аккаунт начал читать вас до того, как вы подключили @{{twitterAccount}}!",
+    "{{username}}'s account has been locked {{emoji}}.": "Учетная запись {{username}} была заблокирована {{emoji}}.",
+    "{{username}} has left Twitter {{emoji}}.": "{{username}} удалил аккаунт {{emoji}}.",
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "Поздравляем, теперь вы можете наслаждаться @{{twitterAccount}} pro {{emoji}}!",
+    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} Пользователи твиттера, отписавшиеся от вас:",
+    "{{username}} has been suspended {{emoji}}.": "{{username}} был приостановлен {{emoji}}.",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Всё готово, добро пожаловать в @{{twitterAccount}} {{emoji}}! \nСкоро вы узнаете о тех, кто отписался!"
 }
