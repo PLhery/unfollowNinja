@@ -50,7 +50,7 @@ export default class UserDao {
             }
         );
 
-        this.followersDetail = dao.sequelize.define(
+        this.followersDetail = dao.sequelizeFollowers.define(
             'followersDetail',
             {
                 userId: { type: DataTypes.STRING(30), allowNull: false, primaryKey: true },

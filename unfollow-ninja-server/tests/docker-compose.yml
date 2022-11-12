@@ -10,23 +10,27 @@ services:
         depends_on:
             - postgres
             - postgres-logs
+            - postgres-followers
             - redis
         environment:
             REDIS_TEST_URI: redis://redis
             POSTGRES_TEST_URI: postgres://postgres:unfollowninja@postgres/postgres
             POSTGRES_LOGS_TEST_URI: postgres://postgres:unfollowninja@postgres-logs/postgres
+            POSTGRES_FOLLOWERS_TEST_URI: postgres://postgres:unfollowninja@postgres-followers/postgres
     postgres:
-        image: postgres:13
+        image: postgres:15
         command: postgres -c 'max_connections=200'
         environment:
             POSTGRES_PASSWORD: 'unfollowninja'
     postgres-logs:
-        restart: always
-        image: postgres:14
+        image: postgres:15
         command: postgres -c 'max_connections=200'
         environment:
             POSTGRES_PASSWORD: 'unfollowninja'
-        volumes:
-            - /data/postgres-logs:/var/lib/postgresql/data
+    postgres-followers:
+        image: postgres:15
+        command: postgres -c 'max_connections=200'
+        environment:
+            POSTGRES_PASSWORD: 'unfollowninja'
     redis:
         image: redis:6

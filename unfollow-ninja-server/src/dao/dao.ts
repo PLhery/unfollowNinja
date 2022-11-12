@@ -31,6 +31,7 @@ export default class Dao {
     public readonly redis: Redis;
     public readonly sequelize: Sequelize;
     public readonly sequelizeLogs: Sequelize;
+    public readonly sequelizeFollowers: Sequelize;
     public readonly userEventDao: UserEventDao;
 
     private readonly CachedUsername: ModelStatic<ICachedUsername>;
@@ -51,11 +52,19 @@ export default class Dao {
                 application_name: 'UnfollowMonkey - ' + (cluster.worker ? `worker ${cluster.worker.id}` : 'master'),
                 statement_timeout: 30000,
             },
+        }),
+        sequelizeFollowers = new Sequelize(process.env.POSTGRES_FOLLOWERS_URI, {
+            logging: false,
+            dialectOptions: {
+                application_name: 'UnfollowMonkey - ' + (cluster.worker ? `worker ${cluster.worker.id}` : 'master'),
+                statement_timeout: 30000,
+            },
         })
     ) {
         this.redis = redis;
         this.sequelize = sequelize;
         this.sequelizeLogs = sequelizeLogs;
+        this.sequelizeFollowers = sequelizeFollowers;
 
         this.CachedUsername = this.sequelize.define('CachedUsername', {
             twitterId: {

@@ -1,21 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Test userDao should get a stable getAllUserData 1`] = `
-Object {
+{
   "category": 0,
-  "followers": Array [
+  "followers": [
     "1",
     "4",
   ],
-  "followersDetail": Array [
-    Object {
+  "followersDetail": [
+    {
       "followDetected": 123,
       "followerId": "1",
       "snowflakeId": "1654482657084000",
       "uncachable": false,
       "userId": "1",
     },
-    Object {
+    {
       "followDetected": 456,
       "followerId": "4",
       "snowflakeId": null,
@@ -25,7 +25,7 @@ Object {
   ],
   "nextCheckTime": 123,
   "temporaryFollowerList": null,
-  "userParams": Object {
+  "userParams": {
     "added_at": 1234,
     "customerId": "",
     "dmId": "",

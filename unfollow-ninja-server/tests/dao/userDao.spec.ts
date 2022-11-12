@@ -17,7 +17,11 @@ const sequelizeLogs = process.env.POSTGRES_LOGS_TEST_URI
     ? new Sequelize(process.env.POSTGRES_LOGS_TEST_URI, { logging: false })
     : new Sequelize({ dialect: 'sqlite', storage: ':memory:', logging: false });
 
-const dao = new Dao(redis, sequelize, sequelizeLogs);
+const sequelizeFollowers = process.env.POSTGRES_FOLLOWERS_TEST_URI
+    ? new Sequelize(process.env.POSTGRES_FOLLOWERS_TEST_URI, { logging: false })
+    : new Sequelize({ dialect: 'sqlite', storage: ':memory:', logging: false });
+
+const dao = new Dao(redis, sequelize, sequelizeLogs, sequelizeFollowers);
 
 const uDao1 = dao.getUserDao('1');
 const uDao2 = dao.getUserDao('2');
