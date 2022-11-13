@@ -44,7 +44,7 @@
         "typescript": "^4.8.4"
     },
     "dependencies": {
-        "@koa/cors": "^3.1.0",
+        "@koa/cors": "^4.0.0",
         "@sentry/node": "^7.19.0",
         "@sentry/tracing": "^7.19.0",
         "@types/geoip-country": "^4.0.0",
@@ -57,25 +57,25 @@
         "big-integer": "^1.6.48",
         "bull": "^4.1.0",
         "dotenv": "^16.0.3",
-        "geoip-country": "^4.0.97",
-        "hot-shots": "^9.0.0",
-        "i18n": "^0.15.0",
+        "geoip-country": "^4.1.30",
+        "hot-shots": "^9.3.0",
+        "i18n": "^0.15.1",
         "ioredis": "^5.2.4",
         "iso-country-currency": "^0.6.0",
         "koa": "^2.13.1",
         "koa-bodyparser": "^4.3.0",
-        "koa-router": "^10.1.1",
+        "koa-router": "^12.0.0",
         "koa-session": "^6.2.0",
         "moment": "^2.29.4",
         "moment-timezone": "^0.5.38",
         "p-limit": "^3.1.0",
-        "pg": "^8.7.1",
+        "pg": "^8.8.0",
         "pg-hstore": "^2.3.4",
-        "sequelize": "^6.6.5",
-        "stripe": "^9.10.0",
+        "sequelize": "^6.25.5",
+        "stripe": "^10.17.0",
         "twit": "^2.2.11",
         "twitter-api-v2": "^1.12.9",
-        "winston": "^3.3.3"
+        "winston": "^3.8.2"
     },
     "//": [
         "p-limit stuck at v3 because of esm module incompatibility"

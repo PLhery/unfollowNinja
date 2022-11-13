@@ -9,7 +9,7 @@ import type Dao from '../dao/dao';
 
 const stripe = process.env.STRIPE_SK
     ? new Stripe(process.env.STRIPE_SK, {
-          apiVersion: '2020-08-27',
+          apiVersion: '2022-08-01',
       })
     : null;
 
