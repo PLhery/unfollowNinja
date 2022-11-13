@@ -7,6 +7,7 @@ services:
         depends_on:
             - postgres
             - postgres-logs
+            - postgres-followers
             - redis-bull
             - redis
         volumes:
@@ -14,7 +15,7 @@ services:
         environment:
             POSTGRES_URI: postgres://postgres:unfollowninja@postgres/postgres
             POSTGRES_LOGS_URI: postgres://postgres:unfollowninja@postgres-logs/postgres
-            POSTGRES_FOLLOWERS_URI: postgres://postgres:unfollowninja@postgres/postgresFollowers
+            POSTGRES_FOLLOWERS_URI: postgres://postgres:unfollowninja@postgres-followers/postgres
             REDIS_URI: redis://redis
             REDIS_BULL_URI: redis://redis-bull
     api:
@@ -26,12 +27,13 @@ services:
         depends_on:
             - postgres
             - postgres-logs
+            - postgres-followers
             - redis-bull
             - redis
         environment:
             POSTGRES_URI: postgres://postgres:unfollowninja@postgres/postgres
             POSTGRES_LOGS_URI: postgres://postgres:unfollowninja@postgres-logs/postgres
-            POSTGRES_FOLLOWERS_URI: postgres://postgres:unfollowninja@postgres/postgresFollowers
+            POSTGRES_FOLLOWERS_URI: postgres://postgres:unfollowninja@postgres-followers/postgres
             REDIS_URI: redis://redis
             REDIS_BULL_URI: redis://redis-bull
     postgres:
@@ -43,6 +45,14 @@ services:
         volumes:
             - /data/postgres:/var/lib/postgresql/data
     postgres-logs:
+        restart: always
+        image: postgres:15
+        command: postgres -c 'max_connections=200'
+        environment:
+            POSTGRES_PASSWORD: 'unfollowninja'
+        volumes:
+            - /data/postgres-logs:/var/lib/postgresql/data
+    postgres-followers:
         restart: always
         image: postgres:15
         command: postgres -c 'max_connections=200'
