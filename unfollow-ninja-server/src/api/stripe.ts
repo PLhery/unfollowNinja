@@ -148,6 +148,7 @@ export const generateProCheckoutUrl = async (
                 userId,
                 username,
             },
+            trial_period_days: 10,
         },
         metadata: {
             userId,
@@ -183,22 +184,22 @@ const PRICES: Record<string, Price> = {
     USD: {
         pro: 3,
         proId: 'price_1K2j6qEwrjMfujSGZiTUPDH9',
-        friends: 5,
-        friendsId: 'price_1K3pLUEwrjMfujSGjQxbfSOB',
+        friends: '5.99',
+        friendsId: 'price_1MEILOEwrjMfujSGgFOJapDB',
         name: 'dollars',
     },
     EUR: {
         pro: '2.50',
         proId: 'price_1K58S6EwrjMfujSGdHu2h1k8',
-        friends: 4,
-        friendsId: 'price_1K58WaEwrjMfujSGPSu3Gain',
+        friends: '4.99',
+        friendsId: 'price_1MEIN4EwrjMfujSGl6qMokU5',
         name: 'euros',
     },
     IDR: {
         pro: '10 000',
         proId: 'price_1KBRhYEwrjMfujSGy1mftPTe',
-        friends: '20 000',
-        friendsId: 'price_1KBReZEwrjMfujSGOt07IEVi',
+        friends: '29 000',
+        friendsId: 'price_1MEIPkEwrjMfujSGHk9vU8JU',
         name: 'rupiah',
     },
     PHP: {

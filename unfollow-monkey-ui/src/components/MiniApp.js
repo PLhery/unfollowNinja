@@ -40,7 +40,8 @@ const LoggedInIntro = ({ user, logout, removeDMs, changeLang, setUserInfo, setHa
         {message}
 	  {user.dmUsername && <LanguageSelector value={user.lang} onChange={changeLang}/> }
 	  {user.dmUsername && <ProCard user={user} setUserInfo={setUserInfo} setHasError={setHasError}/> }
-	  {user.dmUsername && <Paragraph>Any issue with your pro subscription? <br/> Email us: <i>love@unfollow-monkey.com</i></Paragraph> }
+	  {user.dmUsername && <Paragraph><small>Any issue with your pro subscription? <br/> Email us: <i>love@unfollow-monkey.com</i></small></Paragraph> }
+		{user.dmUsername && <Paragraph><small>You don't receive your DMs? Read <Link href={'https://twitter.com/UnfollowMonkey/status/1589955137480818688'}>this thread</Link></small></Paragraph> }
 
         <Paragraph>
             <Link href='#' onClick={e => {logout();e.preventDefault();}} source='disconnect'>Log out</Link>
@@ -125,7 +126,7 @@ function MiniApp(props) {
 		.then(data => setUserInfo(data))
 		.catch(() => {
 		  setHasError(true)
-		})
+		});
 	}
   }, []);
 

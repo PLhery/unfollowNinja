@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Button, Card, Image, Paragraph, RadioButtonGroup, TextInput} from "grommet";
+import {Button, Card, Image, Paragraph, TextInput} from "grommet";
 
 import Styles from './ProCard.module.scss';
 import {applePay, googlePay, mastercard} from "../../images";
@@ -10,7 +10,6 @@ function ProCard(props) {
   const { user, setUserInfo, setHasError } = props;
 
   const [isWrongCode, setIsWrongCode] = useState(false);
-  const [planValue, setPlanValue] = useState('friends');
 
   const codeChanged = (event) => {
 	const newCode = event.target.value;
@@ -70,28 +69,20 @@ function ProCard(props) {
   } else {
 	return <Card className={Styles.checkoutCard}>
 		<Paragraph>
-			You currently receive your notifications in <b>30min</b><br/>
+			You currently receive your notifications in <b>1 hour</b><br/>
 			Become <b className={Styles.pro}>pro</b> to be notified in <b>30 seconds</b>!<br/>
 		</Paragraph>
-		<RadioButtonGroup
-		  value={planValue}
-		  name='choosePlan'
-		  options={[
-			{ label: <><b>Pro</b>: 1 Twitter account - {user.priceTags.pro}/year</>, value: 'pro' },
-			{ label: <><b>Friends</b>: 5 Twitter accounts - {user.priceTags.friends}/year</>, value: 'friends' }
-		  ]}
-		  onChange={(e) => setPlanValue(e.target.value)}
-		/>
+		<Paragraph>Valid on <b>5 Twitter accounts</b> - {user.priceTags.friends}/year</Paragraph>
+		<small>10 days trial - easily cancel online</small>
 		<Button
 		  className={Styles.checkoutButton}
-		  href={`${API_URL}/user/buy-${planValue}`}
+		  href={`${API_URL}/user/buy-friends`}
 		  label={<>
 		  <Image className={Styles.googlePayIcon} src={googlePay} alt='Google pay'/>
 		  <Image height={26} src={applePay} alt='Apple pay'/>
 		  <Image height={26} src={mastercard} alt='Mastercard'/>
 		  <span>Pay with Stripe</span>
 		</>}/>
-	  <small>30-days refund policy, if you change your mind</small>
 		<div className={Styles.friendCodeLine + (isWrongCode ? ' ' + Styles.error : '')}>
 		  <Paragraph>Use a friend code:</Paragraph><TextInput maxLength={6} onChange={codeChanged}/>
 		</div>
