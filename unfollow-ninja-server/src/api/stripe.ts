@@ -29,8 +29,9 @@ export const handleWebhook = async (ctx: ParameterizedContext, dao: Dao, bullQue
     const { userId } = subscription.metadata;
 
     switch (event.type) {
+        case 'customer.subscription.created':
         case 'customer.subscription.updated':
-            if (subscription.status === 'active') {
+            if (subscription.status === 'active' || subscription.status === 'trialing') {
                 // enable pro
                 const plan = 'prod_KjHvT2vhr2F7tA' === subscription.items.data[0].plan.product ? 'friends' : 'pro';
                 await enablePro(dao, bullQueue, userId, plan, ctx.ip, subscription.id);
@@ -39,6 +40,8 @@ export const handleWebhook = async (ctx: ParameterizedContext, dao: Dao, bullQue
                 await stripe.customers.update(customerId, {
                     metadata: subscription.metadata,
                 });
+            } else {
+                await disablePro(dao, userId, ctx.ip, subscription.id);
             }
             break;
         case 'customer.subscription.deleted':
