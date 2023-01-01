@@ -91,8 +91,8 @@ async function checkFollowersWithTimeout(userId: string, dao: Dao, queue: Queue)
             new Promise(
                 (_, reject) =>
                     (watchdogTimeout = setTimeout(
-                        () => reject(new Error('Timeout - checkFollowers took more than 2mins')),
-                        2 * 60 * 1000
+                        () => reject(new Error('Timeout - checkFollowers took more than 10mins')),
+                        10 * 60 * 1000
                     ))
             ),
         ]);
