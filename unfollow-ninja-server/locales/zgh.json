@@ -1,0 +1,15 @@
+{
+    "{{nbUnfollows}} Twitter users unfollowed you:": "ⴽⴽⵙⵏ {{nbUnfollows}} ⵉⵏⵙⵙⵎⵔⴰⵙ ⵏ ⵜⵡⵉⵜⵔ ⵜⵉⴹⴼⵕⵉ ⵏⵏⴽ:",
+    "one of your followers": "ⵉⵊⵊ ⵙⴳ ⵉⵎⴹⴼⴰⵕⵏ ⵏⵏⴽ",
+    "{{username}} unfollowed you {{emoji}}.": "{{username}} ⵉⵙⵙⵔ ⵜⵉⴹⴼⵕⵉ ⵏⵏⴽ {{emoji}}.",
+    "{{username}} has been suspended {{emoji}}.": "{{username}} ⵉⴱⴷⴷ ⵓⵎⵉⴹⴰⵏ ⵏⵏⵙ {{emoji}}.",
+    "{{username}} has left Twitter {{emoji}}.": "ⵉⴼⴼⵖ {{username} ⵙⴳ ⵜⵡⵉⵜⵔ {{emoji}}.",
+    "You blocked {{username}} {{emoji}}.": "ⵜⴽⴽⵙⴷ {{username}} {{emoji}}.",
+    "This account followed you for {{duration}} ({{{time}}}).": "ⵉⴹⴼⴰⵕ ⴽ ⵓⵎⵉⴹⴰⵏ ⴰⴷ ⵙⴳ {{duration}} ({{{time}}}).",
+    "This account followed you before you signed up to @{{twitterAccount}}!": "ⵉⴹⴼⴰⵕ ⴽ ⵓⵎⵉⴹⴰⵏ ⴰⴷ ⴷⴰⵜ ⵏ ⵓⵣⵎⵎⴻⵎ ⵏⵏⴽ ⴳ @{{twitterAccount}}!",
+    "{{username}}'s account has been locked {{emoji}}.": "ⴰⵎⵉⴹⴰⵏ ⵏ {{username}} ⵉⵜⵜⵡⴰⵇⵇⵏ {{emoji}}.",
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "ⴰⵢⵢⵓⵣ ⵏⵏⴽ, ⵜⵣⵎⵔⴷ ⴰⴷ ⵜⵖⴱⴱⵉⴷ ⵙ @{{twitterAccount}} ⵉⵖⵓⴷⴰⵏ {{emoji}}!",
+    "{{username}} blocked you {{emoji}}.": "{{username}} ⵉⴽⴽⵙ ⴽ {{emoji}}.",
+    "and {{nbLeftovers}} more.": "ⴷ {{nbLeftovers}} ⵢⴰⴹⵏ.",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "ⵎⴰⵕⵕⴰ ⵉⵙⴽⴽⵉⵏⵏ ⵓⵊⴷⵏ, ⴱⵔⵔⴽⴰⵜ ⴳ @{{twitterAccount}} {{emoji}}!\nⵔⴰⴷ ⵜⵉⵙⵉⵏⴷ ⵎⴰⵕⵕⴰ ⵉⵙⴽⴽⵉⵏⵏ ⵅⴼ ⵉⵔⴰⵎⴹⴼⴰⵕⵏ ⵏⵏⴽ ⴷⴰ!"
+}
