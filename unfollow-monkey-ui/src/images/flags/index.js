@@ -12,3 +12,4 @@ export {default as tr} from './tr.svg';
 export {default as uk} from './ua.svg';
 export {default as pt_BR} from './br.svg';
 export {default as ar} from './eg.svg';
+export {default as zgh} from './ma.svg';

@@ -23,5 +23,6 @@ export const SUPPORTED_LANGUAGES_CONST = [
     'uk',
     'pt_BR',
     'ar',
+    'zgh',
 ] as const;
 export const SUPPORTED_LANGUAGES = SUPPORTED_LANGUAGES_CONST as unknown as string[];
