@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
-import {Button, Card, Image, Paragraph, TextInput} from "grommet";
+import {Card, Paragraph, TextInput} from "grommet";
 
 import Styles from './ProCard.module.scss';
-import {applePay, googlePay, mastercard} from "../../images";
+// import {applePay, googlePay, mastercard} from "../../images";
 import { API_URL } from "../MiniApp";
 import Link from "../Link";
 
@@ -72,7 +72,8 @@ function ProCard(props) {
 			You currently receive your notifications in <b>1 hour</b><br/>
 			Become <b className={Styles.pro}>pro</b> to be notified in <b>30 seconds</b>!<br/>
 		</Paragraph>
-		<Paragraph>Valid on <b>5 Twitter accounts</b> - {user.priceTags.friends}/year</Paragraph>
+		<Paragraph>(Not available right now)</Paragraph>
+		{/*<Paragraph>Valid on <b>5 Twitter accounts</b> - {user.priceTags.friends}/year</Paragraph>
 		<small>10 days trial - easily cancel online</small>
 		<Button
 		  className={Styles.checkoutButton}
@@ -82,7 +83,7 @@ function ProCard(props) {
 		  <Image height={26} src={applePay} alt='Apple pay'/>
 		  <Image height={26} src={mastercard} alt='Mastercard'/>
 		  <span>Pay with Stripe</span>
-		</>}/>
+		</>}/>*/}
 		<div className={Styles.friendCodeLine + (isWrongCode ? ' ' + Styles.error : '')}>
 		  <Paragraph>Use a friend code:</Paragraph><TextInput maxLength={6} onChange={codeChanged}/>
 		</div>
