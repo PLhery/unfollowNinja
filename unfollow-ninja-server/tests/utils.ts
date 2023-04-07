@@ -1,15 +1,14 @@
 import type { Queue } from 'bull';
 import type Dao from '../src/dao/dao';
-import type Twit from 'twit';
 
 export function userDaoMock() {
-    const twit = twitMock();
-    const dmTwit = twitMock();
+    const twit = twitterApiMock();
+    const dmTwit = twitterApiMock();
     return {
         twit,
         dmTwit,
-        getTwit: jest.fn().mockResolvedValue(twit),
-        getDmTwit: jest.fn().mockResolvedValue(dmTwit),
+        getTwitterApi: jest.fn().mockResolvedValue(twit),
+        getDmTwitterApi: jest.fn().mockResolvedValue(dmTwit),
         getLang: jest.fn(),
         getDmId: jest.fn().mockResolvedValue('user0'),
         getUsername: jest.fn(),
@@ -64,9 +63,11 @@ interface DmSendParams {
     event: { message_create: { message_data: { text: string } } };
 }
 
-export function twitMock() {
+export function twitterApiMock() {
     return {
-        get: jest.fn(),
-        post: jest.fn<Promise<Partial<Twit.PromiseResponse>>, [string, Twit.Params & DmSendParams]>(),
+        v2: {
+            get: jest.fn(),
+            sendDmToParticipant: jest.fn(),
+        },
     };
 }

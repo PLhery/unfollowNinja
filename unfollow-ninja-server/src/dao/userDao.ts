@@ -1,5 +1,4 @@
 import Redis from 'ioredis';
-import Twit from 'twit';
 import { TwitterApi } from 'twitter-api-v2';
 import crypto from 'crypto';
 import { DataTypes, InferAttributes, InferCreationAttributes, Model, Op } from 'sequelize';
@@ -145,21 +144,9 @@ export default class UserDao {
         await this.redis.hmset(`user:${this.userId}`, userParams);
     }
 
-    public async getTwit(): Promise<Twit> {
-        const [token, tokenSecret] = await this.redis.hmget(`user:${this.userId}`, 'token', 'tokenSecret');
-        if (!token || !tokenSecret) {
-            throw new Error("Tried to create a new Twit client but the user didn't have any credentials stored");
-        }
-        return new Twit({
-            access_token: token,
-            access_token_secret: tokenSecret,
-            consumer_key: process.env.CONSUMER_KEY,
-            consumer_secret: process.env.CONSUMER_SECRET,
-        });
-    }
-
     public async getTwitterApi(): Promise<TwitterApi> {
-        const [token, tokenSecret] = await this.redis.hmget(`user:${this.userId}`, 'token', 'tokenSecret');
+        return this.getDmTwitterApi();
+        /*const [token, tokenSecret] = await this.redis.hmget(`user:${this.userId}`, 'token', 'tokenSecret');
         if (!token || !tokenSecret) {
             throw new Error("Tried to create a new twitter client but the user didn't have any credentials stored");
         }
@@ -168,20 +155,7 @@ export default class UserDao {
             accessSecret: tokenSecret,
             appKey: process.env.CONSUMER_KEY,
             appSecret: process.env.CONSUMER_SECRET,
-        });
-    }
-
-    public async getDmTwit(): Promise<Twit> {
-        const [dmToken, dmTokenSecret] = await this.redis.hmget(`user:${this.userId}`, 'dmToken', 'dmTokenSecret');
-        if (!dmToken || !dmTokenSecret) {
-            throw new Error("Tried to create a new Twit DM client but the user didn't have any DM credentials stored");
-        }
-        return new Twit({
-            access_token: dmToken,
-            access_token_secret: dmTokenSecret,
-            consumer_key: process.env.DM_CONSUMER_KEY,
-            consumer_secret: process.env.DM_CONSUMER_SECRET,
-        });
+        });*/
     }
 
     public async getDmTwitterApi(): Promise<TwitterApi> {

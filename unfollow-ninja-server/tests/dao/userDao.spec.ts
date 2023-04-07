@@ -138,35 +138,38 @@ describe('Test userDao', () => {
     test('should be able to get a Twit instance for each user', async () => {
         process.env.CONSUMER_KEY = 'ckey';
         process.env.CONSUMER_SECRET = 'csecret';
-        const twit1 = await uDao1.getTwit();
-        const twit2 = await uDao2.getTwit();
+        const twit1 = await uDao1.getTwitterApi();
+        const twit2 = await uDao2.getTwitterApi();
 
-        expect(twit1.getAuth()).toStrictEqual({
-            consumer_key: 'ckey',
-            consumer_secret: 'csecret',
-            access_token: USER_PARAMS_1.token,
-            access_token_secret: USER_PARAMS_1.tokenSecret,
+        expect(twit1.getActiveTokens()).toStrictEqual({
+            appKey: 'ckey',
+            appSecret: 'csecret',
+            accessToken: USER_PARAMS_1.token,
+            accessSecret: USER_PARAMS_1.tokenSecret,
+            type: 'oauth-1.0a',
         });
-        expect(twit2.getAuth()).toStrictEqual({
-            consumer_key: 'ckey',
-            consumer_secret: 'csecret',
-            access_token: USER_PARAMS_2.token,
-            access_token_secret: USER_PARAMS_2.tokenSecret,
+        expect(twit2.getActiveTokens()).toStrictEqual({
+            appKey: 'ckey',
+            appSecret: 'csecret',
+            accessToken: USER_PARAMS_2.token,
+            accessSecret: USER_PARAMS_2.tokenSecret,
+            type: 'oauth-1.0a',
         });
     });
 
     test('should be able to get a dmTwit instance for each user', async () => {
         process.env.DM_CONSUMER_KEY = 'dmckey';
         process.env.DM_CONSUMER_SECRET = 'dmcsecret';
-        const dmTwit2 = await uDao2.getDmTwit();
+        const dmTwit2 = await uDao2.getDmTwitterApi();
 
-        expect(dmTwit2.getAuth()).toStrictEqual({
-            consumer_key: 'dmckey',
-            consumer_secret: 'dmcsecret',
-            access_token: USER_PARAMS_2.dmToken,
-            access_token_secret: USER_PARAMS_2.dmTokenSecret,
+        expect(dmTwit2.getActiveTokens()).toStrictEqual({
+            appKey: 'dmckey',
+            appSecret: 'dmcsecret',
+            accessToken: USER_PARAMS_2.dmToken,
+            accessSecret: USER_PARAMS_2.dmTokenSecret,
+            type: 'oauth-1.0a',
         });
-        await expect(uDao1.getDmTwit()).rejects.toThrow("the user didn't have any DM credentials stored");
+        await expect(uDao1.getDmTwitterApi()).rejects.toThrow("the user didn't have any DM credentials stored");
     });
 
     test('should be able to get the language', async () => {

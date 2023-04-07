@@ -1,6 +1,6 @@
+/*
 import pLimit from 'p-limit';
 import * as Sentry from '@sentry/node';
-import { Twitter } from 'twit';
 
 import Dao, { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
@@ -9,12 +9,12 @@ import metrics from '../utils/metrics';
 const CACHE_WORKER_RATE_LIMIT =
     Number(process.env.CACHE_WORKER_RATE_LIMIT) || Number(process.env.WORKER_RATE_LIMIT) || 15;
 
-/**
+/!**
  * Check 1/nbWorkers users for uncached follower's username and follow date
  * @param workerId a number between 1 and nbWorkers included
  * @param nbWorkers the number of workers
  * @param dao
- */
+ *!/
 export async function cacheAllFollowers(workerId: number, nbWorkers: number, dao: Dao) {
     const limit = pLimit(CACHE_WORKER_RATE_LIMIT);
     const startedAt = Date.now();
@@ -158,3 +158,4 @@ async function cacheFollowers(userId: string, dao: Dao) {
 
     return;
 }
+*/

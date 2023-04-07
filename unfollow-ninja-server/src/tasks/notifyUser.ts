@@ -1,7 +1,6 @@
 import i18n from 'i18n';
 import type { Job } from 'bull';
 import moment from 'moment-timezone';
-import { Params, Twitter } from 'twit';
 import { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
 import { IUnfollowerInfo, Lang } from '../utils/types';
@@ -9,6 +8,7 @@ import Task from './task';
 import metrics from '../utils/metrics';
 import { NotificationEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES } from '../utils/utils';
+import { ApiResponseError, UsersV2Result } from 'twitter-api-v2';
 
 i18n.configure({
     locales: SUPPORTED_LANGUAGES,
@@ -30,7 +30,7 @@ export default class extends Task {
         const userDao = this.dao.getUserDao(userId);
         const username = await userDao.getUsername();
 
-        const twit = await userDao.getTwit();
+        const twitterApi = await userDao.getTwitterApi();
         const unfollowersInfo: IUnfollowerInfo[] = job.data.unfollowersInfo;
         let stopThere = false;
 
@@ -40,45 +40,46 @@ export default class extends Task {
         const unfollowersMap = new Map(unfollowersInfo.map((info) => [info.id, info]));
 
         // cache twittos and know who's suspended
-        const usersLookup = (await twit
-            .post('users/lookup', {
-                user_id: unfollowersInfo.map((u) => u.id).join(','),
-                include_entities: false,
-            })
+        const usersLookup = (await twitterApi.v2
+            .users(
+                unfollowersInfo.map((u) => u.id),
+                { 'user.fields': ['public_metrics'] }
+            )
             .catch((err) =>
                 this.manageTwitterErrors(err, username, userId).then((stop) =>
                     stop ? (stopThere = true) : { data: [] }
                 )
-            )) as { data: Twitter.User[] };
+            )) as UsersV2Result;
 
         if (stopThere) {
             return;
         }
 
-        usersLookup.data.forEach((user) => {
-            const unfollowerInfo = unfollowersMap.get(user.id_str);
+        usersLookup.data?.forEach((user) => {
+            const unfollowerInfo = unfollowersMap.get(user.id);
             unfollowerInfo.suspended = false;
-            unfollowerInfo.locked = user.friends_count === 0;
-            unfollowerInfo.username = user.screen_name;
+            unfollowerInfo.locked = user.public_metrics.following_count === 0;
+            unfollowerInfo.username = user.username;
         });
 
         await Promise.all(
-            usersLookup.data.map((user) =>
+            usersLookup.data?.map((user) =>
                 this.dao.addTwittoToCache({
-                    id: user.id_str,
-                    username: user.screen_name,
+                    id: user.id,
+                    username: user.username,
                 })
             )
         );
 
         // know who you're blocking or blocked you
-        await Promise.all(
+        // TODO: later maybe
+        /*await Promise.all(
             unfollowersInfo.map(async (unfollower) => {
                 // know if we're blocked / if we blocked them
                 let friendship;
                 try {
                     // in @types/twit 2.2.23 target_id must be a number, however it's safer to send a string TODO PR @types/twit
-                    friendship = await twit.get('friendships/show', {
+                    friendship = await twitterApi.get('friendships/show', {
                         target_id: unfollower.id,
                     } as object as Params);
                 } catch (err) {
@@ -107,7 +108,7 @@ export default class extends Task {
                     unfollower.followed_by = followed_by;
                 }
             })
-        );
+        );*/
 
         // get missing usernames from the cache
         await Promise.all(
@@ -171,19 +172,11 @@ export default class extends Task {
                 message
             );
 
-            const dmTwit = await userDao.getDmTwit();
+            const dmTwit = await userDao.getDmTwitterApi();
             logger.info('sending a DM to @%s', username);
 
-            await dmTwit
-                .post('direct_messages/events/new', {
-                    event: {
-                        type: 'message_create',
-                        message_create: {
-                            target: { recipient_id: userId },
-                            message_data: { text: message },
-                        },
-                    },
-                } as Params)
+            await dmTwit.v2
+                .sendDmToParticipant(userId, { text: message })
                 .catch((err) => this.manageTwitterErrors(err, username, userId));
 
             metrics.increment('notifyUser.dmsSent');
@@ -284,14 +277,13 @@ export default class extends Task {
     // throw an error if it's a twitter problem
     // return true if we can't continue to process the user
     private async manageTwitterErrors(err: unknown, username: string, userId: string): Promise<boolean> {
-        if (!err['twitterReply']) {
+        if (!(err instanceof ApiResponseError)) {
             throw err;
         }
-        const twitterReply: Twitter.Errors = err['twitterReply'];
 
         const userDao = this.dao.getUserDao(userId);
 
-        for (const { code, message } of twitterReply.errors) {
+        for (const { code, message } of [err]) {
             switch (code) {
                 case 17: // no user matches the specified terms (users/lookup)
                 case 50: // user not found (friendship/show)
@@ -327,7 +319,9 @@ export default class extends Task {
                 case 88: // rate limit
                     throw new Error('the user reached its rate-limit (notifyUser)');
                 default:
-                    throw new Error(`An unexpected twitter error occured: ${code} ${message}`);
+                    throw new Error(
+                        `An unexpected twitter error occured: ${code} ${message} ${err.data.title} ${err.data.detail}`
+                    );
             }
         }
         return false;

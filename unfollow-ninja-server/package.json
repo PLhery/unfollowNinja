@@ -53,7 +53,6 @@
         "@types/koa-session": "^5.10.4",
         "@types/node": "^18.11.9",
         "@types/oauth": "^0.9.1",
-        "@types/twit": "^2.2.31",
         "big-integer": "^1.6.48",
         "bull": "^4.1.0",
         "dotenv": "^16.0.3",
@@ -71,10 +70,9 @@
         "p-limit": "^3.1.0",
         "pg": "^8.8.0",
         "pg-hstore": "^2.3.4",
-        "sequelize": "^6.25.5",
+        "sequelize": "^6.30.0",
         "stripe": "^10.17.0",
-        "twit": "^2.2.11",
-        "twitter-api-v2": "^1.12.9",
+        "twitter-api-v2": "^1.14.2",
         "winston": "^3.8.2"
     },
     "//": [

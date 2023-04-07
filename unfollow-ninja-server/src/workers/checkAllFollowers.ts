@@ -1,7 +1,6 @@
 import type { Queue } from 'bull';
 import pLimit from 'p-limit';
 import * as Sentry from '@sentry/node';
-import * as Twit from 'twit';
 
 import Dao, { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
@@ -9,6 +8,7 @@ import metrics from '../utils/metrics';
 import { IUnfollowerInfo } from '../utils/types';
 import UserDao from '../dao/userDao';
 import { FollowEvent } from '../dao/userEventDao';
+import { ApiResponseError, UserV2TimelineResult } from 'twitter-api-v2';
 
 const WORKER_RATE_LIMIT = Number(process.env.WORKER_RATE_LIMIT) || 15;
 const VIP_WORKER_RATE_LIMIT = Number(process.env.VIP_WORKER_RATE_LIMIT) || 1;
@@ -115,12 +115,10 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
         return;
     } // don't check every minute if the user has more than 5000 followers : we can only get 5000 followers/minute
 
-    let twit = await userDao.getTwit();
-    let useDmTwit = false;
-    let twitResetTime = 0;
+    const twitterApi = await userDao.getTwitterApi();
 
     let requests = 0;
-    let cursor = '-1';
+    let cursor = null;
     let followers: string[] = [];
 
     // For big account (>150k), maybe we got the 150k first accounts previously, we'll continue the scrapping
@@ -134,34 +132,28 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
         let resetTime: number;
         while (cursor !== '0') {
             if (remainingRequests === 0) {
-                if (useDmTwit) {
-                    // this may happen for 150 000+ followers
-                    // We'll save what we scrapped and will continue in 15min (or sooner if we can)
-                    await userDao.setNextCheckTime(Math.max(resetTime, twitResetTime)); // main and DM app reset times
-                    await userDao.setTemporaryFollowerList(cursor, followers);
-                    return;
-                } else {
-                    // this may happen for 75 000+ followers
-                    useDmTwit = true;
-                    twitResetTime = resetTime;
-                    twit = await userDao.getDmTwit();
-                }
+                // this may happen for 100 000+ followers
+                // We'll save what we scrapped and will continue in 15min (or sooner if we can)
+                await userDao.setNextCheckTime(resetTime);
+                await userDao.setTemporaryFollowerList(cursor, followers);
+                return;
             }
-            const result = await twit.get('followers/ids', {
-                cursor,
-                stringify_ids: true,
-                user_id: userId,
-            });
-            if (!result.data && result.resp.statusCode === 503) {
+            const result = await twitterApi.v2.get<UserV2TimelineResult>(
+                'users/:id/followers',
+                { max_results: 1000, ...(cursor ? { pagination_token: cursor } : null) },
+                { fullResponse: true, params: { id: userId } }
+            );
+            // TODO manage errors
+            /*        if (!result.data.data && result.data.errors === 503) {
                 // noinspection ExceptionCaughtLocallyJS
                 throw new Error('[checkFollowers] Twitter services overloaded / unavailable (503)');
-            }
-            cursor = result.data['next_cursor_str'];
+            }*/
+            cursor = result.data.meta.next_token || '0';
             requests++;
 
-            remainingRequests = Number(result.resp.headers['x-rate-limit-remaining']);
-            resetTime = Number(result.resp.headers['x-rate-limit-reset']) * 1000;
-            followers.push(...result.data['ids']);
+            remainingRequests = result.rateLimit.remaining;
+            resetTime = result.rateLimit.reset * 1000;
+            followers.push(...result.data.data.map((user) => user.id));
         }
         if (scrappedFollowers) {
             await userDao.deleteTemporaryFollowerList();
@@ -179,7 +171,7 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
 
         await detectUnfollows(userId, followers, dao, queue);
     } catch (err) {
-        if (!err.twitterReply) {
+        if (!(err instanceof ApiResponseError)) {
             // network error
             if (err.code === 'EAI_AGAIN' || err.code === 'ETIMEDOUT') {
                 logger.warn('check skipped because of a network error.');
@@ -187,7 +179,7 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
             }
             throw err;
         } else {
-            await manageTwitterErrors(err.twitterReply, userDao);
+            await manageTwitterErrors(err, userDao);
         }
     }
 }
@@ -260,8 +252,8 @@ async function detectUnfollows(userId: string, followers: string[], dao: Dao, qu
 }
 
 // Manage or rethrow twitter errors
-async function manageTwitterErrors(twitterReply: Twit.Twitter.Errors, userDao: UserDao): Promise<void> {
-    for (const { code, message } of twitterReply.errors) {
+async function manageTwitterErrors(err: ApiResponseError, userDao: UserDao): Promise<void> {
+    for (const { code, message } of [err]) {
         switch (code) {
             // app-related
             case 32:
@@ -291,7 +283,9 @@ async function manageTwitterErrors(twitterReply: Twit.Twitter.Errors, userDao: U
             case 88: // rate limit
                 throw new Error(`[checkFollowers] the user reached its rate-limit.`);
             default:
-                throw new Error(`[checkFollowers] An unexpected twitter error occured: ${code} ${message}`);
+                throw new Error(
+                    `[checkFollowers] An unexpected twitter error occured: ${code} ${message} ${err.data.title} ${err.data.detail}`
+                );
         }
     }
 }
