@@ -10,6 +10,11 @@ Used by ~500 000 Twitter users (11/2021)
 ![Screenshot](https://raw.githubusercontent.com/PLhery/unfollowNinja/master/unfollow-monkey-ui/public/preview.png)
 
 ---
+
+**[Deprecated] This app was built mostly on top of Twitter API V1.1, which is now deprecated.**
+
+
+
 Feel free to reuse the UI on a personal server, but please don't reuse the name/logo on a public instance.
 
 Indeed, this software is under apache v2 license which means:
