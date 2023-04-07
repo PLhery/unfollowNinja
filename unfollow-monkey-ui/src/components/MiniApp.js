@@ -120,7 +120,7 @@ function MiniApp(props) {
 	  }
 
 	  // second: load it more accurately from the server
-	  fetch(API_URL + '/get-status', {credentials: 'include'})
+	 fetch(API_URL + '/get-status', {credentials: 'include'})
 		.then(response => response.ok ? response.json() : null)
 		.then(data => data || Promise.reject())
 		.then(data => setUserInfo(data))
@@ -204,6 +204,8 @@ function MiniApp(props) {
   const step2 = !!userInfo?.dmUsername; // logged in and have a DM account
 
   return (
+<>
+	  <Paragraph><i>As of April 2023, Twitter apps are not free anymore.<br/>To face this change, Unfollow Monkey will now cost {userInfo?.priceTags?.pro || '3$'}/month.</i></Paragraph>
       <Box gap='small' margin={{horizontal: 'small', vertical: 'medium'}} {...props}>
         {hasError ?
 		  <Paragraph textAlign='center'><Alert/><br/>Unable to reach the server, try again later...</Paragraph> :
@@ -235,7 +237,7 @@ function MiniApp(props) {
         />
         <Button
             icon={<UserExpert color={step2 ? 'white' : null}/>}
-            label={'Follow @UnfollowMonkey'}
+            label={'Follow @UnfollowMonkey (optional)'}
             primary={step2}
             style={step2 ? {color: 'white'} : {}}
             href='https://twitter.com/unfollowmonkey'
@@ -243,6 +245,7 @@ function MiniApp(props) {
             rel='noopener'
         />
       </Box>
+</>
   );
 }
 

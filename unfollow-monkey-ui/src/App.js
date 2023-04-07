@@ -46,7 +46,7 @@ function App() {
           <Box direction='row' wrap={true} margin={{vertical: 'large'}}>
             <Box basis='medium' flex={true} pad='medium'>
               <Heading level={1} color='dark'>Get notified when your Twitter account loses a follower</Heading>
-              <Paragraph size='large'>Unfollow Monkey sends you a direct message as soon as a twitter user unfollows you, blocks you, or leave Twitter, within seconds.</Paragraph>
+              <Paragraph size='large'>Unfollow Monkey sends you a direct message as soon as a twitter user unfollows you, blocks you, or leave Twitter.</Paragraph>
 			  <MiniApp/>
             </Box>
             <Box basis='medium' flex={true} pad='medium'>

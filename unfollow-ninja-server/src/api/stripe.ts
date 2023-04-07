@@ -151,7 +151,7 @@ export const generateProCheckoutUrl = async (
                 userId,
                 username,
             },
-            trial_period_days: 10,
+            // trial_period_days: 10,
         },
         metadata: {
             userId,
@@ -186,45 +186,45 @@ interface Price {
 const PRICES: Record<string, Price> = {
     USD: {
         pro: 3,
-        proId: 'price_1K2j6qEwrjMfujSGZiTUPDH9',
+        proId: 'price_1MuOQwEwrjMfujSG7Tp5hBI0',
         friends: '5.99',
         friendsId: 'price_1MEILOEwrjMfujSGgFOJapDB',
-        name: 'dollars',
+        name: '$',
     },
     EUR: {
         pro: '2.50',
-        proId: 'price_1K58S6EwrjMfujSGdHu2h1k8',
+        proId: 'price_1MuOS7EwrjMfujSGNasExS9d',
         friends: '4.99',
         friendsId: 'price_1MEIN4EwrjMfujSGl6qMokU5',
-        name: 'euros',
+        name: '€',
     },
     IDR: {
         pro: '10 000',
-        proId: 'price_1KBRhYEwrjMfujSGy1mftPTe',
+        proId: 'price_1MuORiEwrjMfujSGpAAq54ZV',
         friends: '29 000',
         friendsId: 'price_1MEIPkEwrjMfujSGHk9vU8JU',
-        name: 'rupiah',
+        name: 'Rp',
     },
     PHP: {
         pro: 120,
-        proId: 'price_1K58ddEwrjMfujSGGoga3KB7',
+        proId: 'price_1MuOSdEwrjMfujSGIi4EloLv',
         friends: 190,
         friendsId: 'price_1K58dsEwrjMfujSGyAXvzoMz',
-        name: 'pesos',
+        name: '₱',
     },
     BRL: {
         pro: 10,
-        proId: 'price_1KBRgzEwrjMfujSGy158RWWu',
+        proId: 'price_1MuOTJEwrjMfujSGBWjPj5s4',
         friends: 15,
         friendsId: 'price_1KBRdPEwrjMfujSGxfIMGqYq',
-        name: 'reais',
+        name: 'R$',
     },
     GBP: {
         pro: 2,
-        proId: 'price_1K58isEwrjMfujSGhUcEq77E',
+        proId: 'price_1MuOTfEwrjMfujSGkDiFlQ2v',
         friends: '3.50',
         friendsId: 'price_1K58jcEwrjMfujSG5qXVO8mB',
-        name: 'pounds',
+        name: '£',
     },
 };
 
@@ -241,7 +241,7 @@ const getPrice = (countryCode: string) => {
 export const getPriceTags = (countryCode: string) => {
     const price = getPrice(countryCode);
     return {
-        pro: price.pro + ' ' + price.name,
-        friends: price.friends + ' ' + price.name,
+        pro: price.pro + '' + price.name,
+        friends: price.friends + '' + price.name,
     };
 };

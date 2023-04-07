@@ -97,19 +97,19 @@ export function createUserRouter(dao: Dao, queue: Queue) {
 
                 ctx.status = 204;
             })
-            /*.get('/buy-pro', async (ctx) => {
-            const session = ctx.session as NinjaSession;
-            const country = geoip.lookup(ctx.ip)?.country;
-            const checkoutUrl = await generateProCheckoutUrl(country, 'pro', session.userId, session.username);
-            if (!checkoutUrl) {
-                // stripe disabled
-                ctx.throw(404);
-                return;
-            }
+            .get('/buy-pro', async (ctx) => {
+                const session = ctx.session as NinjaSession;
+                const country = geoip.lookup(ctx.ip)?.country;
+                const checkoutUrl = await generateProCheckoutUrl(country, 'pro', session.userId, session.username);
+                if (!checkoutUrl) {
+                    // stripe disabled
+                    ctx.throw(404);
+                    return;
+                }
 
-            ctx.redirect(checkoutUrl);
-        })*/
-            .get('/buy-friends', async (ctx) => {
+                ctx.redirect(checkoutUrl);
+            })
+            /*.get('/buy-friends', async (ctx) => {
                 const session = ctx.session as NinjaSession;
                 const country = geoip.lookup(ctx.ip)?.country;
                 const checkoutUrl = await generateProCheckoutUrl(country, 'friends', session.userId, session.username);
@@ -120,7 +120,7 @@ export function createUserRouter(dao: Dao, queue: Queue) {
                 }
 
                 ctx.redirect(checkoutUrl);
-            })
+            })*/
             .get('/manage-subscription', async (ctx) => {
                 const session = ctx.session as NinjaSession;
                 const manageSubscriptionUrl = await getManageSubscriptionUrl(dao, session.userId);
