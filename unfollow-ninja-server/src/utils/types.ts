@@ -34,6 +34,7 @@ export interface IUserParams {
     lang: Lang;
     token: string;
     tokenSecret: string;
+    isTemporarySecondAppToken?: boolean;
     dmId?: string;
     dmToken?: string;
     dmTokenSecret?: string;

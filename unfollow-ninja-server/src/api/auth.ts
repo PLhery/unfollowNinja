@@ -24,14 +24,15 @@ if (
     process.exit();
 }
 
-const _STEP1_CREDENTIALS = {
+/*const _STEP1_CREDENTIALS = {
     appKey: process.env.CONSUMER_KEY,
     appSecret: process.env.CONSUMER_SECRET,
-} as const;
+} as const;*/
 const _STEP2_CREDENTIALS = {
     appKey: process.env.DM_CONSUMER_KEY,
     appSecret: process.env.DM_CONSUMER_SECRET,
 } as const;
+const _STEP1_CREDENTIALS = _STEP2_CREDENTIALS;
 
 if (!process.env.API_URL || !process.env.WEB_URL) {
     logger.error('Some required environment variables are missing (API_URL/WEB_URL).');
@@ -92,12 +93,13 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
             ]);
 
             if (!params.token) {
-                // params = {} => the user doesn't exists, let's create it
+                // params = {} => the user doesn't exist, let's create it
                 params = {
                     added_at: Date.now(),
                     lang: DEFAULT_LANGUAGE,
                     token: loginResult.accessToken,
                     tokenSecret: loginResult.accessSecret,
+                    isTemporarySecondAppToken: true,
                 };
                 category = UserCategory.disabled;
                 await dao.addUser({
@@ -117,10 +119,11 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                 // not a new user
                 if (params.tokenSecret !== loginResult.accessSecret) {
                     // after a revoked token => refresh the token
-                    await dao.getUserDao(loginResult.userId).setUserParams({
+                    /*  await dao.getUserDao(loginResult.userId).setUserParams({
                         token: loginResult.accessToken,
                         tokenSecret: loginResult.accessSecret,
-                    });
+                        isTemporarySecondAppToken: true,
+                    });*/
                 }
             }
             const session = ctx.session as NinjaSession;

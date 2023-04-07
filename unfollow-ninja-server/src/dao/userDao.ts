@@ -134,6 +134,7 @@ export default class UserDao {
         const stringUserParams = (await this.redis.hgetall(`user:${this.userId}`)) as Record<keyof IUserParams, string>;
         return {
             ...stringUserParams,
+            isTemporarySecondAppToken: Boolean(stringUserParams.isTemporarySecondAppToken),
             added_at: parseInt(stringUserParams.added_at, 10),
             lang: stringUserParams.lang as Lang,
             pro: (stringUserParams.pro || '0') as '3' | '2' | '1' | '0',
