@@ -55,21 +55,23 @@ export default class extends Task {
             return;
         }
 
-        usersLookup.data?.forEach((user) => {
-            const unfollowerInfo = unfollowersMap.get(user.id);
-            unfollowerInfo.suspended = false;
-            unfollowerInfo.locked = user.public_metrics.following_count === 0;
-            unfollowerInfo.username = user.username;
-        });
+        if (usersLookup.data) {
+            usersLookup.data.forEach((user) => {
+                const unfollowerInfo = unfollowersMap.get(user.id);
+                unfollowerInfo.suspended = false;
+                unfollowerInfo.locked = user.public_metrics.following_count === 0;
+                unfollowerInfo.username = user.username;
+            });
 
-        await Promise.all(
-            usersLookup.data?.map((user) =>
-                this.dao.addTwittoToCache({
-                    id: user.id,
-                    username: user.username,
-                })
-            )
-        );
+            await Promise.all(
+                usersLookup.data.map((user) =>
+                    this.dao.addTwittoToCache({
+                        id: user.id,
+                        username: user.username,
+                    })
+                )
+            );
+        }
 
         // know who you're blocking or blocked you
         // TODO: later maybe
