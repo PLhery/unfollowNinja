@@ -40,7 +40,8 @@ export const handleWebhook = async (ctx: ParameterizedContext, dao: Dao, bullQue
                 await stripe.customers.update(customerId, {
                     metadata: subscription.metadata,
                 });
-            } else {
+            } else if (subscription.status !== 'incomplete') {
+                // not enough to disable pro
                 await disablePro(dao, userId, ctx.ip, subscription.id);
             }
             break;
