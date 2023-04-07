@@ -6,7 +6,7 @@ import cluster from 'cluster';
 import { cpus } from 'os';
 import Bull from 'bull';
 import Dao from './dao/dao';
-import { checkAllFollowers, checkAllVipFollowers } from './workers/checkAllFollowers';
+import { checkAllVipFollowers } from './workers/checkAllFollowers';
 // import { cacheAllFollowers } from './workers/cacheAllFollowers';
 import tasks from './tasks';
 import logger from './utils/logger';

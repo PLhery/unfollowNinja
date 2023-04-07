@@ -20,7 +20,7 @@ const VIP_WORKER_RATE_LIMIT = Number(process.env.VIP_WORKER_RATE_LIMIT) || 1;
  * @param dao
  * @param queue
  */
-export async function checkAllFollowers(workerId: number, nbWorkers: number, dao: Dao, queue: Queue) {
+/*export async function checkAllFollowers(workerId: number, nbWorkers: number, dao: Dao, queue: Queue) {
     const limit = pLimit(WORKER_RATE_LIMIT);
     const startedAt = Date.now();
 
@@ -40,9 +40,9 @@ export async function checkAllFollowers(workerId: number, nbWorkers: number, dao
     // check every minute minimum (Twitter's limit for the followers/ids API requests)
     setTimeout(
         () => checkAllFollowers(workerId, nbWorkers, dao, queue),
-        Math.max(0, 60 * 1000 + startedAt - Date.now())
+        Math.max(0, 15 * 60 * 1000 + startedAt - Date.now())
     );
-}
+}*/
 
 export async function checkAllVipFollowers(workerId: number, nbWorkers: number, dao: Dao, queue: Queue) {
     const limit = pLimit(VIP_WORKER_RATE_LIMIT);
@@ -64,7 +64,7 @@ export async function checkAllVipFollowers(workerId: number, nbWorkers: number, 
     // check every minute minimum (Twitter's limit for the followers/ids API requests)
     setTimeout(
         () => checkAllVipFollowers(workerId, nbWorkers, dao, queue),
-        Math.max(0, 60 * 1000 + startedAt - Date.now())
+        Math.max(0, 15 * 60 * 1000 + startedAt - Date.now())
     );
 }
 
@@ -128,16 +128,7 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
         cursor = scrappedFollowers.nextCursor;
     }
     try {
-        let remainingRequests: number;
-        let resetTime: number;
         while (cursor !== '0') {
-            if (remainingRequests === 0) {
-                // this may happen for 100 000+ followers
-                // We'll save what we scrapped and will continue in 15min (or sooner if we can)
-                await userDao.setNextCheckTime(resetTime);
-                await userDao.setTemporaryFollowerList(cursor, followers);
-                return;
-            }
             const result = await twitterApi.v2.get<UserV2TimelineResult>(
                 'users/:id/followers',
                 { max_results: 1000, ...(cursor ? { pagination_token: cursor } : null) },
@@ -151,22 +142,19 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
             cursor = result.data.meta.next_token || '0';
             requests++;
 
-            remainingRequests = result.rateLimit.remaining;
-            resetTime = result.rateLimit.reset * 1000;
             followers.push(...result.data.data.map((user) => user.id));
         }
         if (scrappedFollowers) {
             await userDao.deleteTemporaryFollowerList();
         }
         // Compute next time we can do the X requests
-        const remainingChecks = Math.floor(remainingRequests / requests);
-        // if we have 10 requests left and each check is 4 requests then we have 2 checks left
-        if (remainingChecks > 0) {
+
+        if (requests > 1) {
+            // if we needed more than 1 request
             await userDao.setNextCheckTime(
-                Math.floor(Date.now() + (resetTime - Date.now()) / (remainingChecks + 1) - 30000)
+                // next check time is in 14min * nb request
+                Math.floor(Date.now() + 14.4 * 60 * 1000 * requests)
             ); // minus 30s because we can trigger it a bit before the ideal time
-        } else {
-            await userDao.setNextCheckTime(resetTime);
         }
 
         await detectUnfollows(userId, followers, dao, queue);
@@ -179,6 +167,20 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
             }
             throw err;
         } else {
+            if (err.code === 429) {
+                // too many requests - rate limit
+                if (followers.length > 0) {
+                    await userDao.setTemporaryFollowerList(cursor, followers);
+                }
+                if (requests > 1) {
+                    // if we needed more than 1 request
+                    await userDao.setNextCheckTime(
+                        // next check time is in 14min * nb request
+                        Math.floor(Date.now() + 14.4 * 60 * 1000 * requests)
+                    ); // minus 30s because we can trigger it a bit before the ideal time
+                }
+                throw new Error('[checkFollowers] Error 429 Too many requests');
+            }
             await manageTwitterErrors(err, userDao);
         }
     }
@@ -266,6 +268,7 @@ async function manageTwitterErrors(err: ApiResponseError, userDao: UserDao): Pro
                 await userDao.setCategory(UserCategory.revoked);
                 break;
             case 326:
+            case 403: // since V2? but not clear message
                 logger.warn('@%s is suspended. Removing them from the list...', await userDao.getUsername());
                 await userDao.setCategory(UserCategory.suspended);
                 break;
