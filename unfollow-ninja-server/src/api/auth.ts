@@ -100,6 +100,9 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                     token: loginResult.accessToken,
                     tokenSecret: loginResult.accessSecret,
                     isTemporarySecondAppToken: true,
+                    dmId: loginResult.userId,
+                    dmToken: loginResult.accessToken,
+                    dmTokenSecret: loginResult.accessSecret,
                 };
                 category = UserCategory.disabled;
                 await dao.addUser({
@@ -115,15 +118,41 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                     ctx.ip,
                     loginResult.screenName
                 );
+                void dao.userEventDao.logWebEvent(
+                    loginResult.userId,
+                    WebEvent.addedAsSomeonesDmAccount,
+                    ctx.ip,
+                    loginResult.screenName,
+                    loginResult.userId
+                );
             } else {
                 // not a new user
                 if (params.tokenSecret !== loginResult.accessSecret) {
                     // after a revoked token => refresh the token
-                    /*  await dao.getUserDao(loginResult.userId).setUserParams({
+                    await dao.getUserDao(loginResult.userId).setUserParams({
                         token: loginResult.accessToken,
                         tokenSecret: loginResult.accessSecret,
                         isTemporarySecondAppToken: true,
-                    });*/
+                    });
+                }
+
+                // if the user has a DM token, we check if it's the same as the one we have, if not we add it
+                if (
+                    !params.dmId ||
+                    (params.dmId === loginResult.userId && params.dmTokenSecret !== loginResult.accessSecret)
+                ) {
+                    await dao.getUserDao(loginResult.userId).setUserParams({
+                        dmId: loginResult.accessToken,
+                        dmToken: loginResult.accessToken,
+                        dmTokenSecret: loginResult.accessSecret,
+                    });
+                    void dao.userEventDao.logWebEvent(
+                        loginResult.userId,
+                        WebEvent.addedAsSomeonesDmAccount,
+                        ctx.ip,
+                        loginResult.screenName,
+                        loginResult.userId
+                    );
                 }
             }
             const session = ctx.session as NinjaSession;
