@@ -38,15 +38,10 @@ export default class extends Task {
 
     private async checkAccountValid(userId: string) {
         const userDao = this.dao.getUserDao(userId);
-        const [twitterApi, twitterDMApi] = await Promise.all([
-            userDao.getTwitterApi(),
-            userDao.getDmTwitterApi(),
-            this.dao.getCachedUsername(userId),
-        ]);
+        const twitterApi = await userDao.getTwitterApi();
 
         await twitterApi.v2
             .following('1162323988493799424')
-            .then(() => twitterDMApi.v2.following('1162323988493799424'))
             .then(() => {
                 metrics.increment('reenableFollowers.reenabled');
                 return userDao.enable();
