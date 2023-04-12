@@ -55,6 +55,7 @@ export default class extends Task {
             return;
         }
 
+        // check who is (probably) locked ; get the latest username
         if (usersLookup.data) {
             usersLookup.data.forEach((user) => {
                 const unfollowerInfo = unfollowersMap.get(user.id);
@@ -62,55 +63,59 @@ export default class extends Task {
                 unfollowerInfo.locked = user.public_metrics.following_count === 0;
                 unfollowerInfo.username = user.username;
             });
-
-            await Promise.all(
-                usersLookup.data.map((user) =>
-                    this.dao.addTwittoToCache({
-                        id: user.id,
-                        username: user.username,
-                    })
-                )
-            );
         }
 
-        // know who you're blocking or blocked you
-        // TODO: later maybe
-        /*await Promise.all(
+        // know who blocked you, is deleted, is suspended etc
+        await Promise.all(
             unfollowersInfo.map(async (unfollower) => {
-                // know if we're blocked / if we blocked them
-                let friendship;
                 try {
-                    // in @types/twit 2.2.23 target_id must be a number, however it's safer to send a string TODO PR @types/twit
-                    friendship = await twitterApi.get('friendships/show', {
-                        target_id: unfollower.id,
-                    } as object as Params);
+                    const fResult = await twitterApi.v2.following(unfollower.id, { max_results: 1 });
+                    unfollower.suspended = false;
+                    if (fResult.errors) {
+                        if (fResult.errors[0].title === 'Authorization Error') {
+                            unfollower.blocked_by = true;
+                        } else if (fResult.errors[0].title === 'Not Found Error') {
+                            unfollower.deleted = true;
+                        } else if (fResult.errors[0].title === 'Forbidden') {
+                            unfollower.suspended = true;
+                        }
+                    }
                 } catch (err) {
                     await this.manageTwitterErrors(err, username, userId);
-                    const errorCode = err?.twitterReply?.errors?.[0]?.code;
-                    unfollower.friendship_error_code = errorCode;
-                    if (errorCode === 50) {
-                        unfollower.suspended = false;
-                        unfollower.deleted = true;
-                    }
-                    return;
-                }
-                if (friendship?.data?.relationship) {
-                    if (!unfollower.username) {
-                        const { id_str, screen_name } = friendship.data.relationship.target;
-                        unfollower.username = screen_name;
-                        await this.dao.addTwittoToCache({
-                            id: id_str,
-                            username: screen_name,
-                        });
-                    }
-                    const { blocking, blocked_by, following, followed_by } = friendship.data.relationship.source;
-                    unfollower.blocking = blocking;
-                    unfollower.blocked_by = blocked_by;
-                    unfollower.following = following;
-                    unfollower.followed_by = followed_by;
                 }
             })
-        );*/
+        );
+
+        // get the list of (3000 first) following to check whether there were some mutuals
+        await twitterApi.v2
+            .following(userId, { max_results: 1000, asPaginator: true })
+            .then((result) => (!result.done ? result.fetchNext(1000) : result))
+            .then((result) => (!result.done ? result.fetchNext(1000) : result))
+            .then((followings) => {
+                followings.users.forEach((following) => {
+                    const unfollowerInfo = unfollowersMap.get(following.id);
+                    if (unfollowerInfo) {
+                        unfollowerInfo.following = true;
+                    }
+                });
+            })
+            .catch((err) => this.manageTwitterErrors(err, username, userId));
+
+        // get the list of blocked people to see if the person was blocked
+        if ((await userDao.getDmId()) === userId) {
+            // only if the DM user has access to this list - is the user
+            await twitterApi.v2
+                .userBlockingUsers(userId, { max_results: 1000 })
+                .then((blockedUsers) => {
+                    blockedUsers.users.forEach((blockedUser) => {
+                        const unfollowerInfo = unfollowersMap.get(blockedUser.id);
+                        if (unfollowerInfo) {
+                            unfollowerInfo.blocking = true;
+                        }
+                    });
+                })
+                .catch((err) => this.manageTwitterErrors(err, username, userId));
+        }
 
         // get missing usernames from the cache
         await Promise.all(
@@ -128,7 +133,6 @@ export default class extends Task {
         let realUnfollowersInfo = unfollowersInfo.filter((unfollowerInfo) => {
             const followDuration = unfollowerInfo.unfollowTime - (unfollowerInfo.followDetectedTime || 0);
             unfollowerInfo.skippedBecauseGlitchy = !(
-                unfollowerInfo.followed_by !== true &&
                 !(unfollowerInfo.deleted && followDuration < 24 * 60 * 60 * 1000) &&
                 !(followDuration < 60 * 60 * 1000) &&
                 followDuration > Math.max(MINUTES_BETWEEN_CHECKS * 2 + 1, 7) * 60 * 1000 &&
