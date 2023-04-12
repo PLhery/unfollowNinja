@@ -32,12 +32,44 @@ export default class extends Task {
 
         const twitterApi = await userDao.getTwitterApi();
         const unfollowersInfo: IUnfollowerInfo[] = job.data.unfollowersInfo;
+        const unfollowersMap = new Map(unfollowersInfo.map((info) => [info.id, info]));
         let stopThere = false;
 
+        // get the list of (3000 first) following to check whether there were some mutuals, priorise them
+        await twitterApi.v2
+            .following(userId, { max_results: 1000, asPaginator: true })
+            .then((result) => (!result.done ? result.fetchNext(1000) : result))
+            .then((result) => (!result.done ? result.fetchNext(1000) : result))
+            .then((followings) => {
+                followings.users.forEach((following) => {
+                    const unfollowerInfo = unfollowersMap.get(following.id);
+                    if (unfollowerInfo) {
+                        unfollowerInfo.following = true;
+                        // move to top
+                        unfollowersInfo.unshift(
+                            // move to the top
+                            unfollowersInfo.splice(
+                                // the removed element that is unfollowerInfo
+                                unfollowersInfo.indexOf(unfollowerInfo),
+                                1
+                            )[0]
+                        );
+                    }
+                });
+            })
+            .catch((err) =>
+                this.manageTwitterErrors(err, username, userId).then((stop) =>
+                    stop ? (stopThere = true) : { data: [] }
+                )
+            );
+        if (stopThere) {
+            return;
+        }
+
+        // splice as we won't get every username and info
         const leftovers = unfollowersInfo.splice(MAX_UNFOLLOWERS);
 
         unfollowersInfo.forEach((u) => (u.suspended = true));
-        const unfollowersMap = new Map(unfollowersInfo.map((info) => [info.id, info]));
 
         // cache twittos and know who's suspended
         const usersLookup = (await twitterApi.v2
@@ -86,24 +118,10 @@ export default class extends Task {
             })
         );
 
-        // get the list of (3000 first) following to check whether there were some mutuals
-        await twitterApi.v2
-            .following(userId, { max_results: 1000, asPaginator: true })
-            .then((result) => (!result.done ? result.fetchNext(1000) : result))
-            .then((result) => (!result.done ? result.fetchNext(1000) : result))
-            .then((followings) => {
-                followings.users.forEach((following) => {
-                    const unfollowerInfo = unfollowersMap.get(following.id);
-                    if (unfollowerInfo) {
-                        unfollowerInfo.following = true;
-                    }
-                });
-            })
-            .catch((err) => this.manageTwitterErrors(err, username, userId));
-
+        const params = await userDao.getUserParams();
         // get the list of blocked people to see if the person was blocked
-        if ((await userDao.getDmId()) === userId) {
-            // only if the DM user has access to this list - is the user
+        if (params.dmId === userId || params.isTemporarySecondAppToken) {
+            // only if the app has access to that list
             await twitterApi.v2
                 .userBlockingUsers(userId, { max_results: 1000 })
                 .then((blockedUsers) => {

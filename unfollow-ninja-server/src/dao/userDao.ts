@@ -146,17 +146,23 @@ export default class UserDao {
     }
 
     public async getTwitterApi(): Promise<TwitterApi> {
-        return this.getDmTwitterApi();
-        /*const [token, tokenSecret] = await this.redis.hmget(`user:${this.userId}`, 'token', 'tokenSecret');
-        if (!token || !tokenSecret) {
+        const [token, tokenSecret, isTemporarySecondAppToken] = await this.redis.hmget(
+            `user:${this.userId}`,
+            'token',
+            'tokenSecret',
+            'isTemporarySecondAppToken'
+        );
+        if (!isTemporarySecondAppToken) {
+            return this.getDmTwitterApi();
+        } else if (!token || !tokenSecret) {
             throw new Error("Tried to create a new twitter client but the user didn't have any credentials stored");
         }
         return new TwitterApi({
             accessToken: token,
             accessSecret: tokenSecret,
-            appKey: process.env.CONSUMER_KEY,
-            appSecret: process.env.CONSUMER_SECRET,
-        });*/
+            appKey: process.env.DM_CONSUMER_KEY,
+            appSecret: process.env.DM_CONSUMER_SECRET,
+        });
     }
 
     public async getDmTwitterApi(): Promise<TwitterApi> {
