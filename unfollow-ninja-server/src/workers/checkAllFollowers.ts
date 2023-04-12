@@ -264,6 +264,7 @@ async function manageTwitterErrors(err: ApiResponseError, userDao: UserDao): Pro
                 throw new Error(`[checkFollowers] Oops, it looks like the application has been suspended :/...`);
             // user-related
             case 89:
+            case 401: // since V2? but not clear message
                 logger.warn('@%s revoked the token. Removing them from the list...', await userDao.getUsername());
                 await userDao.setCategory(UserCategory.revoked);
                 break;
