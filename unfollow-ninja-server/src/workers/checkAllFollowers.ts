@@ -135,7 +135,7 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
                 { fullResponse: true, params: { id: userId } }
             );
 
-            if (result.data.errors[0]) {
+            if (result.data?.errors?.[0]) {
                 // noinspection ExceptionCaughtLocallyJS
                 throw new Error(JSON.stringify(result.data.errors[0]));
             }
