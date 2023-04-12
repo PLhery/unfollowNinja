@@ -134,12 +134,17 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
                 { max_results: 1000, ...(cursor ? { pagination_token: cursor } : null) },
                 { fullResponse: true, params: { id: userId } }
             );
+
+            if (result.data.errors[0]) {
+                // noinspection ExceptionCaughtLocallyJS
+                throw new Error(JSON.stringify(result.data.errors[0]));
+            }
             // TODO manage errors
             /*        if (!result.data.data && result.data.errors === 503) {
                 // noinspection ExceptionCaughtLocallyJS
                 throw new Error('[checkFollowers] Twitter services overloaded / unavailable (503)');
             }*/
-            cursor = result.data.meta?.next_token || '0';
+            cursor = result.data.meta.next_token || '0';
             requests++;
 
             followers.push(...result.data.data.map((user) => user.id));
