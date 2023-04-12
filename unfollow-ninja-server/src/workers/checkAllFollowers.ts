@@ -139,7 +139,7 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
                 // noinspection ExceptionCaughtLocallyJS
                 throw new Error('[checkFollowers] Twitter services overloaded / unavailable (503)');
             }*/
-            cursor = result.data.meta.next_token || '0';
+            cursor = result.data.meta?.next_token || '0';
             requests++;
 
             followers.push(...result.data.data.map((user) => user.id));
