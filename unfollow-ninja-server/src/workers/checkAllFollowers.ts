@@ -139,15 +139,17 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
                 // noinspection ExceptionCaughtLocallyJS
                 throw new Error(JSON.stringify(result.data.errors[0]));
             }
-            // TODO manage errors
-            /*        if (!result.data.data && result.data.errors === 503) {
-                // noinspection ExceptionCaughtLocallyJS
-                throw new Error('[checkFollowers] Twitter services overloaded / unavailable (503)');
-            }*/
             cursor = result.data.meta.next_token || '0';
             requests++;
 
             followers.push(...result.data.data.map((user) => user.id));
+            for (const user of result.data.data) {
+                // refresh the username cache
+                await dao.addTwittoToCache({
+                    id: user.id,
+                    username: user.username,
+                });
+            }
         }
         if (scrappedFollowers) {
             await userDao.deleteTemporaryFollowerList();
