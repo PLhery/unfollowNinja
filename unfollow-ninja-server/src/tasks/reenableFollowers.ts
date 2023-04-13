@@ -39,6 +39,10 @@ export default class extends Task {
     private async checkAccountValid(userId: string) {
         const userDao = this.dao.getUserDao(userId);
         const twitterApi = await userDao.getTwitterApi();
+        if (!(await userDao.isPro())) {
+            // check only pro users
+            return;
+        }
 
         await twitterApi.v2
             .following('1162323988493799424')
