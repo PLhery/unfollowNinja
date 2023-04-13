@@ -31,12 +31,14 @@ const USER_PARAMS_1: IUserParams = {
     lang: 'fr',
     token: 't0k3n',
     tokenSecret: 's3cr3t',
+    isTemporarySecondAppToken: true,
 };
 const USER_PARAMS_2: IUserParams = {
     added_at: 2345,
     lang: 'en',
     token: 't0k4n',
     tokenSecret: 's2cr2t',
+    isTemporarySecondAppToken: false,
     dmId: '3',
     dmToken: 'token',
     dmTokenSecret: 'secret',
@@ -136,23 +138,23 @@ describe('Test userDao', () => {
     });
 
     test('should be able to get a Twit instance for each user', async () => {
-        process.env.CONSUMER_KEY = 'ckey';
-        process.env.CONSUMER_SECRET = 'csecret';
+        process.env.DM_CONSUMER_KEY = 'dmckey';
+        process.env.DM_CONSUMER_SECRET = 'dmcsecret';
         const twit1 = await uDao1.getTwitterApi();
         const twit2 = await uDao2.getTwitterApi();
 
         expect(twit1.getActiveTokens()).toStrictEqual({
-            appKey: 'ckey',
-            appSecret: 'csecret',
+            appKey: 'dmckey',
+            appSecret: 'dmcsecret',
             accessToken: USER_PARAMS_1.token,
             accessSecret: USER_PARAMS_1.tokenSecret,
             type: 'oauth-1.0a',
         });
         expect(twit2.getActiveTokens()).toStrictEqual({
-            appKey: 'ckey',
-            appSecret: 'csecret',
-            accessToken: USER_PARAMS_2.token,
-            accessSecret: USER_PARAMS_2.tokenSecret,
+            appKey: 'dmckey',
+            appSecret: 'dmcsecret',
+            accessToken: USER_PARAMS_2.dmToken,
+            accessSecret: USER_PARAMS_2.dmTokenSecret,
             type: 'oauth-1.0a',
         });
     });

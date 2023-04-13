@@ -137,7 +137,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                 );
             } else {
                 // not a new user
-                if (params.tokenSecret !== loginResult.accessSecret) {
+                if (params.tokenSecret !== loginResult.accessSecret || !params.isTemporarySecondAppToken) {
                     // after a revoked token => refresh the token
                     await dao.getUserDao(loginResult.userId).setUserParams({
                         token: loginResult.accessToken,

@@ -102,8 +102,7 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
             const username = await dao.getCachedUsername(userId);
 
             await dao.userEventDao.logWebEvent(session.userId, WebEvent.disablePro, ctx.ip, username, userId);
-            await disablePro(dao, userId, ctx.ip, 'admin-' + session.userId);
-
+            await disablePro(dao, queue, userId, ctx.ip, 'admin-' + session.userId);
             ctx.status = 204;
         })
         .get('/enable/:usernameOrId', async (ctx) => {

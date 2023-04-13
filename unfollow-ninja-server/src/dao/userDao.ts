@@ -134,7 +134,7 @@ export default class UserDao {
         const stringUserParams = (await this.redis.hgetall(`user:${this.userId}`)) as Record<keyof IUserParams, string>;
         return {
             ...stringUserParams,
-            isTemporarySecondAppToken: Boolean(stringUserParams.isTemporarySecondAppToken),
+            isTemporarySecondAppToken: stringUserParams.isTemporarySecondAppToken === 'true',
             added_at: parseInt(stringUserParams.added_at, 10),
             lang: stringUserParams.lang as Lang,
             pro: (stringUserParams.pro || '0') as '3' | '2' | '1' | '0',
@@ -152,7 +152,7 @@ export default class UserDao {
             'tokenSecret',
             'isTemporarySecondAppToken'
         );
-        if (!isTemporarySecondAppToken) {
+        if (isTemporarySecondAppToken !== 'true') {
             return this.getDmTwitterApi();
         } else if (!token || !tokenSecret) {
             throw new Error("Tried to create a new twitter client but the user didn't have any credentials stored");

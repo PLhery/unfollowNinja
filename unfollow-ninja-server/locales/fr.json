@@ -9,7 +9,8 @@
     "This account followed you for {{duration}} ({{{time}}}).": "Ce compte vous a suivi pendant {{duration}} ({{{time}}}).",
     "This account followed you before you signed up to @{{twitterAccount}}!": "Ce compte vous suivait avant votre inscription à @{{twitterAccount}} !",
     "and {{nbLeftovers}} more.": "et {{nbLeftovers}} autres twittos.",
-    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Tout est prêt, bienvenue sur @{{twitterAccount}} {{emoji}} !\nVous allez bientot tout savoir sur vos unfollowers ici !",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Tout est prêt, bienvenue sur @{{twitterAccount}} {{emoji}} !\nAvec un abonnement pro, vous allez bientot tout savoir sur vos unfollowers ici !",
     "{{username}}'s account has been locked {{emoji}}.": "Le compte de {{username}} a été verrouillé {{emoji}}.",
-    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "Félicitations, vous pouvez maintenant profiter de @{{twitterAccount}} pro {{emoji}} !"
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "Félicitations, vous pouvez maintenant profiter de @{{twitterAccount}} pro {{emoji}} !",
+    "Your @{{twitterAccount}} pro subscription has ended, thank you for being a part of our community, we hope we'll see you again {{emoji}}!": "Votre abonnement @{{twitterAccount}} pro est terminé, merci d'avoir fait partie de notre communauté, nous espérons vous revoir {{emoji}}!"
 }

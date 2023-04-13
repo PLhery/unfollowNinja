@@ -42,11 +42,11 @@ export const handleWebhook = async (ctx: ParameterizedContext, dao: Dao, bullQue
                 });
             } else if (subscription.status !== 'incomplete') {
                 // not enough to disable pro
-                await disablePro(dao, userId, ctx.ip, subscription.id);
+                await disablePro(dao, bullQueue, userId, ctx.ip, subscription.id);
             }
             break;
         case 'customer.subscription.deleted':
-            await disablePro(dao, userId, ctx.ip, subscription.id);
+            await disablePro(dao, bullQueue, userId, ctx.ip, subscription.id);
             break;
     }
     ctx.status = 204;
@@ -63,7 +63,7 @@ export const enablePro = async (
     const userDao = dao.getUserDao(userId);
     const username = await dao.getCachedUsername(userId);
 
-    const wasPro = userDao.isPro();
+    const wasPro = await userDao.isPro();
     if (plan === 'friends') {
         void dao.userEventDao.logWebEvent(userId, WebEvent.enableFriends, ip, username, subscriptionId);
         await userDao.setUserParams({ pro: '2' });
@@ -71,7 +71,7 @@ export const enablePro = async (
     } else {
         void dao.userEventDao.logWebEvent(userId, WebEvent.enablePro, ip, username, subscriptionId);
         await userDao.setUserParams({ pro: '1' });
-        await disableFriendCodes(dao, userId, ip); // in case the update is a downgrade
+        await disableFriendCodes(dao, queue, userId, ip); // in case the update is a downgrade
     }
     if (UserCategory.enabled === (await userDao.getCategory())) {
         await userDao.setCategory(UserCategory.vip);
@@ -87,19 +87,31 @@ export const enablePro = async (
     }
 };
 
-export const disablePro = async (dao: Dao, userId: string, ip: string, subscriptionId: string) => {
+export const disablePro = async (dao: Dao, queue: Queue, userId: string, ip: string, subscriptionId: string) => {
     const userDao = dao.getUserDao(userId);
     const username = await dao.getCachedUsername(userId);
 
     await dao.userEventDao.logWebEvent(userId, WebEvent.disablePro, ip, username, subscriptionId);
+
+    const wasPro = await userDao.isPro();
+
     await userDao.setUserParams({ pro: '0' });
-    await disableFriendCodes(dao, userId, ip);
+    await disableFriendCodes(dao, queue, userId, ip);
     if (UserCategory.vip === (await userDao.getCategory())) {
         await userDao.setCategory(UserCategory.enabled);
     }
+
+    if (wasPro) {
+        await queue.add('sendWelcomeMessage', {
+            id: Date.now(), // otherwise some seem stuck??
+            userId,
+            username,
+            lostPro: true,
+        });
+    }
 };
 
-const disableFriendCodes = async (dao: Dao, userId: string, ip: string) => {
+const disableFriendCodes = async (dao: Dao, queue: Queue, userId: string, ip: string) => {
     const userDao = dao.getUserDao(userId);
     for (const code of await userDao.getFriendCodes()) {
         if (code.friendId) {
@@ -119,9 +131,19 @@ const disableFriendCodes = async (dao: Dao, userId: string, ip: string) => {
                 friendUsername,
                 code.userId
             );
+            const wasPro = await dao.getUserDao(code.friendId).isPro();
             await dao.getUserDao(code.friendId).setUserParams({ pro: '0' });
             if (UserCategory.vip === (await dao.getUserDao(code.friendId).getCategory())) {
                 await dao.getUserDao(code.friendId).setCategory(UserCategory.enabled);
+            }
+
+            if (wasPro) {
+                await queue.add('sendWelcomeMessage', {
+                    id: Date.now(), // otherwise some seem stuck??
+                    userId: code.userId,
+                    username: friendUsername,
+                    lostPro: true,
+                });
             }
         }
         await userDao.deleteFriendCodes(code.code);

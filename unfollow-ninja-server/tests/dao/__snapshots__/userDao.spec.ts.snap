@@ -31,6 +31,7 @@ exports[`Test userDao should get a stable getAllUserData 1`] = `
     "dmId": "",
     "dmToken": "",
     "dmTokenSecret": "",
+    "isTemporarySecondAppToken": true,
     "lang": "fr",
     "pro": "0",
     "token": "t0k3n",
