@@ -104,7 +104,6 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                     dmToken: loginResult.accessToken,
                     dmTokenSecret: loginResult.accessSecret,
                 };
-                category = UserCategory.disabled;
                 await dao.addUser({
                     category,
                     id: loginResult.userId,
@@ -124,6 +123,17 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                     ctx.ip,
                     loginResult.screenName,
                     loginResult.userId
+                );
+
+                category = await dao.getUserDao(loginResult.userId).enable();
+                await queue.add(
+                    'sendWelcomeMessage',
+                    {
+                        id: Date.now(), // otherwise some seem stuck??
+                        userId: loginResult.userId,
+                        username: ctx.session.username,
+                    },
+                    { delay: 500 } // otherwise it looks like it weirdly may start before setUserParams finished :/
                 );
             } else {
                 // not a new user
@@ -152,6 +162,16 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                         ctx.ip,
                         loginResult.screenName,
                         loginResult.userId
+                    );
+                    category = await dao.getUserDao(loginResult.userId).enable();
+                    await queue.add(
+                        'sendWelcomeMessage',
+                        {
+                            id: Date.now(), // otherwise some seem stuck??
+                            userId: loginResult.userId,
+                            username: ctx.session.username,
+                        },
+                        { delay: 500 } // otherwise it looks like it weirdly may start before setUserParams finished :/
                     );
                 }
             }
