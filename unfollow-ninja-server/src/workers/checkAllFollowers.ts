@@ -186,7 +186,7 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
                         Math.floor(Date.now() + 14.4 * 60 * 1000 * requests)
                     ); // minus 30s because we can trigger it a bit before the ideal time
                 }
-                throw new Error('[checkFollowers] Error 429 Too many requests');
+                logger.debug('[checkFollowers] Error 429 Too many requests will continue later');
             }
             await manageTwitterErrors(err, userDao);
         }
