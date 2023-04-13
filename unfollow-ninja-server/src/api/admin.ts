@@ -2,8 +2,8 @@ import Router from 'koa-router';
 import type { Queue } from 'bull';
 
 import type Dao from '../dao/dao';
-import type { NinjaSession } from '../api';
 import { UserCategory } from '../dao/dao';
+import type { NinjaSession } from '../api';
 import { WebEvent } from '../dao/userEventDao';
 import { disablePro, enablePro } from './stripe';
 
@@ -104,6 +104,16 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
             await dao.userEventDao.logWebEvent(session.userId, WebEvent.disablePro, ctx.ip, username, userId);
             await disablePro(dao, userId, ctx.ip, 'admin-' + session.userId);
 
+            ctx.status = 204;
+        })
+        .get('/enable/:usernameOrId', async (ctx) => {
+            const userId = await getUserId(ctx.params.usernameOrId);
+            await dao.getUserDao(userId).enable();
+            ctx.status = 204;
+        })
+        .get('/disable/:usernameOrId', async (ctx) => {
+            const userId = await getUserId(ctx.params.usernameOrId);
+            await dao.getUserDao(userId).setCategory(UserCategory.disabled);
             ctx.status = 204;
         })
         .get('/update-params/:usernameOrId', async (ctx) => {
