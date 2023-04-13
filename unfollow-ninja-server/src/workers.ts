@@ -83,10 +83,10 @@ if (cluster.isMaster) {
             bullQueue
                 .process(taskName, WORKER_RATE_LIMIT, (job) =>
                     task.run(job).catch(async (err) => {
-                        const username = job.data.userId
-                            ? await dao.getCachedUsername(job.data.userId)
-                            : job.data.userId;
-                        logger.error(`An error happened with ${taskName} / @${username}: ${err.stack}`);
+                        const username = job.data.userId ? await dao.getCachedUsername(job.data.userId) : 'unknown';
+                        logger.error(
+                            `An error happened with ${taskName} / @${username}-${job.data.userId}: ${err.stack}`
+                        );
                         Sentry.withScope((scope) => {
                             scope.setTag('task-name', taskName);
                             scope.setUser({ username });
