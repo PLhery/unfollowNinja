@@ -142,8 +142,8 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
             cursor = result.data.meta.next_token || '0';
             requests++;
 
-            followers.push(...result.data.data.map((user) => user.id));
-            for (const user of result.data.data) {
+            followers.push(...(result.data.data || []).map((user) => user.id));
+            for (const user of result.data.data || []) {
                 // refresh the username cache
                 await dao.addTwittoToCache({
                     id: user.id,
