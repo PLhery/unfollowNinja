@@ -57,11 +57,15 @@ export default class extends Task {
                     }
                 });
             })
-            .catch((err) =>
-                this.manageTwitterErrors(err, username, userId).then((stop) =>
+            .catch(async (err) => {
+                if (err instanceof ApiResponseError && err.code === 429) {
+                    logger.debug('Too many requests, will ignore getFollowing');
+                    return;
+                }
+                await this.manageTwitterErrors(err, username, userId).then((stop) =>
                     stop ? (stopThere = true) : { data: [] }
-                )
-            );
+                );
+            });
         if (stopThere) {
             return;
         }
@@ -113,6 +117,10 @@ export default class extends Task {
                         }
                     }
                 } catch (err) {
+                    if (err instanceof ApiResponseError && err.code === 429) {
+                        logger.debug('Too many requests, will ignore suspended/blocked detection');
+                        return;
+                    }
                     await this.manageTwitterErrors(err, username, userId);
                 }
             })
