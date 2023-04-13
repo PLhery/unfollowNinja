@@ -1,7 +1,7 @@
 import type { UserCategory } from '../dao/dao';
 import { SUPPORTED_LANGUAGES_CONST } from './utils';
 
-export type Lang = typeof SUPPORTED_LANGUAGES_CONST[number];
+export type Lang = (typeof SUPPORTED_LANGUAGES_CONST)[number];
 
 export interface IFollowerInfo {
     id: string;
