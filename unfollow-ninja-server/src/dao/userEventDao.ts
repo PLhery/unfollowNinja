@@ -190,7 +190,7 @@ export default class UserEventDao {
 
     public async logWebEvent(userId: string, event: WebEvent, ip: string, username: string, extraInfo?: string) {
         await this.webEvent.create({ userId, event, ip, username, extraInfo }).catch((error) => {
-            Logger.error(error);
+            Logger.error(error, { userId, event, ip, username, extraInfo });
             Sentry.captureException(error);
         });
     }
@@ -211,7 +211,7 @@ export default class UserEventDao {
 
     public async logFollowEvent(userId: string, event: FollowEvent, followerId: string, nbFollowers: number) {
         await this.followEvent.create({ userId, event, followerId, nbFollowers }).catch((error) => {
-            Logger.error(error);
+            Logger.error(error, { userId, event, followerId, nbFollowers });
             Sentry.captureException(error);
         });
     }
@@ -244,26 +244,25 @@ export default class UserEventDao {
             skippedBecauseGlitchy,
         } = info;
 
-        await this.unfollowerEvent
-            .create({
-                userId,
-                followerId: info.id,
-                followTime: Math.floor(followTime / 1000),
-                followDetectedTime: Math.floor(followDetectedTime / 1000),
-                blocking,
-                blockedBy: blocked_by,
-                suspended,
-                locked,
-                deleted,
-                following,
-                followedBy: followed_by,
-                skippedBecauseGlitchy,
-                isSecondCheck,
-            })
-            .catch((error) => {
-                Logger.error(error);
-                Sentry.captureException(error);
-            });
+        const obj: InferAttributes<IUnfollowerEvent> = {
+            userId,
+            followerId: info.id,
+            followTime: Math.floor(followTime / 1000),
+            followDetectedTime: Math.floor(followDetectedTime / 1000),
+            blocking,
+            blockedBy: blocked_by,
+            suspended,
+            locked,
+            deleted,
+            following,
+            followedBy: followed_by,
+            skippedBecauseGlitchy,
+            isSecondCheck,
+        };
+        await this.unfollowerEvent.create(obj).catch((error) => {
+            Logger.error(error, obj);
+            Sentry.captureException(error);
+        });
     }
 
     public async getUnfollowerEvents(userId: string, limit = 500, offset = 0) {
@@ -277,7 +276,7 @@ export default class UserEventDao {
 
     public async logNotificationEvent(userId: string, event: NotificationEvent, fromId: string, message: string) {
         await this.notificationEvent.create({ userId, event, fromId, message }).catch((error) => {
-            Logger.error(error);
+            Logger.error(error, { userId, event, fromId, message });
             Sentry.captureException(error);
         });
     }
@@ -298,7 +297,7 @@ export default class UserEventDao {
 
     public async logCategoryEvent(userId: string, category: UserCategory, formerCategory: UserCategory) {
         await this.categoryEvent.create({ userId, category, formerCategory }).catch((error) => {
-            Logger.error(error);
+            Logger.error(error, { userId, category, formerCategory });
             Sentry.captureException(error);
         });
     }
