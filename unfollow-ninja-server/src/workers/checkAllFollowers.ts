@@ -277,6 +277,7 @@ async function manageTwitterErrors(err: ApiResponseError, userDao: UserDao): Pro
                 await userDao.setCategory(UserCategory.revoked);
                 break;
             case 326:
+            case 64:
             case 403: // since V2? but not clear message
                 logger.warn('@%s is suspended. Removing them from the list...', await userDao.getUsername());
                 await userDao.setCategory(UserCategory.suspended);

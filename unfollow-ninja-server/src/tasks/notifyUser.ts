@@ -329,11 +329,13 @@ export default class extends Task {
                     throw new Error('Oops, it looks like the application has been suspended :/...');
                 // user-related
                 case 89:
+                case 401: // since V2? but not clear message
                     logger.warn('@%s revoked the token. removing them from the list...', username);
                     await userDao.setCategory(UserCategory.revoked);
                     return true;
                 case 326:
                 case 64:
+                case 403: // since V2? but not clear message
                     logger.warn('@%s is suspended. removing them from the list...', username);
                     await userDao.setCategory(UserCategory.suspended);
                     return true;
