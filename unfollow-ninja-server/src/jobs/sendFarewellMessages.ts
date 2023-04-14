@@ -7,6 +7,8 @@ import { FollowEvent, NotificationEvent } from '../dao/userEventDao';
 
 // The code is a bit dirty sometimes, but a one-time script
 async function run() {
+    const startTime = Date.now(); // Used to make sure we don't go faster than 10 000 DMs/d = 6 DMs/min
+
     const dao = await new Dao().load();
     const userIds = await dao.getUserIdsByCategory(UserCategory.enabled);
 
@@ -209,6 +211,13 @@ async function run() {
             'left',
             userIds.length - sent - errored - skipped
         );
+
+        // if we're sending at a rate above 10k DMs/day, slow down
+        const timeToWaitToReachRateLimit = (sent * (24 * 60 * 60 * 1000)) / 10000 - (Date.now() - startTime);
+        if (timeToWaitToReachRateLimit > 0) {
+            console.log('slow down for ', Math.floor(timeToWaitToReachRateLimit / 1000), 'secs');
+            await new Promise((resolve) => setTimeout(resolve, timeToWaitToReachRateLimit));
+        }
     }
     await dao.disconnect();
 }
