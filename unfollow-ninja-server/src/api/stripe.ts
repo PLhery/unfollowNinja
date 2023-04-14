@@ -222,8 +222,8 @@ const PRICES: Record<string, Price> = {
         name: '€',
     },
     IDR: {
-        pro: '10 000',
-        proId: 'price_1MuORiEwrjMfujSGpAAq54ZV',
+        pro: '30 000',
+        proId: 'price_1MwsYpEwrjMfujSGn9ppjSwc',
         friends: '29 000',
         friendsId: 'price_1MEIPkEwrjMfujSGHk9vU8JU',
         name: 'Rp',
