@@ -188,7 +188,7 @@ async function run() {
             await dao.userEventDao.logNotificationEvent(
                 userId,
                 NotificationEvent.farewellRecapMessage,
-                await dao.redis.hget(`user:${this.userId}`, 'dmId'),
+                await userDao.getDmId(),
                 message
             );
             console.log('DM sent to', userId, await dao.getCachedUsername(userId));
