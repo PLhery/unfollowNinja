@@ -30,6 +30,55 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
                 notificationEvents,
                 categoryEvents,
                 webEvents,
+            ] = await Promise.all([
+                userDao.getUserParams(),
+                userDao.getUsername(),
+                userDao.getCategory(),
+                userDao.getFriendCodes(),
+                userDao.getRegisteredFriendCode(),
+                dao.userEventDao.getNotificationEvents(userId),
+                dao.userEventDao.getCategoryEvents(userId),
+                dao.userEventDao.getWebEvents(userId),
+            ]);
+
+            await dao.userEventDao.logWebEvent(ctx.session.userId, WebEvent.adminFetchUser, ctx.ip, username, userId);
+
+            ctx.body = JSON.stringify(
+                {
+                    id: userId,
+                    username,
+                    category,
+                    categoryStr: UserCategory[category],
+                    addedAt: params.added_at,
+                    lang: params.lang,
+                    dmId: params.dmId,
+                    dmUsername: await dao.getCachedUsername(params.dmId),
+                    pro: params.pro,
+                    customerId: params.customerId,
+                    friendCodes,
+                    registeredFriendCode,
+                    notificationEvents,
+                    categoryEvents,
+                    webEvents,
+                },
+                null,
+                2
+            );
+            ctx.response.type = 'json';
+        })
+        .get('/user-full/:usernameOrId', async (ctx) => {
+            const userId = await getUserId(ctx.params.usernameOrId);
+            const userDao = dao.getUserDao(userId);
+
+            const [
+                params,
+                username,
+                category,
+                friendCodes,
+                registeredFriendCode,
+                notificationEvents,
+                categoryEvents,
+                webEvents,
                 unfollowerEvents,
                 followEvents,
                 followers,
