@@ -3,7 +3,7 @@ import 'dotenv/config';
 import Dao, { UserCategory } from '../dao/dao';
 import logger from '../utils/logger';
 import moment from 'moment-timezone';
-import { FollowEvent } from '../dao/userEventDao';
+import { FollowEvent, NotificationEvent } from '../dao/userEventDao';
 
 // The code is a bit dirty sometimes, but a one-time script
 async function run() {
@@ -185,6 +185,12 @@ async function run() {
             console.log(message);
             const twitterApi = await userDao.getDmTwitterApi();
             await twitterApi.v2.sendDmToParticipant(userId, { text: message });
+            await dao.userEventDao.logNotificationEvent(
+                userId,
+                NotificationEvent.farewellRecapMessage,
+                await dao.redis.hget(`user:${this.userId}`, 'dmId'),
+                message
+            );
             console.log('DM sent to', userId, await dao.getCachedUsername(userId));
             sent++;
             await dao.redis.set('recapSent:' + userId, '1');

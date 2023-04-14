@@ -65,6 +65,7 @@ interface IUnfollowerEvent extends Model<InferAttributes<IUnfollowerEvent>, Infe
 export enum NotificationEvent {
     welcomeMessage,
     unfollowersMessage,
+    farewellRecapMessage,
 }
 
 interface INotificationEvent
