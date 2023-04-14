@@ -79,7 +79,7 @@ export default class extends Task {
         const usersLookup = (await twitterApi.v2
             .users(
                 unfollowersInfo.map((u) => u.id),
-                { 'user.fields': ['public_metrics'] }
+                { 'user.fields': ['public_metrics', 'protected'] }
             )
             .catch((err) =>
                 this.manageTwitterErrors(err, username, userId).then((stop) =>
@@ -98,32 +98,35 @@ export default class extends Task {
                 unfollowerInfo.suspended = false;
                 unfollowerInfo.locked = user.public_metrics.following_count === 0;
                 unfollowerInfo.username = user.username;
+                unfollowerInfo.protected = user.protected;
             });
         }
 
         // know who blocked you, is deleted, is suspended etc
         await Promise.all(
-            unfollowersInfo.map(async (unfollower) => {
-                try {
-                    const fResult = await twitterApi.v2.following(unfollower.id, { max_results: 1 });
-                    unfollower.suspended = false;
-                    if (fResult.errors) {
-                        if (fResult.errors[0].title === 'Authorization Error') {
-                            unfollower.blocked_by = true;
-                        } else if (fResult.errors[0].title === 'Not Found Error') {
-                            unfollower.deleted = true;
-                        } else if (fResult.errors[0].title === 'Forbidden') {
-                            unfollower.suspended = true;
+            unfollowersInfo
+                .filter((unfollower) => !unfollower.protected) // otherwise we know we'll get Authorization Error
+                .map(async (unfollower) => {
+                    try {
+                        const fResult = await twitterApi.v2.following(unfollower.id, { max_results: 1 });
+                        unfollower.suspended = false;
+                        if (fResult.errors) {
+                            if (fResult.errors[0].title === 'Authorization Error') {
+                                unfollower.blocked_by = true;
+                            } else if (fResult.errors[0].title === 'Not Found Error') {
+                                unfollower.deleted = true;
+                            } else if (fResult.errors[0].title === 'Forbidden') {
+                                unfollower.suspended = true;
+                            }
                         }
+                    } catch (err) {
+                        if (err instanceof ApiResponseError && err.code === 429) {
+                            logger.debug('Too many requests, will ignore suspended/blocked detection');
+                            return;
+                        }
+                        await this.manageTwitterErrors(err, username, userId);
                     }
-                } catch (err) {
-                    if (err instanceof ApiResponseError && err.code === 429) {
-                        logger.debug('Too many requests, will ignore suspended/blocked detection');
-                        return;
-                    }
-                    await this.manageTwitterErrors(err, username, userId);
-                }
-            })
+                })
         );
 
         const params = await userDao.getUserParams();
