@@ -179,6 +179,11 @@ describe('Test userDao', () => {
         expect(await uDao2.getLang()).toBe('en');
     });
 
+    test('should be able to get the customerId', async () => {
+        expect(await uDao1.getCustomerId()).toBeNull();
+        expect(await uDao2.getCustomerId()).toBe('cus_xXx1fff000999fY');
+    });
+
     test('isPro', async () => {
         expect(await uDao1.isPro()).toBe(false);
         expect(await uDao2.isPro()).toBe(true);

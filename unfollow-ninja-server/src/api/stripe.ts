@@ -41,12 +41,18 @@ export const handleWebhook = async (ctx: ParameterizedContext, dao: Dao, bullQue
                     metadata: subscription.metadata,
                 });
             } else if (subscription.status !== 'incomplete') {
-                // not enough to disable pro
-                await disablePro(dao, bullQueue, userId, ctx.ip, subscription.id);
+                // incomplete is not enough to trigger a deactivation
+                if (subscription.customer === (await dao.getUserDao(userId).getCustomerId())) {
+                    // another subscription may exist
+                    await disablePro(dao, bullQueue, userId, ctx.ip, subscription.id);
+                }
             }
             break;
         case 'customer.subscription.deleted':
-            await disablePro(dao, bullQueue, userId, ctx.ip, subscription.id);
+            if (subscription.customer === (await dao.getUserDao(userId).getCustomerId())) {
+                // another subscription may exist
+                await disablePro(dao, bullQueue, userId, ctx.ip, subscription.id);
+            }
             break;
     }
     ctx.status = 204;

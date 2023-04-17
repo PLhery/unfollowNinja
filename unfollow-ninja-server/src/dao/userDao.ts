@@ -190,6 +190,10 @@ export default class UserDao {
         return this.redis.hget(`user:${this.userId}`, 'dmId');
     }
 
+    public async getCustomerId(): Promise<string | null> {
+        return (await this.redis.hget(`user:${this.userId}`, 'customerId')) || null;
+    }
+
     // list of follower IDs stored during last checkFollowers (in Twitter's order)
     // return null if there are no IDs
     public async getFollowers(): Promise<string[]> {
