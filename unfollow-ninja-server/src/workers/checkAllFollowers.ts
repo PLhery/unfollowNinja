@@ -142,14 +142,11 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
             cursor = result.data.meta.next_token || '0';
             requests++;
 
-            followers.push(...(result.data.data || []).map((user) => user.id));
+            if (result.data.data?.length) {
+                followers.push(...result.data.data.map((user) => user.id));
 
-            const limit = pLimit(10); // add twittos usernames to cache, 10 by 10
-            await Promise.all(
-                (result.data.data || []).map((user) =>
-                    limit(() => dao.addTwittoToCache({ id: user.id, username: user.username }))
-                )
-            );
+                await dao.addTwittosToCache(result.data.data.map((user) => ({ id: user.id, username: user.username })));
+            }
         }
         if (scrappedFollowers) {
             await userDao.deleteTemporaryFollowerList();

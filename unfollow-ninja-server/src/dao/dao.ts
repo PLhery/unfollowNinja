@@ -183,6 +183,18 @@ export default class Dao {
         await this.CachedUsername.upsert({ twitterId: id, username }, { returning: false });
     }
 
+    public async addTwittosToCache(twittosInfo: ITwittoInfo[]): Promise<void> {
+        await this.CachedUsername.bulkCreate(
+            twittosInfo
+                .filter((twittoInfo) => !(twittoInfo.username.length > 20 && twittoInfo.username.startsWith('erased_')))
+                .map((twittoInfo) => ({ twitterId: twittoInfo.id, username: twittoInfo.username })),
+            {
+                returning: false,
+                updateOnDuplicate: ['username', 'updatedAt'],
+            }
+        );
+    }
+
     public async getSession(uid: string): Promise<Session> {
         return JSON.parse((await this.redis.get(`session:${uid}`)) || '{}');
     }
