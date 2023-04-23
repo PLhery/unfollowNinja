@@ -191,7 +191,7 @@ export default class UserEventDao {
 
     public async logWebEvent(userId: string, event: WebEvent, ip: string, username: string, extraInfo?: string) {
         await this.webEvent.create({ userId, event, ip, username, extraInfo }).catch((error) => {
-            Logger.error(error, { userId, event, ip, username, extraInfo });
+            Logger.error(error.message + JSON.stringify({ userId, event, ip, username, extraInfo }));
             Sentry.captureException(error);
         });
     }
@@ -212,7 +212,7 @@ export default class UserEventDao {
 
     public async logFollowEvent(userId: string, event: FollowEvent, followerId: string, nbFollowers: number) {
         await this.followEvent.create({ userId, event, followerId, nbFollowers }).catch((error) => {
-            Logger.error(error, { userId, event, followerId, nbFollowers });
+            Logger.error(error.message + JSON.stringify({ userId, event, followerId, nbFollowers });
             Sentry.captureException(error);
         });
     }
@@ -261,7 +261,7 @@ export default class UserEventDao {
             isSecondCheck,
         };
         await this.unfollowerEvent.create(obj).catch((error) => {
-            Logger.error(error, obj);
+            Logger.error(error.message + JSON.stringify(obj));
             Sentry.captureException(error);
         });
     }
@@ -277,7 +277,7 @@ export default class UserEventDao {
 
     public async logNotificationEvent(userId: string, event: NotificationEvent, fromId: string, message: string) {
         await this.notificationEvent.create({ userId, event, fromId, message }).catch((error) => {
-            Logger.error(error, { userId, event, fromId, message });
+            Logger.error(error.message + JSON.stringify({ userId, event, fromId, message }));
             Sentry.captureException(error);
         });
     }
@@ -298,7 +298,7 @@ export default class UserEventDao {
 
     public async logCategoryEvent(userId: string, category: UserCategory, formerCategory: UserCategory) {
         await this.categoryEvent.create({ userId, category, formerCategory }).catch((error) => {
-            Logger.error(error, { userId, category, formerCategory });
+            Logger.error(error.message + JSON.stringify({ userId, category, formerCategory }));
             Sentry.captureException(error);
         });
     }
