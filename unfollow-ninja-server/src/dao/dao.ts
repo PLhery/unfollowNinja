@@ -66,14 +66,20 @@ export default class Dao {
         this.sequelizeLogs = sequelizeLogs;
         this.sequelizeFollowers = sequelizeFollowers;
 
-        this.CachedUsername = this.sequelize.define('CachedUsername', {
-            twitterId: {
-                type: DataTypes.STRING(30),
-                allowNull: false,
-                primaryKey: true,
+        this.CachedUsername = this.sequelize.define(
+            'CachedUsername',
+            {
+                twitterId: {
+                    type: DataTypes.STRING(30),
+                    allowNull: false,
+                    primaryKey: true,
+                },
+                username: { type: DataTypes.STRING(20), allowNull: false },
             },
-            username: { type: DataTypes.STRING(20), allowNull: false },
-        });
+            {
+                indexes: [{ fields: ['username'] }],
+            }
+        );
         this.FriendCode = this.sequelize.define(
             'FriendCode',
             {
