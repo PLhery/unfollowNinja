@@ -144,8 +144,24 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
 
             if (result.data.data?.length) {
                 followers.push(...result.data.data.map((user) => user.id));
-
-                await dao.addTwittosToCache(result.data.data.map((user) => ({ id: user.id, username: user.username })));
+                try {
+                    await dao.addTwittosToCache(
+                        result.data.data.map((user) => ({
+                            id: user.id,
+                            username: user.username,
+                        }))
+                    );
+                } catch (error) {
+                    const username: string = (await dao.getCachedUsername(userId).catch(() => userId)) || userId;
+                    logger.error(
+                        `An error happened with checkFollowers-addTwittosToCache / @${username}: ${error.stack}`
+                    );
+                    Sentry.withScope((scope) => {
+                        scope.setTag('task-name', 'add-twittos-to-cache');
+                        scope.setUser({ username });
+                        Sentry.captureException(error);
+                    });
+                }
             }
         }
         if (scrappedFollowers) {
