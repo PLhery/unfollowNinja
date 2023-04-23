@@ -6,6 +6,7 @@ import { UserCategory } from '../dao/dao';
 import type { NinjaSession } from '../api';
 import { WebEvent } from '../dao/userEventDao';
 import { disablePro, enablePro } from './stripe';
+import logger from '../utils/logger';
 
 export function createAdminRouter(dao: Dao, queue: Queue) {
     return new Router()
@@ -176,9 +177,16 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
             return usernameOrId;
         } else {
             // usernameOrId is a username, look for the ID
-            const client = await dao.getUserDao(process.env.ADMIN_USERID).getTwitterApi();
-            const result = await client.v1.user({ screen_name: usernameOrId });
-            return result.id_str;
+            try {
+                const client = await dao.getUserDao(process.env.ADMIN_USERID).getTwitterApi();
+                const result = await client.v1.user({ screen_name: usernameOrId });
+                return result.id_str;
+            } catch (e) {
+                logger.error(
+                    'Tried to fetch userId for ' + usernameOrId + ' but failed, falling back to the cache.\n' + e.error
+                );
+                return await dao.getCachedUserId(usernameOrId);
+            }
         }
     }
 }
