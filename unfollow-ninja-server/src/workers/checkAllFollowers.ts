@@ -136,6 +136,11 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
             );
 
             if (result.data?.errors?.[0]) {
+                if (result.data.errors[0].detail.startsWith('User has been suspended')) {
+                    logger.warn('@%s is suspended. Removing them from the list...', await userDao.getUsername());
+                    await userDao.setCategory(UserCategory.suspended);
+                    return;
+                }
                 // noinspection ExceptionCaughtLocallyJS
                 throw new Error(JSON.stringify(result.data.errors[0]));
             }
