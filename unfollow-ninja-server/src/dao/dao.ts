@@ -45,6 +45,12 @@ export default class Dao {
                 application_name: 'UnfollowMonkey - ' + (cluster.worker ? `worker ${cluster.worker.id}` : 'master'),
                 statement_timeout: 30000,
             },
+            retry: {
+                match: [/Deadlock/i], // happens sometimes with addTwittosToCache
+                max: 3, // Maximum rety 3 times
+                backoffBase: 1000, // Initial backoff duration in ms. Default: 100,
+                backoffExponent: 1.5, // Exponent to increase backoff each try. Default: 1.1
+            },
         }),
         sequelizeLogs = new Sequelize(process.env.POSTGRES_LOGS_URI, {
             logging: false,
