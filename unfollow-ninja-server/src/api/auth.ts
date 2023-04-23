@@ -152,7 +152,7 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                     (params.dmId === loginResult.userId && params.dmTokenSecret !== loginResult.accessSecret)
                 ) {
                     await dao.getUserDao(loginResult.userId).setUserParams({
-                        dmId: loginResult.accessToken,
+                        dmId: loginResult.userId,
                         dmToken: loginResult.accessToken,
                         dmTokenSecret: loginResult.accessSecret,
                     });
