@@ -212,7 +212,7 @@ export default class UserEventDao {
 
     public async logFollowEvent(userId: string, event: FollowEvent, followerId: string, nbFollowers: number) {
         await this.followEvent.create({ userId, event, followerId, nbFollowers }).catch((error) => {
-            Logger.error(error.message + JSON.stringify({ userId, event, followerId, nbFollowers });
+            Logger.error(error.message + JSON.stringify({ userId, event, followerId, nbFollowers }));
             Sentry.captureException(error);
         });
     }
