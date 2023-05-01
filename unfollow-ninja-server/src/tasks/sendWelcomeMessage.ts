@@ -6,6 +6,7 @@ import Task from './task';
 import { NotificationEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES } from '../utils/utils';
 import { ApiResponseError } from 'twitter-api-v2';
+import { sendRevokedEmailToUserId } from '../utils/emailSender';
 
 i18n.configure({
     locales: SUPPORTED_LANGUAGES,
@@ -76,6 +77,7 @@ export default class extends Task {
                 case 401: // since V2? but not clear message
                     logger.warn('@%s revoked the token. removing them from the list...', username);
                     await userDao.setCategory(UserCategory.revoked);
+                    await sendRevokedEmailToUserId(userId);
                     break;
                 case 326:
                 case 64:

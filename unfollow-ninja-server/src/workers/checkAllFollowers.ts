@@ -9,6 +9,7 @@ import { IUnfollowerInfo } from '../utils/types';
 import UserDao from '../dao/userDao';
 import { FollowEvent } from '../dao/userEventDao';
 import { ApiResponseError, UserV2TimelineResult } from 'twitter-api-v2';
+import { sendRevokedEmailToUserId } from '../utils/emailSender';
 
 const WORKER_RATE_LIMIT = Number(process.env.WORKER_RATE_LIMIT) || 15;
 const VIP_WORKER_RATE_LIMIT = Number(process.env.VIP_WORKER_RATE_LIMIT) || 1;
@@ -207,7 +208,7 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
                 logger.debug('[checkFollowers] Error 429 Too many requests will continue later');
                 return;
             }
-            await manageTwitterErrors(err, userDao);
+            await manageTwitterErrors(err, userDao, userId);
         }
     }
 }
@@ -280,7 +281,7 @@ async function detectUnfollows(userId: string, followers: string[], dao: Dao, qu
 }
 
 // Manage or rethrow twitter errors
-async function manageTwitterErrors(err: ApiResponseError, userDao: UserDao): Promise<void> {
+async function manageTwitterErrors(err: ApiResponseError, userDao: UserDao, userId: string): Promise<void> {
     for (const { code, message } of [err]) {
         switch (code) {
             // app-related
@@ -293,6 +294,7 @@ async function manageTwitterErrors(err: ApiResponseError, userDao: UserDao): Pro
             case 401: // since V2? but not clear message
                 logger.warn('@%s revoked the token. Removing them from the list...', await userDao.getUsername());
                 await userDao.setCategory(UserCategory.revoked);
+                await sendRevokedEmailToUserId(userId);
                 break;
             case 326:
             case 64:
