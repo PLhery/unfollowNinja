@@ -221,7 +221,7 @@ export default class UserEventDao {
         return (
             await this.followEvent.findAll({
                 where: { userId },
-                // order: [['id', 'desc']],
+                order: [['id', 'desc']],
                 limit,
                 offset,
             })
@@ -269,7 +269,7 @@ export default class UserEventDao {
     public async getUnfollowerEvents(userId: string, limit = 500, offset = 0) {
         return await this.unfollowerEvent.findAll({
             where: { userId },
-            // order: [['id', 'desc']],
+            order: [['id', 'desc']],
             limit,
             offset,
         });
