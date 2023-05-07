@@ -2,7 +2,7 @@
     "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} Usuários do Twitter deixaram de te seguir:",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} Deixou de seguir você {{emoji}}.",
     "{{username}} has been suspended {{emoji}}.": "{{username}} foi suspenso {{emoji}}.",
-    "{{username}} has left Twitter {{emoji}}.": "{{username}] deixou o Twitter {{emoji}}.",
+    "{{username}} has left Twitter {{emoji}}.": "{{username}} deixou o Twitter {{emoji}}.",
     "{{username}} blocked you {{emoji}}.": "{{username}} te bloqueou {{emoji}}.",
     "This account followed you for {{duration}} ({{{time}}}).": "Essa conta te seguiu por {{duration}} ({{{time}}}).",
     "This account followed you before you signed up to @{{twitterAccount}}!": "Essa conta te seguiu antes de você se inscrever em @{{twitterAccount}}!",
