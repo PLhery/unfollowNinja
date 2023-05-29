@@ -157,6 +157,7 @@ const disableFriendCodes = async (dao: Dao, queue: Queue, userId: string, ip: st
 };
 
 export const generateProCheckoutUrl = async (
+    dao: Dao,
     countryCode: string,
     plan: 'pro' | 'friends',
     userId: string,
@@ -165,6 +166,24 @@ export const generateProCheckoutUrl = async (
     if (!stripe) {
         return null;
     }
+    const customerId = await dao.getUserDao(userId).getCustomerId();
+
+    // If there's any passed-due subscription, show the customer portal instead
+    if (customerId) {
+        const subscriptions = await stripe.subscriptions.list({
+            customer: customerId,
+            status: 'past_due',
+        });
+        const passedDueSubscription = subscriptions.data.find((s) => s.metadata.userId === userId);
+        if (passedDueSubscription) {
+            const stripePortal = await stripe.billingPortal.sessions.create({
+                customer: customerId,
+                return_url: `${process.env.WEB_URL}`,
+            });
+            return stripePortal.url;
+        }
+    }
+
     const price = getPrice(countryCode);
     const stripeSession = await stripe.checkout.sessions.create({
         billing_address_collection: 'auto',
@@ -175,12 +194,12 @@ export const generateProCheckoutUrl = async (
             },
         ],
         mode: 'subscription',
+        customer: customerId, // may be null
         subscription_data: {
             metadata: {
                 userId,
                 username,
             },
-            // trial_period_days: 10,
         },
         metadata: {
             userId,

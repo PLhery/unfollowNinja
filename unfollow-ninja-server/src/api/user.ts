@@ -100,7 +100,7 @@ export function createUserRouter(dao: Dao, queue: Queue) {
             .get('/buy-pro', async (ctx) => {
                 const session = ctx.session as NinjaSession;
                 const country = geoip.lookup(ctx.ip)?.country;
-                const checkoutUrl = await generateProCheckoutUrl(country, 'pro', session.userId, session.username);
+                const checkoutUrl = await generateProCheckoutUrl(dao, country, 'pro', session.userId, session.username);
                 if (!checkoutUrl) {
                     // stripe disabled
                     ctx.throw(404);

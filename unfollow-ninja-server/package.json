@@ -52,6 +52,7 @@
         "@types/koa-router": "^7.4.4",
         "@types/koa-session": "^6.4.0",
         "@types/node": "^18.11.9",
+        "@types/nodemailer": "^6.4.7",
         "@types/oauth": "^0.9.1",
         "big-integer": "^1.6.48",
         "bull": "^4.1.0",
@@ -73,7 +74,7 @@
         "pg": "^8.8.0",
         "pg-hstore": "^2.3.4",
         "sequelize": "^6.30.0",
-        "stripe": "^12.1.0",
+        "stripe": "^12.7.0",
         "twitter-api-v2": "^1.14.2",
         "winston": "^3.8.2"
     },
