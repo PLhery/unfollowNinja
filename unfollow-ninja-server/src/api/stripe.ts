@@ -194,7 +194,7 @@ export const generateProCheckoutUrl = async (
             },
         ],
         mode: 'subscription',
-        customer: customerId, // may be null
+        customer: customerId || undefined,
         subscription_data: {
             metadata: {
                 userId,
