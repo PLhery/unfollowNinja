@@ -206,7 +206,8 @@ function MiniApp(props) {
   return (
 <>
 	  <Paragraph><i>As of April 2023, Twitter apps are not free anymore.<br/>To face this change, Unfollow Monkey will now cost {userInfo?.priceTags?.pro || '3$'}/month.</i></Paragraph>
-      <Box gap='small' margin={{horizontal: 'small', vertical: 'medium'}} {...props}>
+	<Paragraph textAlign='center'><Alert/> [11-Jun-23] <br/>Unfollow Monkey is having an <Link href='https://twitter.com/UnfollowMonkey/status/1667710731263901697'>incident</Link> with DMs sent</Paragraph>
+	<Box gap='small' margin={{horizontal: 'small', vertical: 'medium'}} {...props}>
         {hasError ?
 		  <Paragraph textAlign='center'><Alert/><br/>Unable to reach the server, try again later...</Paragraph> :
 		  <>
