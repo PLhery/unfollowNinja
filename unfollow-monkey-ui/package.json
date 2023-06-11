@@ -10,6 +10,7 @@
     "react-dom": "^18.2.0",
     "react-dom-confetti": "^0.2.0",
     "react-github-corner": "^2.5.0",
+    "react-onesignal": "^2.0.4",
     "react-scripts": "^5.0.0",
     "react-snap": "^1.23.0",
     "sass": "^1.49.8",
