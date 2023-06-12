@@ -18,7 +18,6 @@ import Styles from './MiniApp.module.scss';
 import Link from "./Link";
 import LanguageSelector from "./MiniApp/LanguageSelector";
 import ProCard from "./MiniApp/ProCard";
-import OneSignal from 'react-onesignal';
 
 export const API_URL = 'https://api.unfollow-monkey.com';
 
@@ -108,20 +107,6 @@ function MiniApp(props) {
   const [userInfo, setUserInfo] = useState(null);
   const [latestMessages, setLatestMessages] = useState(null);
   const [hasError, setHasError] = useState(false);
-
-
-
-
-	useEffect(() => {
-		if (userInfo?.username === 'plhery') {
-			OneSignal.init({appId: 'd5e8272c-8bd7-475c-a667-ed7f128f8751'}).then(() => {
-				OneSignal.setExternalUserId(userInfo.userId);
-				OneSignal.sendTag('username', userInfo.username);
-				OneSignal.sendTag('lang', userInfo.lang);
-				OneSignal.showSlidedownPrompt();
-			});
-		}
-	}, [userInfo]);
 
   // persist the userInfo in sessionStorage
   useEffect(() => { userInfo && sessionStorage.setItem('userInfo', JSON.stringify(userInfo)) }, [userInfo]);

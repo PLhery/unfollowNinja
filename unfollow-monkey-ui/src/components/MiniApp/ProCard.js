@@ -35,10 +35,12 @@ function ProCard(props) {
 		<Paragraph>
 			One last step to receive your notifications:<br/>
 			Become a <b className={Styles.pro}>pro</b> user - for {user.priceTags.pro}/month<br/>
+			<small>New subscriptions are disabled</small>
 		</Paragraph>
 		<Button
+			disabled={true}
 		  className={Styles.checkoutButton}
-		  href={`${API_URL}/user/buy-pro`}
+		  href={`#`}
 		  label={<>
 		  <Image className={Styles.googlePayIcon} src={googlePay} alt='Google pay'/>
 		  <Image height={26} src={applePay} alt='Apple pay'/>
