@@ -1,5 +1,5 @@
 import type { InferAttributes, InferCreationAttributes, Sequelize } from 'sequelize';
-import { DataTypes, Model } from 'sequelize';
+import { DataTypes, literal, Model, Op } from 'sequelize';
 import type { ModelStatic } from 'sequelize/types/model';
 import * as Sentry from '@sentry/node';
 
@@ -46,7 +46,8 @@ interface IFollowEvent extends Model<InferAttributes<IFollowEvent>, InferCreatio
     nbFollowers: number;
 }
 
-interface IUnfollowerEvent extends Model<InferAttributes<IUnfollowerEvent>, InferCreationAttributes<IUnfollowerEvent>> {
+export interface IUnfollowerEvent
+    extends Model<InferAttributes<IUnfollowerEvent>, InferCreationAttributes<IUnfollowerEvent>> {
     userId: string;
     followerId: string;
     followTime: number;
@@ -60,6 +61,7 @@ interface IUnfollowerEvent extends Model<InferAttributes<IUnfollowerEvent>, Infe
     followedBy: boolean;
     skippedBecauseGlitchy: boolean;
     isSecondCheck: boolean;
+    createdAt?: string;
 }
 
 export enum NotificationEvent {
@@ -269,6 +271,15 @@ export default class UserEventDao {
     public async getUnfollowerEvents(userId: string, limit = 500, offset = 0) {
         return await this.unfollowerEvent.findAll({
             where: { userId },
+            order: [['id', 'desc']],
+            limit,
+            offset,
+        });
+    }
+
+    public async getFilteredUnfollowerEvents(userId: string, limit = 500, offset = 0) {
+        return await this.unfollowerEvent.findAll({
+            where: { userId, [Op.or]: [{ deleted: false }, { isSecondCheck: true }] },
             order: [['id', 'desc']],
             limit,
             offset,

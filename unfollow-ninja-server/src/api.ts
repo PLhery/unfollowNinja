@@ -7,7 +7,6 @@ import Router from 'koa-router';
 import koaSession from 'koa-session';
 import koaBodyParser from 'koa-bodyparser';
 import koaCors from '@koa/cors';
-import Bull from 'bull';
 import geoip from 'geoip-country';
 
 import Dao, { UserCategory } from './dao/dao';
@@ -15,7 +14,7 @@ import logger, { setLoggerPrefix } from './utils/logger';
 import { createAuthRouter } from './api/auth';
 import { createAdminRouter } from './api/admin';
 import { createUserRouter } from './api/user';
-import { getPriceTags, handleWebhook } from './api/stripe';
+import { handleWebhook } from './api/stripe';
 
 function assertEnvVariable(name: string) {
     if (typeof process.env[name] === 'undefined') {
@@ -37,27 +36,17 @@ if (SENTRY_DSN) {
 assertEnvVariable('REDIS_URI');
 assertEnvVariable('POSTGRES_URI');
 const dao = new Dao();
-const bullQueue = new Bull('ninja', process.env.REDIS_BULL_URI, {
-    defaultJobOptions: {
-        attempts: 3,
-        backoff: 60000,
-        removeOnComplete: true,
-        removeOnFail: true,
-    },
-});
-bullQueue.on('error', (err) => {
-    logger.error('Bull error: ' + err.stack);
-    Sentry.captureException(err);
-});
 
-const authRouter = createAuthRouter(dao, bullQueue);
-const userRouter = createUserRouter(dao, bullQueue);
-const adminRouter = createAdminRouter(dao, bullQueue);
+const authRouter = createAuthRouter(dao);
+const userRouter = createUserRouter(dao);
+const adminRouter = createAdminRouter(dao);
 
 export interface NinjaSession {
     twitterTokenSecret?: Record<string, string>;
     userId?: string;
     username?: string;
+    profilePic?: string;
+    fullName?: string;
 }
 
 const router = new Router()
@@ -90,25 +79,19 @@ const router = new Router()
                 dao.getUserDao(session.userId).getCategory(),
             ]);
             const country = geoip.lookup(ctx.ip)?.country;
+
             ctx.body = {
                 userId: session.userId,
                 username: session.username,
-                dmUsername:
-                    params.dmId && [UserCategory.enabled, UserCategory.vip].includes(category)
-                        ? await dao.getCachedUsername(params.dmId)
-                        : null,
+                fullName: session.fullName,
                 category,
                 lang: params.lang,
                 country,
-                priceTags: getPriceTags(country),
-                isPro: Number(params.pro) > 0,
-                friendCodes:
-                    params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
-                hasSubscription: Boolean(params.customerId),
+                profilePic: session.profilePic,
             };
         }
     })
-    .post('/stripe-webhook', (ctx) => handleWebhook(ctx, dao, bullQueue));
+    .post('/stripe-webhook', (ctx) => handleWebhook(ctx, dao));
 
 // Create the server app with its router/log/session and error management
 const app = new Koa();

@@ -1,6 +1,5 @@
 import TwitterApi from 'twitter-api-v2';
 import Router from 'koa-router';
-import type { Queue } from 'bull';
 import geoip from 'geoip-country';
 
 import logger from '../utils/logger';
@@ -42,7 +41,7 @@ if (!process.env.API_URL || !process.env.WEB_URL) {
 
 const DEFAULT_LANGUAGE = (process.env.DEFAULT_LANGUAGE || 'en') as Lang;
 
-export function createAuthRouter(dao: Dao, queue: Queue) {
+export function createAuthRouter(dao: Dao) {
     return authRouter
         .get('/step-1', async (ctx) => {
             // Generate an authentication URL
@@ -126,15 +125,6 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                 );
 
                 category = await dao.getUserDao(loginResult.userId).enable();
-                await queue.add(
-                    'sendWelcomeMessage',
-                    {
-                        id: Date.now(), // otherwise some seem stuck??
-                        userId: loginResult.userId,
-                        username: ctx.session.username,
-                    },
-                    { delay: 500 } // otherwise it looks like it weirdly may start before setUserParams finished :/
-                );
             } else {
                 // not a new user
                 if (params.tokenSecret !== loginResult.accessSecret || !params.isTemporarySecondAppToken) {
@@ -164,20 +154,21 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                         loginResult.userId
                     );
                     category = await dao.getUserDao(loginResult.userId).enable();
-                    await queue.add(
-                        'sendWelcomeMessage',
-                        {
-                            id: Date.now(), // otherwise some seem stuck??
-                            userId: loginResult.userId,
-                            username: ctx.session.username,
-                        },
-                        { delay: 500 } // otherwise it looks like it weirdly may start before setUserParams finished :/
-                    );
                 }
             }
             const session = ctx.session as NinjaSession;
             session.userId = loginResult.userId;
             session.username = loginResult.screenName;
+
+            const twitterApi = new TwitterApi({
+                accessToken: loginResult.accessToken,
+                accessSecret: loginResult.accessSecret,
+                appKey: process.env.DM_CONSUMER_KEY,
+                appSecret: process.env.DM_CONSUMER_SECRET,
+            });
+            const result = await twitterApi.v2.me({ 'user.fields': ['profile_image_url'] });
+            session.profilePic = result.data.profile_image_url.replace('_normal', '_bigger');
+            session.fullName = result.data.name;
 
             void dao.userEventDao.logWebEvent(loginResult.userId, WebEvent.signIn, ctx.ip, loginResult.screenName);
             const country = geoip.lookup(ctx.ip)?.country;
@@ -185,18 +176,11 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
                 JSON.stringify({
                     userId: loginResult.userId,
                     username: loginResult.screenName,
-                    dmUsername:
-                        params.dmId && [UserCategory.enabled, UserCategory.vip].includes(category)
-                            ? await dao.getCachedUsername(params.dmId)
-                            : null,
+                    fullName: session.fullName,
                     category,
                     lang: params.lang,
                     country,
-                    priceTags: getPriceTags(country),
-                    isPro: Number(params.pro) > 0,
-                    friendCodes:
-                        params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
-                    hasSubscription: Boolean(params.customerId),
+                    profilePic: session.profilePic,
                 })
             );
 
@@ -204,117 +188,6 @@ export function createAuthRouter(dao: Dao, queue: Queue) {
             ctx.body = `You successfully logged in! closing this window...
       <script>
         window.opener && window.opener.postMessage({msg: 'step1', content: "${msgContent}"}, '${process.env.WEB_URL}');
-        close();
-      </script>`;
-        })
-        .get('/step-2', async (ctx) => {
-            // Generate an authentication URL
-            const forceLogin = Boolean(ctx.query.force_login);
-            const { url, oauth_token, oauth_token_secret } = await new TwitterApi(_STEP2_CREDENTIALS).generateAuthLink(
-                process.env.API_URL + '/auth/step-2-callback',
-                {
-                    forceLogin,
-                }
-            );
-
-            // store the relevant information in the session
-            const session = ctx.session as NinjaSession;
-            session.twitterTokenSecret = ctx.session.twitterTokenSecret || {};
-            session.twitterTokenSecret[oauth_token] = oauth_token_secret;
-
-            // redirect to the authentication URL
-            ctx.redirect(url);
-        })
-        .get('/step-2-callback', async (ctx) => {
-            // check query params and session data
-            const { oauth_token, oauth_verifier } = ctx.query;
-            if (typeof oauth_token !== 'string' || typeof oauth_verifier !== 'string') {
-                ctx.body = { status: 'Oops, it looks like you refused to log in..' };
-                ctx.status = 401;
-                return;
-            }
-
-            const session = ctx.session as NinjaSession;
-            const oauthTokenSecret = session.twitterTokenSecret?.[oauth_token];
-            const userId = session.userId;
-            if (typeof oauthTokenSecret !== 'string' || typeof userId !== 'string') {
-                ctx.body = {
-                    status: 'Oops, it looks like your session has expired.. Try again!',
-                };
-                ctx.status = 401;
-                return;
-            }
-
-            // fetch the token / secret / account infos (from the temporary one)
-            const loginResult = await new TwitterApi({
-                ..._STEP2_CREDENTIALS,
-                accessToken: oauth_token,
-                accessSecret: oauthTokenSecret,
-            }).login(oauth_verifier);
-
-            // Add info about the DM account to the user's params
-            await Promise.all([
-                dao.getUserDao(userId).setUserParams({
-                    dmId: loginResult.userId,
-                    dmToken: loginResult.accessToken,
-                    dmTokenSecret: loginResult.accessSecret,
-                }),
-                dao.addTwittoToCache({
-                    id: loginResult.userId,
-                    username: loginResult.screenName,
-                }),
-            ]);
-            const category = await dao.getUserDao(userId).enable();
-
-            void dao.userEventDao.logWebEvent(
-                userId,
-                WebEvent.addDmAccount,
-                ctx.ip,
-                loginResult.screenName,
-                loginResult.userId
-            );
-            if (userId !== loginResult.userId) {
-                void dao.userEventDao.logWebEvent(
-                    loginResult.userId,
-                    WebEvent.addedAsSomeonesDmAccount,
-                    ctx.ip,
-                    session.username,
-                    userId
-                );
-            }
-
-            await queue.add(
-                'sendWelcomeMessage',
-                {
-                    id: Date.now(), // otherwise some seem stuck??
-                    userId,
-                    username: ctx.session.username,
-                },
-                { delay: 500 }
-            ); // otherwise it looks like it weirdly may start before setUserParams finished :/
-
-            const params = await dao.getUserDao(session.userId).getUserParams();
-            const country = geoip.lookup(ctx.ip)?.country;
-            const msgContent = encodeURI(
-                JSON.stringify({
-                    userId: session.userId,
-                    username: session.username,
-                    dmUsername: loginResult.screenName,
-                    category,
-                    lang: params.lang,
-                    country,
-                    priceTags: getPriceTags(country),
-                    isPro: Number(params.pro) > 0,
-                    friendCodes:
-                        params.pro === '2' ? await dao.getUserDao(session.userId).getFriendCodesWithUsername() : null,
-                    hasSubscription: Boolean(params.customerId),
-                })
-            );
-
-            ctx.type = 'html';
-            ctx.body = `You successfully logged in! closing this window...
-      <script>
-        window.opener && window.opener.postMessage({msg: 'step2', content: "${msgContent}"}, '${process.env.WEB_URL}');
         close();
       </script>`;
         });

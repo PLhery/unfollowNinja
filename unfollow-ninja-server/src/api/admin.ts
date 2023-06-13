@@ -1,5 +1,4 @@
 import Router from 'koa-router';
-import type { Queue } from 'bull';
 
 import type Dao from '../dao/dao';
 import { UserCategory } from '../dao/dao';
@@ -8,7 +7,7 @@ import { WebEvent } from '../dao/userEventDao';
 import { disablePro, enablePro } from './stripe';
 import logger from '../utils/logger';
 
-export function createAdminRouter(dao: Dao, queue: Queue) {
+export function createAdminRouter(dao: Dao) {
     return new Router()
         .use(async (ctx, next) => {
             const session = ctx.session as NinjaSession;
@@ -134,7 +133,7 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
             const username = await dao.getCachedUsername(userId);
 
             await dao.userEventDao.logWebEvent(session.userId, WebEvent.enablePro, ctx.ip, username, userId);
-            await enablePro(dao, queue, userId, 'pro', ctx.ip, 'admin-' + session.userId);
+            await enablePro(dao, userId, 'pro', ctx.ip, 'admin-' + session.userId);
             ctx.status = 204;
         })
         .get('/set-friends/:usernameOrId', async (ctx) => {
@@ -143,7 +142,7 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
             const username = await dao.getCachedUsername(userId);
 
             await dao.userEventDao.logWebEvent(session.userId, WebEvent.enableFriends, ctx.ip, username, userId);
-            await enablePro(dao, queue, userId, 'friends', ctx.ip, 'admin-' + session.userId);
+            await enablePro(dao, userId, 'friends', ctx.ip, 'admin-' + session.userId);
             ctx.status = 204;
         })
         .get('/remove-pro/:usernameOrId', async (ctx) => {
@@ -152,7 +151,7 @@ export function createAdminRouter(dao: Dao, queue: Queue) {
             const username = await dao.getCachedUsername(userId);
 
             await dao.userEventDao.logWebEvent(session.userId, WebEvent.disablePro, ctx.ip, username, userId);
-            await disablePro(dao, queue, userId, ctx.ip, 'admin-' + session.userId);
+            await disablePro(dao, userId, ctx.ip, 'admin-' + session.userId);
             ctx.status = 204;
         })
         .get('/enable/:usernameOrId', async (ctx) => {

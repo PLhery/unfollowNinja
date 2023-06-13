@@ -1,15 +1,17 @@
 import Router from 'koa-router';
-import type { Queue } from 'bull';
 import geoip from 'geoip-country';
 
 import type Dao from '../dao/dao';
 import type { NinjaSession } from '../api';
 import { UserCategory } from '../dao/dao';
-import { WebEvent } from '../dao/userEventDao';
+import { IUnfollowerEvent, WebEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES_CONST } from '../utils/utils';
 import { generateProCheckoutUrl, getManageSubscriptionUrl } from './stripe';
+import i18n from 'i18n';
+import moment from 'moment-timezone';
+import { format } from 'winston';
 
-export function createUserRouter(dao: Dao, queue: Queue) {
+export function createUserRouter(dao: Dao) {
     return (
         new Router()
             .use(async (ctx, next) => {
@@ -48,12 +50,6 @@ export function createUserRouter(dao: Dao, queue: Queue) {
                 await dao.getUserDao(session.userId).setUserParams({ lang });
                 void dao.userEventDao.logWebEvent(session.userId, WebEvent.setLang, ctx.ip, session.username, lang);
 
-                await queue.add('sendWelcomeMessage', {
-                    id: Date.now(), // otherwise some seem stuck??
-                    userId: session.userId,
-                    username: session.username,
-                });
-
                 ctx.status = 204;
             })
             .put('/registerFriendCode', async (ctx) => {
@@ -87,13 +83,6 @@ export function createUserRouter(dao: Dao, queue: Queue) {
                 );
                 await dao.getUserDao(session.userId).setUserParams({ pro: '3' });
                 await dao.getUserDao(session.userId).setCategory(UserCategory.vip);
-
-                await queue.add('sendWelcomeMessage', {
-                    id: Date.now(), // otherwise some seem stuck??
-                    userId: session.userId,
-                    username: session.username,
-                    isPro: true,
-                });
 
                 ctx.status = 204;
             })
@@ -142,5 +131,61 @@ export function createUserRouter(dao: Dao, queue: Queue) {
                     message: event.message,
                 }));
             })
+            .get('/latest-unfollowers', async (ctx) => {
+                const session = ctx.session as NinjaSession;
+                const events = await dao.userEventDao.getFilteredUnfollowerEvents(session.userId, 250, 0);
+
+                const alreadySeen = new Set<string>();
+                const unfollowers = (
+                    await Promise.all(
+                        events
+                            .filter((event) => {
+                                const alreadyInThere = alreadySeen.has(event.followerId);
+                                alreadySeen.add(event.followerId);
+                                return !alreadyInThere;
+                            })
+                            .map(async (event) => ({
+                                followerId: event.followerId,
+                                username: await dao.getCachedUsername(event.followerId),
+                                followTime: event.followTime * 1000,
+                                unfollowTime: event.createdAt,
+                                reason: getReason(event),
+                                following: event.following,
+                                duration: moment(event.followTime * 1000).to(event.createdAt, true),
+                                profileImageUrl: null as null | string,
+                            }))
+                    )
+                ).slice(0, 100);
+
+                const twitterApi = await dao.getUserDao(session.userId).getTwitterApi();
+                const results = await twitterApi.v2.users(
+                    unfollowers.map((follower) => follower.followerId),
+                    { 'user.fields': 'profile_image_url' }
+                );
+                results.data.forEach((user) => {
+                    const unfollower = unfollowers.find((u) => u.followerId === user.id);
+                    if (unfollower) {
+                        unfollower.profileImageUrl = user.profile_image_url.replace('_normal', '_bigger');
+                    }
+                });
+                ctx.body = unfollowers;
+            })
     );
+}
+
+function getReason(event: IUnfollowerEvent) {
+    if (event.suspended) {
+        return (event.following ? '💔' : '') + '🙈 suspended';
+    } else if (event.deleted) {
+        return (event.following ? '💔' : '') + '🙈 has left Twitter';
+    } else if (event.blockedBy) {
+        return (event.following ? '💔' : '') + '⛔ blocked you';
+    } else if (event.blocking) {
+        return (event.following ? '💔' : '') + '💩💩💩 You blocked them';
+    } else if (event.locked) {
+        return (event.following ? '💔' : '') + '🔒 account locked';
+    } else if (event.following) {
+        return '💔 unfollowed you';
+    }
+    return '👋 unfollowed you';
 }
