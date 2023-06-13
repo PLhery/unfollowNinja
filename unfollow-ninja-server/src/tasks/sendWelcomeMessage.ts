@@ -19,7 +19,7 @@ export default class extends Task {
     public async run(job: Job) {
         const { username, userId, isPro, lostPro } = job.data;
         const userDao = this.dao.getUserDao(userId);
-        const dmTwitterApi = await userDao.getDmTwitterApi();
+        // const dmTwitterApi = await userDao.getDmTwitterApi();
         i18n.setLocale(await userDao.getLang());
 
         let message;
