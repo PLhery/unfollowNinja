@@ -7,9 +7,7 @@ import { UserCategory } from '../dao/dao';
 import { IUnfollowerEvent, WebEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES_CONST } from '../utils/utils';
 import { generateProCheckoutUrl, getManageSubscriptionUrl } from './stripe';
-import i18n from 'i18n';
 import moment from 'moment-timezone';
-import { format } from 'winston';
 
 export function createUserRouter(dao: Dao) {
     return (
@@ -148,7 +146,7 @@ export function createUserRouter(dao: Dao) {
                                 followerId: event.followerId,
                                 username: await dao.getCachedUsername(event.followerId),
                                 followTime: event.followTime * 1000,
-                                unfollowTime: event.createdAt,
+                                unfollowTime: new Date(event.createdAt).getTime(),
                                 reason: getReason(event),
                                 following: event.following,
                                 duration: moment(event.followTime * 1000).to(event.createdAt, true),
