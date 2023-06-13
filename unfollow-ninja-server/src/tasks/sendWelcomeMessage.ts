@@ -51,9 +51,9 @@ export default class extends Task {
             message
         );
 
-        await dmTwitterApi.v2
+        /* await dmTwitterApi.v2
             .sendDmToParticipant(userId, { text: message })
-            .catch((err) => this.manageTwitterErrors(err, username, userId));
+            .catch((err) => this.manageTwitterErrors(err, username, userId)); */
     }
 
     private async manageTwitterErrors(err: unknown, username: string, userId: string): Promise<void> {

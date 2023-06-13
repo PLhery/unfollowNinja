@@ -21,7 +21,7 @@ const VIP_WORKER_RATE_LIMIT = Number(process.env.VIP_WORKER_RATE_LIMIT) || 1;
  * @param dao
  * @param queue
  */
-/*export async function checkAllFollowers(workerId: number, nbWorkers: number, dao: Dao, queue: Queue) {
+export async function checkAllFollowers(workerId: number, nbWorkers: number, dao: Dao, queue: Queue) {
     const limit = pLimit(WORKER_RATE_LIMIT);
     const startedAt = Date.now();
 
@@ -43,7 +43,7 @@ const VIP_WORKER_RATE_LIMIT = Number(process.env.VIP_WORKER_RATE_LIMIT) || 1;
         () => checkAllFollowers(workerId, nbWorkers, dao, queue),
         Math.max(0, 15 * 60 * 1000 + startedAt - Date.now())
     );
-}*/
+}
 
 export async function checkAllVipFollowers(workerId: number, nbWorkers: number, dao: Dao, queue: Queue) {
     const limit = pLimit(VIP_WORKER_RATE_LIMIT);

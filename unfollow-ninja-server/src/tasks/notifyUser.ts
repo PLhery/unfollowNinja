@@ -207,14 +207,14 @@ export default class extends Task {
                 await userDao.getDmId(),
                 message
             );
-
+            /*
             const dmTwit = await userDao.getDmTwitterApi();
             logger.info('sending a DM to @%s', username);
 
             await dmTwit.v2
                 .sendDmToParticipant(userId, { text: message })
                 .catch((err) => this.manageTwitterErrors(err, username, userId));
-
+*/
             metrics.increment('notifyUser.dmsSent');
             metrics.increment('notifyUser.nbUnfollowers', realUnfollowersInfo.length + leftovers.length);
         }
