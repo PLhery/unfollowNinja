@@ -6,7 +6,7 @@ import cluster from 'cluster';
 import { cpus } from 'os';
 import Bull from 'bull';
 import Dao from './dao/dao';
-import { checkAllVipFollowers } from './workers/checkAllFollowers';
+import { checkAllFollowers, checkAllVipFollowers } from './workers/checkAllFollowers';
 // import { cacheAllFollowers } from './workers/cacheAllFollowers';
 import tasks from './tasks';
 import logger from './utils/logger';
@@ -71,7 +71,7 @@ if (cluster.isMaster) {
     // workers 1,2,3 will be used to check new unfollowers, workers 4,5,6 to process new bull tasks
     if (cluster.worker.id <= CLUSTER_SIZE) {
         // start checking the worker's followers
-        // checkAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao, bullQueue).catch((err) => Sentry.captureException(err));
+        checkAllFollowers(cluster.worker.id, CLUSTER_SIZE, dao, bullQueue).catch((err) => Sentry.captureException(err));
         checkAllVipFollowers(cluster.worker.id, CLUSTER_SIZE, dao, bullQueue).catch((err) =>
             Sentry.captureException(err)
         );
