@@ -154,18 +154,19 @@ export function createUserRouter(dao: Dao) {
                             }))
                     )
                 ).slice(0, 100);
-
-                const twitterApi = await dao.getUserDao(session.userId).getTwitterApi();
-                const results = await twitterApi.v2.users(
-                    unfollowers.map((follower) => follower.followerId),
-                    { 'user.fields': 'profile_image_url' }
-                );
-                results.data.forEach((user) => {
-                    const unfollower = unfollowers.find((u) => u.followerId === user.id);
-                    if (unfollower) {
-                        unfollower.profileImageUrl = user.profile_image_url.replace('_normal', '_bigger');
-                    }
-                });
+                if (unfollowers.length) {
+                    const twitterApi = await dao.getUserDao(session.userId).getTwitterApi();
+                    const results = await twitterApi.v2.users(
+                        unfollowers.map((follower) => follower.followerId),
+                        { 'user.fields': 'profile_image_url' }
+                    );
+                    results.data.forEach((user) => {
+                        const unfollower = unfollowers.find((u) => u.followerId === user.id);
+                        if (unfollower) {
+                            unfollower.profileImageUrl = user.profile_image_url.replace('_normal', '_bigger');
+                        }
+                    });
+                }
                 ctx.body = unfollowers;
             })
     );
