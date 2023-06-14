@@ -286,6 +286,15 @@ export default class UserEventDao {
         });
     }
 
+    public async getFilteredMutualUnfollowerEvents(userId: string, limit = 500, offset = 0) {
+        return await this.unfollowerEvent.findAll({
+            where: { userId, following: true, [Op.or]: [{ deleted: false }, { isSecondCheck: true }] },
+            order: [['id', 'desc']],
+            limit,
+            offset,
+        });
+    }
+
     public async logNotificationEvent(userId: string, event: NotificationEvent, fromId: string, message: string) {
         await this.notificationEvent.create({ userId, event, fromId, message }).catch((error) => {
             Logger.error(error.message + JSON.stringify({ userId, event, fromId, message }));

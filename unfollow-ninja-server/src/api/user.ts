@@ -131,7 +131,12 @@ export function createUserRouter(dao: Dao) {
             })
             .get('/latest-unfollowers', async (ctx) => {
                 const session = ctx.session as NinjaSession;
-                const events = await dao.userEventDao.getFilteredUnfollowerEvents(session.userId, 250, 0);
+                let events: IUnfollowerEvent[];
+                if (ctx.request['query']?.['mutuals']) {
+                    events = await dao.userEventDao.getFilteredMutualUnfollowerEvents(session.userId, 250, 0);
+                } else {
+                    events = await dao.userEventDao.getFilteredUnfollowerEvents(session.userId, 250, 0);
+                }
 
                 const alreadySeen = new Set<string>();
                 const unfollowers = (
