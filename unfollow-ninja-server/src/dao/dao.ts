@@ -202,7 +202,7 @@ export default class Dao {
                 .map((twittoInfo) => ({ twitterId: twittoInfo.id, username: twittoInfo.username })),
             {
                 returning: false,
-                updateOnDuplicate: ['username'],
+                updateOnDuplicate: ['username', 'updatedAt'],
             }
         );
     }
