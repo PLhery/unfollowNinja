@@ -196,6 +196,9 @@ export default class Dao {
     }
 
     public async addTwittosToCache(twittosInfo: ITwittoInfo[]): Promise<void> {
+        if (twittosInfo.length === 0) {
+            return;
+        }
         await this.CachedUsername.bulkCreate(
             twittosInfo
                 .filter((twittoInfo) => !(twittoInfo.username.length > 20 && twittoInfo.username.startsWith('erased_')))

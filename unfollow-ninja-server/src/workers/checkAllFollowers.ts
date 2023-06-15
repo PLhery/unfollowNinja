@@ -122,6 +122,9 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
     let cursor = null;
     let followers: string[] = [];
 
+    const formerFollowers: string[] = await userDao.getFollowers();
+    const formerFollowersSet = new Set(formerFollowers);
+
     // For big account (>150k), maybe we got the 150k first accounts previously, we'll continue the scrapping
     const scrappedFollowers = await userDao.getTemporaryFollowerList();
     if (scrappedFollowers) {
@@ -152,10 +155,12 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
                 followers.push(...result.data.data.map((user) => user.id));
                 try {
                     await dao.addTwittosToCache(
-                        result.data.data.map((user) => ({
-                            id: user.id,
-                            username: user.username,
-                        }))
+                        result.data.data
+                            .filter((user) => !formerFollowersSet.has(user.id))
+                            .map((user) => ({
+                                id: user.id,
+                                username: user.username,
+                            }))
                     );
                 } catch (error) {
                     const username: string = (await dao.getCachedUsername(userId).catch(() => userId)) || userId;
@@ -183,7 +188,7 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
             ); // minus 30s because we can trigger it a bit before the ideal time
         }
 
-        await detectUnfollows(userId, followers, dao, queue);
+        await detectUnfollows(userId, followers, formerFollowers, dao, queue);
     } catch (err) {
         if (!(err instanceof ApiResponseError)) {
             // network error
@@ -213,11 +218,10 @@ async function checkFollowers(userId: string, dao: Dao, queue: Queue) {
     }
 }
 
-async function detectUnfollows(userId: string, followers: string[], dao: Dao, queue: Queue) {
+async function detectUnfollows(userId: string, followers: string[], formerFollowers: string[], dao: Dao, queue: Queue) {
     const userDao = dao.getUserDao(userId);
 
     let newUser = false;
-    let formerFollowers: string[] = await userDao.getFollowers();
     if (formerFollowers === null) {
         newUser = true;
         formerFollowers = [];
