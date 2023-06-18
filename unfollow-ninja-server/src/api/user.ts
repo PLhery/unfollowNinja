@@ -36,6 +36,10 @@ export function createUserRouter(dao: Dao) {
                 void dao.userEventDao.logWebEvent(session.userId, WebEvent.logout, ctx.ip, session.username);
                 session.userId = null;
                 session.username = null;
+                session.otherProfiles = null;
+                session.fullName = null;
+                session.username = null;
+                session.twitterTokenSecret = null;
                 ctx.status = 204;
             })
             .put('/lang', async (ctx) => {
