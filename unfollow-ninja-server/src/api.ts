@@ -110,7 +110,7 @@ app.use(async (ctx, next) => {
                     set: (key, sess) => dao.setSession(key, sess),
                     destroy: (key) => dao.deleteSession(key),
                 },
-                maxAge: 3600000, // 1h
+                maxAge: 1000 * 60 * 60 * 24 * 30 * 6, // 6 months
             },
             app
         )
