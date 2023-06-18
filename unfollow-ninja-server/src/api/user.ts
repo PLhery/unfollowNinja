@@ -169,7 +169,7 @@ export function createUserRouter(dao: Dao) {
                         unfollowers.map((follower) => follower.followerId),
                         { 'user.fields': 'profile_image_url' }
                     );
-                    results.data.forEach((user) => {
+                    results.data?.forEach((user) => {
                         const unfollower = unfollowers.find((u) => u.followerId === user.id);
                         if (unfollower) {
                             unfollower.profileImageUrl = user.profile_image_url.replace('_normal', '_bigger');
