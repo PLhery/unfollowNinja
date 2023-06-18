@@ -12,7 +12,7 @@ if (auth) {
     auth.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
 }
 
-const client = google.gmail({ version: 'v1', auth });
+const client = auth && google.gmail({ version: 'v1', auth });
 
 const stripe = process.env.STRIPE_SK
     ? new Stripe(process.env.STRIPE_SK, {
