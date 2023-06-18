@@ -189,7 +189,7 @@ export function createAuthRouter(dao: Dao) {
                     lang: params.lang,
                     country,
                     profilePic: session.profilePic,
-                    otherProfiles: Object.values(session.otherProfiles),
+                    otherProfiles: Object.values(session.otherProfiles || {}),
                 })
             );
 
@@ -234,7 +234,7 @@ export function createAuthRouter(dao: Dao) {
                 lang: params.lang,
                 country,
                 profilePic: session.profilePic,
-                otherProfiles: Object.values(session.otherProfiles),
+                otherProfiles: Object.values(session.otherProfiles || {}),
             };
         });
 }

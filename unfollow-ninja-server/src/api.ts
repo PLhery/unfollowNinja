@@ -89,7 +89,7 @@ const router = new Router()
                 lang: params.lang,
                 country,
                 profilePic: session.profilePic,
-                otherProfiles: Object.values(session.otherProfiles),
+                otherProfiles: Object.values(session.otherProfiles || {}),
             };
         }
     })
