@@ -47,6 +47,7 @@ export interface NinjaSession {
     username?: string;
     profilePic?: string;
     fullName?: string;
+    otherProfiles?: Record<string, Omit<NinjaSession, 'twitterTokenSecret' | 'otherProfiles'>>; // key: userId
 }
 
 const router = new Router()
@@ -56,7 +57,6 @@ const router = new Router()
     .get('/robots.txt', (ctx) => {
         ctx.body = 'User-agent: *\nDisallow: /';
     })
-    .use('/auth', authRouter.routes(), authRouter.allowedMethods())
     .use('/admin', adminRouter.routes(), adminRouter.allowedMethods())
     .all(
         '/(.*)',
@@ -66,6 +66,7 @@ const router = new Router()
             credentials: true,
         })
     )
+    .use('/auth', authRouter.routes(), authRouter.allowedMethods())
     .use('/user', userRouter.routes(), userRouter.allowedMethods())
     .get('/get-status', async (ctx) => {
         const session = ctx.session as NinjaSession;
@@ -88,6 +89,7 @@ const router = new Router()
                 lang: params.lang,
                 country,
                 profilePic: session.profilePic,
+                otherProfiles: Object.values(session.otherProfiles),
             };
         }
     })
@@ -110,7 +112,8 @@ app.use(async (ctx, next) => {
                     set: (key, sess) => dao.setSession(key, sess),
                     destroy: (key) => dao.deleteSession(key),
                 },
-                maxAge: 1000 * 60 * 60 * 24 * 30 * 6, // 6 months
+                maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+                renew: true,
             },
             app
         )

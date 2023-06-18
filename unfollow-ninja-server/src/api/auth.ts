@@ -4,11 +4,9 @@ import geoip from 'geoip-country';
 
 import logger from '../utils/logger';
 import type Dao from '../dao/dao';
-import { UserCategory } from '../dao/dao';
 import type { NinjaSession } from '../api';
 import { Lang } from '../utils/types';
 import { WebEvent } from '../dao/userEventDao';
-import { getPriceTags } from './stripe';
 
 const authRouter = new Router();
 
@@ -156,9 +154,6 @@ export function createAuthRouter(dao: Dao) {
                     category = await dao.getUserDao(loginResult.userId).enable();
                 }
             }
-            const session = ctx.session as NinjaSession;
-            session.userId = loginResult.userId;
-            session.username = loginResult.screenName;
 
             const twitterApi = new TwitterApi({
                 accessToken: loginResult.accessToken,
@@ -167,6 +162,19 @@ export function createAuthRouter(dao: Dao) {
                 appSecret: process.env.DM_CONSUMER_SECRET,
             });
             const result = await twitterApi.v2.me({ 'user.fields': ['profile_image_url'] });
+
+            const session = ctx.session as NinjaSession;
+            if (session.userId && session.userId !== loginResult.userId) {
+                session.otherProfiles = session.otherProfiles || {};
+                session.otherProfiles[session.userId] = {
+                    userId: session.userId,
+                    username: session.username,
+                    profilePic: session.profilePic,
+                    fullName: session.fullName,
+                };
+            }
+            session.userId = loginResult.userId;
+            session.username = loginResult.screenName;
             session.profilePic = result.data.profile_image_url.replace('_normal', '_bigger');
             session.fullName = result.data.name;
 
@@ -181,14 +189,52 @@ export function createAuthRouter(dao: Dao) {
                     lang: params.lang,
                     country,
                     profilePic: session.profilePic,
+                    otherProfiles: Object.values(session.otherProfiles),
                 })
             );
 
+            delete ctx.session.twitterTokenSecret;
             ctx.type = 'html';
             ctx.body = `You successfully logged in! closing this window...
       <script>
         window.opener && window.opener.postMessage({msg: 'step1', content: "${msgContent}"}, '${process.env.WEB_URL}');
         close();
       </script>`;
+        })
+        .post('/set-profile', async (ctx) => {
+            const session = ctx.session as NinjaSession;
+            const id = ctx.request['body']?.['userId'];
+            if (!id || typeof id !== 'string' || session.otherProfiles?.[id] === undefined) {
+                ctx.body = { status: 'Oops, something went wrong.. Try again!' };
+                ctx.status = 401;
+                return;
+            }
+            session.otherProfiles[session.userId] = {
+                userId: session.userId,
+                username: session.username,
+                profilePic: session.profilePic,
+                fullName: session.fullName,
+            };
+            session.userId = session.otherProfiles[id].userId;
+            session.username = session.otherProfiles[id].username;
+            session.profilePic = session.otherProfiles[id].profilePic;
+            session.fullName = session.otherProfiles[id].fullName;
+            delete session.otherProfiles[id];
+
+            const [params, category] = await Promise.all([
+                dao.getUserDao(session.userId).getUserParams(),
+                dao.getUserDao(session.userId).getCategory(),
+            ]);
+            const country = geoip.lookup(ctx.ip)?.country;
+            ctx.body = {
+                userId: session.userId,
+                username: session.username,
+                fullName: session.fullName,
+                category,
+                lang: params.lang,
+                country,
+                profilePic: session.profilePic,
+                otherProfiles: Object.values(session.otherProfiles),
+            };
         });
 }

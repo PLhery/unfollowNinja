@@ -216,7 +216,7 @@ export default class Dao {
 
     public async setSession(uid: string, params: Record<string, string>): Promise<void> {
         await this.redis.set(`session:${uid}`, JSON.stringify(params));
-        await this.redis.expire(`session:${uid}`, 3600); // 1h sessions
+        await this.redis.expire(`session:${uid}`, 60 * 60 * 24 * 31); // 30d sessions
     }
 
     public async deleteSession(uid: string): Promise<void> {
