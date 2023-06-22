@@ -138,6 +138,7 @@ export default class UserDao {
             added_at: parseInt(stringUserParams.added_at, 10),
             lang: stringUserParams.lang as Lang,
             pro: (stringUserParams.pro || '0') as '3' | '2' | '1' | '0',
+            dmLastEventId: parseInt(stringUserParams.dmLastEventId || '0', 10),
         };
     }
 
@@ -160,8 +161,8 @@ export default class UserDao {
         return new TwitterApi({
             accessToken: token,
             accessSecret: tokenSecret,
-            appKey: process.env.DM_CONSUMER_KEY,
-            appSecret: process.env.DM_CONSUMER_SECRET,
+            appKey: process.env.CONSUMER_KEY,
+            appSecret: process.env.CONSUMER_SECRET,
         });
     }
 
@@ -173,13 +174,35 @@ export default class UserDao {
         return new TwitterApi({
             accessToken: dmToken,
             accessSecret: dmTokenSecret,
-            appKey: process.env.DM_CONSUMER_KEY,
-            appSecret: process.env.DM_CONSUMER_SECRET,
+            appKey: process.env.CONSUMER_KEY,
+            appSecret: process.env.CONSUMER_SECRET,
         });
+    }
+
+    public async getNewDmTwitterApi(): Promise<TwitterApi> {
+        const [dmRefreshToken] = await this.redis.hmget(`user:${this.userId}`, 'dmRefreshToken');
+        if (!dmRefreshToken) {
+            throw new Error("Tried to create a new new DM client but the user didn't have any DM credentials stored");
+        }
+        const { client, refreshToken } = await new TwitterApi({
+            clientId: process.env.CLIENT_ID,
+            clientSecret: process.env.CLIENT_SECRET,
+        }).refreshOAuth2Token(dmRefreshToken);
+
+        if (!refreshToken) {
+            throw new Error('Tried to refresh DM client but an error occured');
+        }
+        await this.redis.hmset(`user:${this.userId}`, { dmRefreshToken: refreshToken });
+
+        return client;
     }
 
     public async getLang(): Promise<Lang> {
         return (await this.redis.hget(`user:${this.userId}`, 'lang')) as Lang;
+    }
+
+    public async getDmLastEventId(): Promise<number> {
+        return parseInt((await this.redis.hget(`user:${this.userId}`, 'dmLastEventId')) || '0', 10);
     }
 
     public async isPro(): Promise<boolean> {

@@ -42,6 +42,8 @@ export interface IUserParams {
     pro?: '3' | '2' | '1' | '0'; // friendcode-friends-pro-normal
     friendCodes?: string;
     customerId?: string;
+    dmRefreshToken?: string;
+    dmLastEventId?: number;
 }
 
 export interface IUserEgg extends ITwittoInfo, IUserParams {

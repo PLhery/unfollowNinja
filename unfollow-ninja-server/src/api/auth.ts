@@ -10,26 +10,20 @@ import { WebEvent } from '../dao/userEventDao';
 
 const authRouter = new Router();
 
-if (
-    !process.env.CONSUMER_KEY ||
-    !process.env.CONSUMER_SECRET ||
-    !process.env.DM_CONSUMER_KEY ||
-    !process.env.DM_CONSUMER_SECRET
-) {
+if (!process.env.CONSUMER_KEY || !process.env.CONSUMER_SECRET) {
     logger.error('Some required environment variables are missing ((DM_)CONSUMER_KEY/CONSUMER_SECRET).');
     logger.error('Make sure you added them in a .env file in you cwd or that you defined them.');
     process.exit();
 }
 
-/*const _STEP1_CREDENTIALS = {
+const _STEP1_CREDENTIALS = {
     appKey: process.env.CONSUMER_KEY,
     appSecret: process.env.CONSUMER_SECRET,
-} as const;*/
-const _STEP2_CREDENTIALS = {
-    appKey: process.env.DM_CONSUMER_KEY,
-    appSecret: process.env.DM_CONSUMER_SECRET,
 } as const;
-const _STEP1_CREDENTIALS = _STEP2_CREDENTIALS;
+const _DM_CREDENTIALS = {
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+} as const;
 
 if (!process.env.API_URL || !process.env.WEB_URL) {
     logger.error('Some required environment variables are missing (API_URL/WEB_URL).');
@@ -158,8 +152,8 @@ export function createAuthRouter(dao: Dao) {
             const twitterApi = new TwitterApi({
                 accessToken: loginResult.accessToken,
                 accessSecret: loginResult.accessSecret,
-                appKey: process.env.DM_CONSUMER_KEY,
-                appSecret: process.env.DM_CONSUMER_SECRET,
+                appKey: process.env.CONSUMER_KEY,
+                appSecret: process.env.CONSUMER_SECRET,
             });
             const result = await twitterApi.v2.me({ 'user.fields': ['profile_image_url'] });
 
@@ -200,6 +194,53 @@ export function createAuthRouter(dao: Dao) {
         window.opener && window.opener.postMessage({msg: 'step1', content: "${msgContent}"}, '${process.env.WEB_URL}');
         close();
       </script>`;
+        })
+        .get('/dm-auth', async (ctx) => {
+            // Generate an authentication URL
+            const { url, state, codeVerifier } = await new TwitterApi(_DM_CREDENTIALS).generateOAuth2AuthLink(
+                process.env.API_URL + '/auth/dm-auth-callback',
+                { scope: ['dm.write', 'tweet.read', 'users.read', 'offline.access'] }
+            );
+
+            const session = ctx.session as NinjaSession;
+            // store the relevant information in the session
+            session.twitterCodeVerifier = ctx.session.twitterCodeVerifier || {};
+            session.twitterCodeVerifier[state] = codeVerifier;
+
+            // redirect to the authentication URL
+            ctx.redirect(url);
+        })
+        .get('/dm-auth-callback', async (ctx) => {
+            const { state, code } = ctx.query;
+            if (typeof state !== 'string' || typeof code !== 'string') {
+                ctx.body = { status: 'Oops, it looks like you refused to log in..' };
+                ctx.status = 401;
+                return;
+            }
+            const codeVerifier = (ctx.session as NinjaSession).twitterCodeVerifier?.[state];
+            if (typeof codeVerifier !== 'string') {
+                ctx.body = {
+                    status: 'Oops, it looks like your session has expired.. Try again!',
+                };
+                ctx.status = 401;
+                return;
+            }
+
+            const { client, accessToken, refreshToken } = await new TwitterApi(_DM_CREDENTIALS).loginWithOAuth2({
+                code,
+                codeVerifier,
+                redirectUri: process.env.API_URL + '/auth/dm-auth-callback',
+            });
+
+            const { id } = (await client.v2.me()).data;
+            if (id !== ctx.session.userId) {
+                ctx.body = { status: 'Oops, it looks like you logged in with the wrong account..' };
+                ctx.status = 401;
+                return;
+            }
+            await dao.getUserDao(id).setUserParams({ dmRefreshToken: refreshToken });
+            ctx.status = 200;
+            ctx.body = 'You successfully logged in!';
         })
         .post('/set-profile', async (ctx) => {
             const session = ctx.session as NinjaSession;

@@ -42,6 +42,28 @@ export function createUserRouter(dao: Dao) {
                 session.twitterTokenSecret = null;
                 ctx.status = 204;
             })
+            .get('/enable-dms', async (ctx) => {
+                const session = ctx.session as NinjaSession;
+                const result = await dao.userEventDao.getFilteredUnfollowerEvents(session.userId, 1);
+                ctx.body = result;
+                await dao.getUserDao(session.userId).setUserParams({ dmLastEventId: result[0]?.id ?? -1 });
+                void dao.userEventDao.logWebEvent(
+                    session.userId,
+                    WebEvent.enableDms,
+                    ctx.ip,
+                    session.username,
+                    (result[0]?.id ?? -1).toString()
+                );
+
+                ctx.status = 200;
+            })
+            .get('/disable-dms', async (ctx) => {
+                const session = ctx.session as NinjaSession;
+                await dao.getUserDao(session.userId).setUserParams({ dmLastEventId: 0 });
+                void dao.userEventDao.logWebEvent(session.userId, WebEvent.enableDms, ctx.ip, session.username, '0');
+
+                ctx.status = 204;
+            })
             .put('/lang', async (ctx) => {
                 const session = ctx.session as NinjaSession;
                 const lang = ctx.request['body']?.['lang'];

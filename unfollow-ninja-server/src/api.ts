@@ -43,11 +43,12 @@ const adminRouter = createAdminRouter(dao);
 
 export interface NinjaSession {
     twitterTokenSecret?: Record<string, string>;
+    twitterCodeVerifier?: Record<string, string>;
     userId?: string;
     username?: string;
     profilePic?: string;
     fullName?: string;
-    otherProfiles?: Record<string, Omit<NinjaSession, 'twitterTokenSecret' | 'otherProfiles'>>; // key: userId
+    otherProfiles?: Record<string, Omit<NinjaSession, 'twitterTokenSecret' | 'otherProfiles' | 'twitterCodeVerifier'>>; // key: userId
 }
 
 const router = new Router()

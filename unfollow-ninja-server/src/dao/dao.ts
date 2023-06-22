@@ -15,6 +15,7 @@ export enum UserCategory {
     dmclosed,
     accountClosed,
     vip,
+    inactive,
 }
 
 interface ICachedUsername extends Model {
@@ -221,14 +222,5 @@ export default class Dao {
 
     public async deleteSession(uid: string): Promise<void> {
         await this.redis.del(`session:${uid}`);
-    }
-
-    public async getTokenSecret(token: string): Promise<string> {
-        return (await this.redis.get(`tokensecret:${token}`)) || null;
-    }
-
-    public async setTokenSecret(token: string, secret: string): Promise<void> {
-        await this.redis.set(`tokensecret:${token}`, secret);
-        await this.redis.expire(`tokensecret:${token}`, 1200); // 20min memory (lasts <10min on twitter side)
     }
 }

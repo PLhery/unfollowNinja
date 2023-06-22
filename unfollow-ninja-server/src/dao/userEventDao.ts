@@ -23,6 +23,7 @@ export enum WebEvent {
     registeredAsFriend,
     disablePro,
     disableFriendRegistration,
+    enableDms,
 }
 
 interface IWebEvent extends Model<InferAttributes<IWebEvent>, InferCreationAttributes<IWebEvent>> {
@@ -48,6 +49,7 @@ interface IFollowEvent extends Model<InferAttributes<IFollowEvent>, InferCreatio
 
 export interface IUnfollowerEvent
     extends Model<InferAttributes<IUnfollowerEvent>, InferCreationAttributes<IUnfollowerEvent>> {
+    id?: number;
     userId: string;
     followerId: string;
     followTime: number;
@@ -280,6 +282,15 @@ export default class UserEventDao {
     public async getFilteredUnfollowerEvents(userId: string, limit = 500, offset = 0) {
         return await this.unfollowerEvent.findAll({
             where: { userId, [Op.or]: [{ deleted: false }, { isSecondCheck: true }] },
+            order: [['id', 'desc']],
+            limit,
+            offset,
+        });
+    }
+
+    public async getFilteredUnfollowerEventsSinceId(userId: string, sinceId, limit = 500, offset = 0) {
+        return await this.unfollowerEvent.findAll({
+            where: { userId, id: { [Op.gt]: sinceId }, [Op.or]: [{ deleted: false }, { isSecondCheck: true }] },
             order: [['id', 'desc']],
             limit,
             offset,
