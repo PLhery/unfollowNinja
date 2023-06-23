@@ -8,6 +8,7 @@ import { IUnfollowerEvent, WebEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES_CONST } from '../utils/utils';
 import { generateProCheckoutUrl, getManageSubscriptionUrl } from './stripe';
 import moment from 'moment-timezone';
+import { captureException } from '@sentry/node';
 
 export function createUserRouter(dao: Dao) {
     return (
@@ -185,10 +186,16 @@ export function createUserRouter(dao: Dao) {
                 ).slice(0, 100);
                 if (unfollowers.length) {
                     const twitterApi = await dao.getUserDao(session.userId).getTwitterApi();
-                    const results = await twitterApi.v2.users(
-                        unfollowers.map((follower) => follower.followerId),
-                        { 'user.fields': 'profile_image_url' }
-                    );
+                    const results = await twitterApi.v2
+                        .users(
+                            unfollowers.map((follower) => follower.followerId),
+                            { 'user.fields': 'profile_image_url' }
+                        )
+                        .catch((err) => {
+                            console.error(err);
+                            captureException(err);
+                            return { data: [] };
+                        });
                     results.data?.forEach((user) => {
                         const unfollower = unfollowers.find((u) => u.followerId === user.id);
                         if (unfollower) {
