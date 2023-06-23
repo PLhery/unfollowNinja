@@ -16,6 +16,7 @@ export enum UserCategory {
     accountClosed,
     vip,
     inactive,
+    inactiveAndInvalid,
 }
 
 interface ICachedUsername extends Model {
