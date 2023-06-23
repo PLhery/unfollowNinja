@@ -96,7 +96,7 @@ export default class extends Task {
         metrics.gauge('sendDailyDm.sent', dmSentCount);
         metrics.gauge('sendDailyDm.attempt', dmAttemptCount);
         metrics.gauge('sendDailyDm.unfollowers', unfollowersCount);
-        metrics.gauge('reenableFollowers.duration', Date.now() - job.processedOn);
+        metrics.gauge('sendDailyDm.duration', Date.now() - job.processedOn);
     }
 
     private generateMessage(
