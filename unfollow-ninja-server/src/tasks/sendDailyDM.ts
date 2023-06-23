@@ -26,6 +26,7 @@ export default class extends Task {
         let dmSentCount = 0;
         let dmAttemptCount = 0;
         let unfollowersCount = 0;
+        let dmCheckedCount = 0;
 
         for (const userId of [
             ...(await this.dao.getUserIdsByCategory(UserCategory.vip)),
@@ -36,6 +37,7 @@ export default class extends Task {
             if (!lastEventId) {
                 continue; // not enabled
             }
+            dmCheckedCount++;
             const username = await userDao.getUsername();
             const events = await this.dao.userEventDao.getFilteredUnfollowerEventsSinceId(userId, lastEventId, 250, 0);
 
@@ -93,6 +95,7 @@ export default class extends Task {
                 await userDao.setUserParams({ dmLastEventId: events[0].id });
             }
         }
+        metrics.gauge('sendDailyDm.checked', dmCheckedCount);
         metrics.gauge('sendDailyDm.sent', dmSentCount);
         metrics.gauge('sendDailyDm.attempt', dmAttemptCount);
         metrics.gauge('sendDailyDm.unfollowers', unfollowersCount);
