@@ -56,7 +56,7 @@ if (cluster.isMaster) {
 
             // update nbUsers metrics every minute
             await bullQueue.add('updateMetrics', {}, { repeat: { cron: '* * * * *' } });
-            await bullQueue.add('sendDailyDM', {}, { repeat: { cron: '0 11 * * *' } });
+            await bullQueue.add('sendDailyDM', {}, { repeat: { cron: '0 * * * *' } });
         })
         .catch((error) => {
             logger.error(error.stack);
