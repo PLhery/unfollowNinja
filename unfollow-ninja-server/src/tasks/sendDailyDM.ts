@@ -94,8 +94,8 @@ export default class extends Task {
                     .getNewDmTwitterApi()
                     .then((dmClient) => dmClient.v2.sendDmToParticipant(userId, { text: message }))
                     .then(() => dmSentCount++)
+                    .then(() => userDao.setUserParams({ dmLastEventId: events[0].id }))
                     .catch((err) => this.manageTwitterErrors(err, username, userId));
-                await userDao.setUserParams({ dmLastEventId: events[0].id });
             }
         }
         metrics.gauge('sendDailyDm.checked', dmCheckedCount);
