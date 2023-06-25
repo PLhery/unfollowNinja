@@ -45,6 +45,13 @@ export function createUserRouter(dao: Dao) {
             })
             .put('/enable-dms', async (ctx) => {
                 const session = ctx.session as NinjaSession;
+
+                // if the user already has a dmLastEventId, don't do anything
+                if (await dao.getUserDao(session.userId).getDmLastEventId()) {
+                    ctx.status = 204;
+                    return;
+                }
+
                 const result = await dao.userEventDao.getFilteredUnfollowerEvents(session.userId, 1);
                 await dao.getUserDao(session.userId).setUserParams({ dmLastEventId: result[0]?.id ?? -1 });
                 void dao.userEventDao.logWebEvent(

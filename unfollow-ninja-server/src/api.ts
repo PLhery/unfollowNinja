@@ -90,6 +90,7 @@ const router = new Router()
                 lang: params.lang,
                 country,
                 profilePic: session.profilePic,
+                hasNotificationsEnabled: params.dmLastEventId !== 0,
                 otherProfiles: Object.values(session.otherProfiles || {}),
             };
         }

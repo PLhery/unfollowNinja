@@ -183,6 +183,7 @@ export function createAuthRouter(dao: Dao) {
                     lang: params.lang,
                     country,
                     profilePic: session.profilePic,
+                    hasNotificationsEnabled: params.dmLastEventId !== 0,
                     otherProfiles: Object.values(session.otherProfiles || {}),
                 })
             );
@@ -275,6 +276,7 @@ export function createAuthRouter(dao: Dao) {
                 lang: params.lang,
                 country,
                 profilePic: session.profilePic,
+                hasNotificationsEnabled: params.dmLastEventId !== 0,
                 otherProfiles: Object.values(session.otherProfiles || {}),
             };
         });
