@@ -184,6 +184,7 @@ export function createAuthRouter(dao: Dao) {
                     country,
                     profilePic: session.profilePic,
                     hasNotificationsEnabled: params.dmLastEventId !== 0,
+                    hasDMAuth: Boolean(params.dmRefreshToken),
                     otherProfiles: Object.values(session.otherProfiles || {}),
                 })
             );
@@ -235,13 +236,25 @@ export function createAuthRouter(dao: Dao) {
 
             const { id } = (await client.v2.me()).data;
             if (id !== ctx.session.userId) {
-                ctx.body = { status: 'Oops, it looks like you logged in with the wrong account..' };
+                ctx.body =
+                    'Oops, it looks like you logged in with the wrong account. Go to twitter.com, set the right account, and try again!';
                 ctx.status = 401;
                 return;
             }
             await dao.getUserDao(id).setUserParams({ dmRefreshToken: refreshToken });
+
+            if (!(await dao.getUserDao(id).getDmLastEventId())) {
+                const result = await dao.userEventDao.getFilteredUnfollowerEvents(id, 1);
+                await dao.getUserDao(id).setUserParams({ dmLastEventId: result[0]?.id ?? -1 });
+                void dao.userEventDao.logWebEvent(id, WebEvent.enableDms, ctx.ip, '', (result[0]?.id ?? -1).toString());
+            }
+
             ctx.status = 200;
-            ctx.body = 'You successfully logged in!';
+            ctx.type = 'html';
+            ctx.body = `You successfully logged in! redirecting to the dashboard...
+                          <script>
+                            window.location.replace('${process.env.WEB_URL}/dashboard');
+                          </script>`;
         })
         .post('/set-profile', async (ctx) => {
             const session = ctx.session as NinjaSession;
@@ -277,6 +290,7 @@ export function createAuthRouter(dao: Dao) {
                 country,
                 profilePic: session.profilePic,
                 hasNotificationsEnabled: params.dmLastEventId !== 0,
+                hasDMAuth: Boolean(params.dmRefreshToken),
                 otherProfiles: Object.values(session.otherProfiles || {}),
             };
         });

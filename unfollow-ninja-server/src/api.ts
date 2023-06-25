@@ -92,6 +92,7 @@ const router = new Router()
                 profilePic: session.profilePic,
                 hasNotificationsEnabled: params.dmLastEventId !== 0,
                 otherProfiles: Object.values(session.otherProfiles || {}),
+                hasDMAuth: Boolean(params.dmRefreshToken),
             };
         }
     })

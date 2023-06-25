@@ -38,6 +38,10 @@ export default class extends Task {
             if (!lastEventId) {
                 continue; // not enabled
             }
+            const hasNewDmTwitterApi = await userDao.hasNewDmTwitterApi();
+            if (!hasNewDmTwitterApi) {
+                continue;
+            }
             dmCheckedCount++;
             const username = await userDao.getUsername();
             const events = await this.dao.userEventDao.getFilteredUnfollowerEventsSinceId(userId, lastEventId, 250, 0);
