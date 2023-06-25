@@ -179,6 +179,11 @@ export default class UserDao {
         });
     }
 
+    public async hasNewDmTwitterApi(): Promise<boolean> {
+        const [dmRefreshToken] = await this.redis.hmget(`user:${this.userId}`, 'dmRefreshToken');
+        return Boolean(dmRefreshToken);
+    }
+
     public async getNewDmTwitterApi(): Promise<TwitterApi> {
         const [dmRefreshToken] = await this.redis.hmget(`user:${this.userId}`, 'dmRefreshToken');
         if (!dmRefreshToken) {

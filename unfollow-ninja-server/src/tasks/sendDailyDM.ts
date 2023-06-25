@@ -23,7 +23,7 @@ const SENDER_ID = '1162323988493799424'; // unfollowmonkey
 
 export default class extends Task {
     public async run(job: Job) {
-        const newDmClient = await this.dao.getUserDao(SENDER_ID).getNewDmTwitterApi();
+        const umDmClient = await this.dao.getUserDao(SENDER_ID).getNewDmTwitterApi();
         let dmSentCount = 0;
         let dmAttemptCount = 0;
         let unfollowersCount = 0;
@@ -89,7 +89,12 @@ export default class extends Task {
                 );
                 logger.info('sending a DM to @%s', username);
 
-                await newDmClient.v2
+                let dmClient = umDmClient;
+                if (await userDao.hasNewDmTwitterApi()) {
+                    dmClient = await userDao.getNewDmTwitterApi();
+                }
+
+                await dmClient.v2
                     .sendDmToParticipant(userId, { text: message })
                     .then(() => dmSentCount++)
                     .catch((err) => this.manageTwitterErrors(err, username, userId));
