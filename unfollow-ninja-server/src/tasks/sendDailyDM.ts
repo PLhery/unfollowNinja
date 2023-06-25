@@ -9,6 +9,7 @@ import metrics from '../utils/metrics';
 import { NotificationEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES } from '../utils/utils';
 import { ApiResponseError } from 'twitter-api-v2';
+import * as Sentry from '@sentry/node';
 
 i18n.configure({
     locales: SUPPORTED_LANGUAGES,
@@ -204,7 +205,7 @@ export default class extends Task {
         }
 
         // const userDao = this.dao.getUserDao(userId);
-
+        let error;
         for (const { code, message } of [err]) {
             switch (code) {
                 /* case 17: // no user matches the specified terms (users/lookup)
@@ -244,9 +245,11 @@ export default class extends Task {
                 case 88: // rate limit
                     throw new Error('the user reached its rate-limit (notifyUser)');*/
                 default:
-                    throw new Error(
-                        `An unexpected twitter error occured: ${code} ${message} ${err.data.title} ${err.data.detail}`
+                    error = new Error(
+                        `An unexpected twitter error occured: @${username}/${userId} - ${code} ${message} ${err.data.title} ${err.data.detail}`
                     );
+                    logger.error(error);
+                    Sentry.captureException(error);
             }
         }
         return false;
