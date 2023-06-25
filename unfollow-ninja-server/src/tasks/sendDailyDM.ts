@@ -19,11 +19,9 @@ i18n.configure({
 moment.tz.setDefault(process.env.TIMEZONE || 'UTC');
 
 const TWITTER_ACCOUNT = process.env.TWITTER_ACCOUNT || 'unfollowninja';
-const SENDER_ID = '1162323988493799424'; // unfollowmonkey
 
 export default class extends Task {
     public async run(job: Job) {
-        const umDmClient = await this.dao.getUserDao(SENDER_ID).getNewDmTwitterApi();
         let dmSentCount = 0;
         let dmAttemptCount = 0;
         let unfollowersCount = 0;
@@ -88,18 +86,13 @@ export default class extends Task {
                 await this.dao.userEventDao.logNotificationEvent(
                     userId,
                     NotificationEvent.unfollowersMessage,
-                    SENDER_ID,
+                    userId,
                     message
                 );
                 logger.info('sending a DM to @%s', username);
-
-                let dmClient = umDmClient;
-                if (await userDao.hasNewDmTwitterApi()) {
-                    dmClient = await userDao.getNewDmTwitterApi();
-                }
-
-                await dmClient.v2
-                    .sendDmToParticipant(userId, { text: message })
+                await userDao
+                    .getNewDmTwitterApi()
+                    .then((dmClient) => dmClient.v2.sendDmToParticipant(userId, { text: message }))
                     .then(() => dmSentCount++)
                     .catch((err) => this.manageTwitterErrors(err, username, userId));
                 await userDao.setUserParams({ dmLastEventId: events[0].id });
