@@ -286,43 +286,19 @@ async function detectUnfollows(userId: string, followers: string[], formerFollow
 
 // Manage or rethrow twitter errors
 async function manageTwitterErrors(err: ApiResponseError, userDao: UserDao, userId: string): Promise<void> {
-    for (const { code, message } of [err]) {
-        switch (code) {
-            // app-related
-            case 32:
-                throw new Error(`[checkFollowers] Authentication problems. Please check that your consumer key.`);
-            case 416:
-                throw new Error(`[checkFollowers] Oops, it looks like the application has been suspended :/...`);
-            // user-related
-            case 89:
-            case 401: // since V2? but not clear message
-                logger.warn('@%s revoked the token. Removing them from the list...', await userDao.getUsername());
-                await userDao.setCategory(UserCategory.revoked);
-                await sendRevokedEmailToUserId(userId);
-                break;
-            case 326:
-            case 64:
-            case 403: // since V2? but not clear message
-                logger.warn('@%s is suspended. Removing them from the list...', await userDao.getUsername());
-                await userDao.setCategory(UserCategory.suspended);
-                break;
-            case 34: // 404 - the user closed his account?
-                logger.warn(
-                    "@%s this account doesn't exist. Removing them from the list...",
-                    await userDao.getUsername()
-                );
-                await userDao.setCategory(UserCategory.accountClosed);
-                break;
-            // twitter errors
-            case 130: // over capacity
-            case 131: // internal error
-                throw new Error(`[checkFollowers] internal Twitter error`);
-            case 88: // rate limit
-                throw new Error(`[checkFollowers] the user reached its rate-limit.`);
-            default:
-                throw new Error(
-                    `[checkFollowers] An unexpected twitter error occured: ${code} ${message} ${err.data.title} ${err.data.detail}`
-                );
-        }
+    switch (err?.data?.detail) {
+        case 'Unauthorized': // since V2? but not clear message
+            logger.warn('@%s revoked the token. Removing them from the list...', await userDao.getUsername());
+            await userDao.setCategory(UserCategory.revoked);
+            await sendRevokedEmailToUserId(userId);
+            break;
+        case 'Forbidden': // since V2? but not clear message
+            logger.warn('@%s is suspended. Removing them from the list...', await userDao.getUsername());
+            await userDao.setCategory(UserCategory.suspended);
+            break;
+        default:
+            throw new Error(
+                `[checkFollowers] An unexpected twitter error occured: ${err?.code} ${err?.message} ${err?.data?.title} ${err?.data?.detail}`
+            );
     }
 }

@@ -6,7 +6,6 @@ import logger from '../utils/logger';
 import { IUnfollowerInfo, Lang } from '../utils/types';
 import Task from './task';
 import metrics from '../utils/metrics';
-import { NotificationEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES } from '../utils/utils';
 import { ApiResponseError, UsersV2Result } from 'twitter-api-v2';
 import { sendRevokedEmailToUserId } from '../utils/emailSender';
@@ -319,50 +318,21 @@ export default class extends Task {
 
         const userDao = this.dao.getUserDao(userId);
 
-        for (const { code, message } of [err]) {
-            switch (code) {
-                case 17: // no user matches the specified terms (users/lookup)
-                case 50: // user not found (friendship/show)
-                    break;
-                // app-related
-                case 32:
-                    throw new Error(
-                        'Authentication problems.' + 'Please check that your consumer key & secret are correct.'
-                    );
-                case 416:
-                    throw new Error('Oops, it looks like the application has been suspended :/...');
-                // user-related
-                case 89:
-                case 401: // since V2? but not clear message
-                    logger.warn('@%s revoked the token. removing them from the list...', username);
-                    await userDao.setCategory(UserCategory.revoked);
-                    await sendRevokedEmailToUserId(userId);
-                    return true;
-                case 326:
-                case 64:
-                case 403: // since V2? but not clear message
-                    logger.warn('@%s is suspended. removing them from the list...', username);
-                    await userDao.setCategory(UserCategory.suspended);
-                    return true;
-                case 150: // dm closed to non-followers
-                case 349: // user blocked?
-                    logger.warn('@%s does not accept DMs. removing them from the list...', username);
-                    await userDao.setCategory(UserCategory.dmclosed);
-                    return true;
-                case 292:
-                    throw new Error('Notification blocked because "it seems automated".');
-                // twitter errors
-                case 130: // over capacity
-                case 131: // internal error`
-                    throw new Error('Twitter has problems at the moment, skipping this action.');
-                case 88: // rate limit
-                    throw new Error('the user reached its rate-limit (notifyUser)');
-                default:
-                    throw new Error(
-                        `An unexpected twitter error occured: ${code} ${message} ${err.data.title} ${err.data.detail}`
-                    );
-            }
+        switch (err?.data?.detail) {
+            case 'Unauthorized': // since V2? but not clear message
+                logger.warn('@%s revoked the token. Removing them from the list...', await userDao.getUsername());
+                await userDao.setCategory(UserCategory.revoked);
+                await sendRevokedEmailToUserId(userId);
+                return true;
+            case 'Forbidden': // since V2? but not clear message
+                logger.warn('@%s is suspended. Removing them from the list...', await userDao.getUsername());
+                await userDao.setCategory(UserCategory.suspended);
+                return true;
+            default:
+                throw new Error(
+                    `[checkFollowers] An unexpected twitter error occured: ${err?.code} ${err?.message} ${err?.data?.title} ${err?.data?.detail}`
+                );
         }
-        return false;
+        // return false;
     }
 }

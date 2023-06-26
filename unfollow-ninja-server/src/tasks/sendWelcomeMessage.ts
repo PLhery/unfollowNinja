@@ -7,6 +7,7 @@ import { NotificationEvent } from '../dao/userEventDao';
 import { SUPPORTED_LANGUAGES } from '../utils/utils';
 import { ApiResponseError } from 'twitter-api-v2';
 import { sendRevokedEmailToUserId } from '../utils/emailSender';
+import UserDao from '../dao/userDao';
 
 i18n.configure({
     locales: SUPPORTED_LANGUAGES,
@@ -56,55 +57,21 @@ export default class extends Task {
             .catch((err) => this.manageTwitterErrors(err, username, userId)); */
     }
 
-    private async manageTwitterErrors(err: unknown, username: string, userId: string): Promise<void> {
-        if (!(err instanceof ApiResponseError)) {
-            throw err;
-        }
-
-        const userDao = this.dao.getUserDao(userId);
-
-        for (const { code, message } of [err]) {
-            switch (code) {
-                // app-related
-                case 32:
-                    throw new Error(
-                        'Authentication problems.' + 'Please check that your consumer key & secret are correct.'
-                    );
-                case 416:
-                    throw new Error('Oops, it looks like the application has been suspended :/...');
-                // user-related
-                case 89:
-                case 401: // since V2? but not clear message
-                    logger.warn('@%s revoked the token. removing them from the list...', username);
-                    await userDao.setCategory(UserCategory.revoked);
-                    await sendRevokedEmailToUserId(userId);
-                    break;
-                case 326:
-                case 64:
-                case 403: // since V2? but not clear message
-                    logger.warn('@%s is suspended. removing them from the list...', username);
-                    await userDao.setCategory(UserCategory.suspended);
-                    break;
-                // twitter errors
-                case 130: // over capacity
-                case 131: // internal error`
-                case 88: // rate limit
-                    // retry in 15 minutes
-                    await this.queue.add(
-                        'sendWelcomeMessage',
-                        {
-                            id: Date.now(), // otherwise some seem stuck??
-                            userId,
-                            username,
-                        },
-                        { delay: 15 * 60 * 1000 }
-                    );
-                    break;
-                default:
-                    throw new Error(
-                        `An unexpected twitter error occured: ${code} ${message} ${err.data.title} ${err.data.detail}`
-                    );
-            }
+    private async manageTwitterErrors(err: ApiResponseError, userDao: UserDao, userId: string): Promise<void> {
+        switch (err?.data?.detail) {
+            case 'Unauthorized': // since V2? but not clear message
+                logger.warn('@%s revoked the token. Removing them from the list...', await userDao.getUsername());
+                await userDao.setCategory(UserCategory.revoked);
+                await sendRevokedEmailToUserId(userId);
+                break;
+            case 'Forbidden': // since V2? but not clear message
+                logger.warn('@%s is suspended. Removing them from the list...', await userDao.getUsername());
+                await userDao.setCategory(UserCategory.suspended);
+                break;
+            default:
+                throw new Error(
+                    `[checkFollowers] An unexpected twitter error occured: ${err?.code} ${err?.message} ${err?.data?.title} ${err?.data?.detail}`
+                );
         }
     }
 }
