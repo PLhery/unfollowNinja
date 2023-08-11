@@ -1,10 +1,15 @@
 {
-    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} Twitter užívatelia/užívateľov ťa prestalo sledovať",
+    "{{nbUnfollows}} Twitter users unfollowed you:": "{{nbUnfollows}} Twitter užívatelia/užívateľov ťa prestalo sledovať:",
     "one of your followers": "jeden z tvojich sledovateľov",
     "{{username}} unfollowed you {{emoji}}.": "{{username}} ťa prestal sledovať {{emoji}}.",
     "{{username}} has been suspended {{emoji}}.": "Účet {{username}} bol pozastavený {{emoji}}.",
     "{{username}} has left Twitter {{emoji}}.": "{{username}} opustil Twitter {{emoji}}.",
     "{{username}} blocked you {{emoji}}.": "{{username}} si ťa zablokoval {{emoji}}.",
     "You blocked {{username}} {{emoji}}.": "Zablokoval si {{username}} {{emoji}}.",
-    "This account followed you for {{duration}} ({{{time}}}).": "Tento účet ťa sledoval {{duration}} ({{{time}}})."
+    "This account followed you for {{duration}} ({{{time}}}).": "Tento účet ťa sledoval {{duration}} ({{{time}}}).",
+    "All set, welcome to @{{twitterAccount}} {{emoji}}!\nYou will soon know all about your unfollowers here!": "Hotovo, vitajte v @{{twitterAccount}} {{emoji}}!\n Čoskoro sa tu dozvieš všetko o svojich nesledovateľoch!",
+    "Congratulations, can now enjoy @{{twitterAccount}} pro {{emoji}}!": "Gratulujeme, teraz si môžeš užiť @{{twitterAccount}} pro {{emoji}}!",
+    "and {{nbLeftovers}} more.": "a {{nbLeftovers}} viac.",
+    "This account followed you before you signed up to @{{twitterAccount}}!": "Tento účet ťa sledoval predtým, ako si sa prihlásil k @{{twitter Account}}!",
+    "{{username}}'s account has been locked {{emoji}}.": "Účet používateľa {{username}} bol uzamknutý {{emoji}}."
 }
